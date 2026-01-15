@@ -21,7 +21,7 @@
     - [x] Register observer in `AppServiceProvider`
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Database Schema & Core Models' (Protocol in workflow.md)
 
-## Phase 2: Core Services & Math Logic
+## Phase 2: Core Services & Math Logic [checkpoint: 421a248]
 - [x] Task: Implement InventoryMathService
     - [x] Create `InventoryMathService` class
     - [x] Port logic from `skuMath.ts` (EOQ, Safety Stock)
@@ -39,4 +39,4 @@
 - [x] Task: Register Services in Container
     - [x] Create `GameServiceProvider`
     - [x] Bind interfaces and services
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Core Services & Math Logic' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Core Services & Math Logic' (Protocol in workflow.md)
