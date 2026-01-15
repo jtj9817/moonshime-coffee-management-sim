@@ -202,10 +202,9 @@ We will replace `types.ts` interfaces with robust Eloquent models.
 
 ## 5. Execution Plan
 
-### Step 1: Initialization
-- [ ] Scaffold Laravel project & Install Inertia.
-- [ ] Install `spatie/laravel-model-states` and `laravel/wayfinder`.
-- [ ] **Action:** Create `GameServiceProvider`.
+### Step 1: Scaffolding & Configuration
+- [x] Finalize Laravel and Inertia project scaffolding.
+- [x] Configure core packages and environment settings.
 
 ### Step 2: Database Layer
 - [ ] Create Migrations for all core entities.
