@@ -22,21 +22,21 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Database Schema & Core Models' (Protocol in workflow.md)
 
 ## Phase 2: Core Services & Math Logic
-- [ ] Task: Implement InventoryMathService
-    - [ ] Create `InventoryMathService` class
-    - [ ] Port logic from `skuMath.ts` (EOQ, Safety Stock)
-    - [ ] Write Unit Tests for calculation accuracy
-- [ ] Task: Define Strategy Interfaces
-    - [ ] Create `RestockStrategyInterface`
-    - [ ] Implement `JustInTimeStrategy`
-    - [ ] Implement `SafetyStockStrategy`
-- [ ] Task: Implement InventoryManagementService
-    - [ ] Create `InventoryManagementService` class
-    - [ ] Implement `restock` method with transaction support
-    - [ ] Implement `consume` method with transaction support
-    - [ ] Implement `waste` method with transaction support
-    - [ ] Integrate `RestockStrategyInterface` into logic
-- [ ] Task: Register Services in Container
-    - [ ] Create `GameServiceProvider`
-    - [ ] Bind interfaces and services
+- [x] Task: Implement InventoryMathService
+    - [x] Create `InventoryMathService` class
+    - [x] Port logic from `skuMath.ts` (EOQ, Safety Stock)
+    - [x] Write Unit Tests for calculation accuracy
+- [x] Task: Define Strategy Interfaces
+    - [x] Create `RestockStrategyInterface`
+    - [x] Implement `JustInTimeStrategy`
+    - [x] Implement `SafetyStockStrategy`
+- [x] Task: Implement InventoryManagementService
+    - [x] Create `InventoryManagementService` class
+    - [x] Implement `restock` method with transaction support
+    - [x] Implement `consume` method with transaction support
+    - [x] Implement `waste` method with transaction support
+    - [x] Integrate `RestockStrategyInterface` into logic
+- [x] Task: Register Services in Container
+    - [x] Create `GameServiceProvider`
+    - [x] Bind interfaces and services
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Core Services & Math Logic' (Protocol in workflow.md)

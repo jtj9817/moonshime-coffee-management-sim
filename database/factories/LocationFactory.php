@@ -17,8 +17,8 @@ class LocationFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->company() . ' Coffee',
-            'address' => $this->faker->address(),
+            'name' => 'Test Coffee',
+            'address' => '123 Test St',
             'max_storage' => $this->faker->numberBetween(100, 1000),
         ];
     }

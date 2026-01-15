@@ -22,7 +22,7 @@ class InventoryFactory extends Factory
             'location_id' => Location::factory(),
             'product_id' => Product::factory(),
             'quantity' => $this->faker->numberBetween(0, 100),
-            'last_restocked_at' => $this->faker->dateTimeBetween('-1 month', 'now'),
+            'last_restocked_at' => now(),
         ];
     }
 }
