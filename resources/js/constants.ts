@@ -1,0 +1,277 @@
+
+
+import { Item, ItemCategory, Location, Supplier, SupplierItem, InventoryRecord } from './types';
+
+export const LOCATIONS: Location[] = [
+  { id: 'loc-1', name: 'Moonshine HQ (Roastery)', address: '101 Industrial Ave', maxStorage: 5000 },
+  { id: 'loc-2', name: 'Uptown Kiosk', address: '450 Market St', maxStorage: 500 },
+  { id: 'loc-3', name: 'Lakeside Cafe', address: '88 Lakeview Dr', maxStorage: 1200 },
+];
+
+export const ITEMS: Item[] = [
+  { 
+    id: 'item-1', 
+    name: 'Espresso Blend', 
+    category: ItemCategory.BEANS, 
+    unit: 'kg', 
+    isPerishable: false, 
+    bulkThreshold: 50, 
+    storageCostPerUnit: 0.5,
+    estimatedShelfLife: 180
+  },
+  { 
+    id: 'item-2', 
+    name: 'Oat Milk', 
+    category: ItemCategory.MILK, 
+    unit: 'L', 
+    isPerishable: true, 
+    bulkThreshold: 100, 
+    storageCostPerUnit: 0.2,
+    estimatedShelfLife: 21
+  },
+  { 
+    id: 'item-3', 
+    name: '12oz Paper Cups', 
+    category: ItemCategory.CUPS, 
+    unit: 'packs (50)', 
+    isPerishable: false, 
+    bulkThreshold: 200, 
+    storageCostPerUnit: 0.1,
+    estimatedShelfLife: 730
+  },
+  { 
+    id: 'item-4', 
+    name: 'Vanilla Syrup', 
+    category: ItemCategory.SYRUP, 
+    unit: 'bottle', 
+    isPerishable: false, 
+    bulkThreshold: 20, 
+    storageCostPerUnit: 0.3,
+    estimatedShelfLife: 365
+  },
+  {
+    id: 'item-5',
+    name: 'Earl Grey Tea',
+    category: ItemCategory.TEA,
+    unit: 'box (50)', 
+    isPerishable: false,
+    bulkThreshold: 30,
+    storageCostPerUnit: 0.1,
+    estimatedShelfLife: 365
+  },
+  {
+    id: 'item-6',
+    name: 'Raw Sugar',
+    category: ItemCategory.SUGAR,
+    unit: 'kg',
+    isPerishable: false,
+    bulkThreshold: 40,
+    storageCostPerUnit: 0.2,
+    estimatedShelfLife: 1000
+  },
+  {
+    id: 'item-7',
+    name: 'Sanitizer Spray',
+    category: ItemCategory.CLEANING,
+    unit: 'bottle',
+    isPerishable: false,
+    bulkThreshold: 15,
+    storageCostPerUnit: 0.4,
+    estimatedShelfLife: 730
+  },
+  // --- New Items ---
+  {
+    id: 'item-8',
+    name: 'Pumpkin Spice Sauce',
+    category: ItemCategory.SEASONAL,
+    unit: 'jug (1.8L)',
+    isPerishable: true,
+    bulkThreshold: 20,
+    storageCostPerUnit: 0.5,
+    estimatedShelfLife: 14 // Opened
+  },
+  {
+    id: 'item-9',
+    name: 'Bacon Gouda Sandwich',
+    category: ItemCategory.FOOD,
+    unit: 'case (24)',
+    isPerishable: true,
+    bulkThreshold: 10,
+    storageCostPerUnit: 1.5, // Frozen storage cost
+    estimatedShelfLife: 90
+  },
+  {
+    id: 'item-10',
+    name: 'Dark Mocha Sauce',
+    category: ItemCategory.SAUCE,
+    unit: 'jug (1.8L)',
+    isPerishable: true,
+    bulkThreshold: 25,
+    storageCostPerUnit: 0.5,
+    estimatedShelfLife: 30
+  },
+  {
+    id: 'item-11',
+    name: 'Almond Milk',
+    category: ItemCategory.MILK,
+    unit: 'L',
+    isPerishable: true,
+    bulkThreshold: 80,
+    storageCostPerUnit: 0.2,
+    estimatedShelfLife: 30
+  }
+];
+
+export const SUPPLIERS: Supplier[] = [
+  { 
+    id: 'sup-1', 
+    name: 'BeanCo Global', 
+    reliability: 0.95, 
+    deliverySpeed: 'Standard', 
+    freeShippingThreshold: 500, 
+    flatShippingRate: 25,
+    description: 'Premier coffee bean distributor with global sourcing network.',
+    categories: [ItemCategory.BEANS, ItemCategory.CUPS, ItemCategory.TEA, ItemCategory.SAUCE],
+    contactName: 'James Bean',
+    contactEmail: 'orders@beanco.global',
+    phone: '+1 (555) 010-9988',
+    metrics: { lateRate: 0.02, fillRate: 0.99, complaintRate: 0.01 }
+  },
+  { 
+    id: 'sup-2', 
+    name: 'RapidSupplies', 
+    reliability: 0.85, 
+    deliverySpeed: 'Fast', 
+    freeShippingThreshold: 200, 
+    flatShippingRate: 15,
+    description: 'Local general supply depot. Fast delivery but slightly higher prices.',
+    categories: [ItemCategory.CUPS, ItemCategory.SYRUP, ItemCategory.PASTRY, ItemCategory.CLEANING, ItemCategory.FOOD],
+    contactName: 'Sarah Speed',
+    contactEmail: 'sales@rapidsupplies.local',
+    phone: '+1 (555) 012-3344',
+    metrics: { lateRate: 0.08, fillRate: 0.94, complaintRate: 0.03 }
+  },
+  { 
+    id: 'sup-3', 
+    name: 'Dairy Direct', 
+    reliability: 0.98, 
+    deliverySpeed: 'Fast', 
+    freeShippingThreshold: 150, 
+    flatShippingRate: 10,
+    description: 'Farm-to-shop dairy and alternatives logistics.',
+    categories: [ItemCategory.MILK],
+    contactName: 'Betsy Cowell',
+    contactEmail: 'dispatch@dairydirect.com',
+    phone: '+1 (555) 999-8877',
+    metrics: { lateRate: 0.01, fillRate: 0.995, complaintRate: 0.005 }
+  },
+  { 
+    id: 'sup-4', 
+    name: 'ValueBulk', 
+    reliability: 0.70, 
+    deliverySpeed: 'Slow', 
+    freeShippingThreshold: 1000, 
+    flatShippingRate: 40,
+    description: 'Discount bulk warehouse. Best prices, worst service.',
+    categories: [ItemCategory.BEANS, ItemCategory.CUPS, ItemCategory.SYRUP, ItemCategory.SUGAR, ItemCategory.SEASONAL],
+    contactName: 'Charlie Cheap',
+    contactEmail: 'support@valuebulk.net',
+    phone: '+1 (555) 000-1111',
+    metrics: { lateRate: 0.25, fillRate: 0.85, complaintRate: 0.12 }
+  },
+];
+
+export const SUPPLIER_ITEMS: SupplierItem[] = [
+  // BeanCo
+  { 
+    supplierId: 'sup-1', itemId: 'item-1', pricePerUnit: 18.0, minOrderQty: 10, deliveryDays: 3,
+    priceTiers: [
+      { minQty: 10, maxQty: 49, unitPrice: 18.0 },
+      { minQty: 50, maxQty: 99, unitPrice: 17.5 },
+      { minQty: 100, unitPrice: 16.5 }
+    ]
+  },
+  { 
+    supplierId: 'sup-1', itemId: 'item-3', pricePerUnit: 4.5, minOrderQty: 50, deliveryDays: 3,
+    priceTiers: [
+      { minQty: 50, maxQty: 199, unitPrice: 4.5 },
+      { minQty: 200, unitPrice: 4.0 }
+    ]
+  },
+  {
+    supplierId: 'sup-1', itemId: 'item-5', pricePerUnit: 8.0, minOrderQty: 5, deliveryDays: 3,
+    priceTiers: [{ minQty: 5, unitPrice: 8.0 }]
+  },
+  {
+    supplierId: 'sup-1', itemId: 'item-10', pricePerUnit: 28.0, minOrderQty: 4, deliveryDays: 3,
+    priceTiers: [{ minQty: 4, unitPrice: 28.0 }]
+  },
+  // RapidSupplies
+  { 
+    supplierId: 'sup-2', itemId: 'item-3', pricePerUnit: 5.5, minOrderQty: 10, deliveryDays: 1,
+    priceTiers: [ { minQty: 10, unitPrice: 5.5 } ]
+  },
+  { 
+    supplierId: 'sup-2', itemId: 'item-4', pricePerUnit: 9.0, minOrderQty: 5, deliveryDays: 1,
+    priceTiers: [ { minQty: 5, unitPrice: 9.0 } ]
+  },
+  {
+    supplierId: 'sup-2', itemId: 'item-7', pricePerUnit: 12.5, minOrderQty: 2, deliveryDays: 1,
+    priceTiers: [{ minQty: 2, unitPrice: 12.5 }]
+  },
+  {
+    supplierId: 'sup-2', itemId: 'item-9', pricePerUnit: 45.0, minOrderQty: 2, deliveryDays: 1,
+    priceTiers: [{ minQty: 5, unitPrice: 42.0 }]
+  },
+  // Dairy Direct
+  { 
+    supplierId: 'sup-3', itemId: 'item-2', pricePerUnit: 2.8, minOrderQty: 20, deliveryDays: 1,
+    priceTiers: [
+      { minQty: 20, maxQty: 49, unitPrice: 2.8 },
+      { minQty: 50, unitPrice: 2.6 }
+    ]
+  },
+  { 
+    supplierId: 'sup-3', itemId: 'item-11', pricePerUnit: 3.2, minOrderQty: 12, deliveryDays: 1,
+    priceTiers: [
+      { minQty: 12, unitPrice: 3.2 }
+    ]
+  },
+  // ValueBulk
+  { 
+    supplierId: 'sup-4', itemId: 'item-1', pricePerUnit: 15.0, minOrderQty: 100, deliveryDays: 7,
+    priceTiers: [ { minQty: 100, unitPrice: 15.0 } ]
+  },
+  { 
+    supplierId: 'sup-4', itemId: 'item-3', pricePerUnit: 3.8, minOrderQty: 200, deliveryDays: 7,
+    priceTiers: [ { minQty: 200, unitPrice: 3.8 } ]
+  },
+  { 
+    supplierId: 'sup-4', itemId: 'item-4', pricePerUnit: 7.5, minOrderQty: 50, deliveryDays: 7,
+    priceTiers: [ { minQty: 50, unitPrice: 7.5 } ]
+  },
+  {
+    supplierId: 'sup-4', itemId: 'item-6', pricePerUnit: 2.0, minOrderQty: 20, deliveryDays: 7,
+    priceTiers: [{ minQty: 20, unitPrice: 2.0 }]
+  },
+  {
+    supplierId: 'sup-4', itemId: 'item-8', pricePerUnit: 35.0, minOrderQty: 5, deliveryDays: 7,
+    priceTiers: [{ minQty: 5, unitPrice: 35.0 }, {minQty: 20, unitPrice: 30.0}]
+  }
+];
+
+export const INITIAL_INVENTORY: InventoryRecord[] = [
+  { locationId: 'loc-1', itemId: 'item-1', quantity: 120, lastRestocked: '2023-10-01' },
+  { locationId: 'loc-1', itemId: 'item-3', quantity: 500, lastRestocked: '2023-09-20' },
+  { locationId: 'loc-1', itemId: 'item-5', quantity: 45, lastRestocked: '2023-10-02' },
+  { locationId: 'loc-1', itemId: 'item-7', quantity: 20, lastRestocked: '2023-09-25' },
+  { locationId: 'loc-1', itemId: 'item-10', quantity: 50, lastRestocked: '2023-10-10' }, // Plenty of Mocha at HQ
+  { locationId: 'loc-2', itemId: 'item-1', quantity: 15, lastRestocked: '2023-10-05' }, // Low stock
+  { locationId: 'loc-2', itemId: 'item-2', quantity: 8, lastRestocked: '2023-10-10', expiryDate: '2023-10-20' }, // Low stock & perishable
+  { locationId: 'loc-2', itemId: 'item-6', quantity: 5, lastRestocked: '2023-09-30' },
+  { locationId: 'loc-2', itemId: 'item-8', quantity: 2, lastRestocked: '2023-10-01', expiryDate: '2023-11-01' }, // Critical Seasonal (Pumpkin)
+  { locationId: 'loc-2', itemId: 'item-9', quantity: 4, lastRestocked: '2023-10-12' }, // Low Food (Bacon Gouda)
+  { locationId: 'loc-3', itemId: 'item-2', quantity: 45, lastRestocked: '2023-10-11', expiryDate: '2023-10-25' },
+  { locationId: 'loc-3', itemId: 'item-7', quantity: 2, lastRestocked: '2023-09-15' }, // Low cleaning supplies
+  { locationId: 'loc-3', itemId: 'item-11', quantity: 25, lastRestocked: '2023-10-14' }, // Almond Milk ok
+];
