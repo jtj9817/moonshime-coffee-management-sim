@@ -1,0 +1,29 @@
+<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="1.5" />
+      <feOffset dx="1" dy="1" result="offsetblur" />
+      <feFlood floodColor="#000000" floodOpacity="0.2" />
+      <feComposite in2="offsetblur" operator="in" />
+      <feMerge>
+        <feMergeNode />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#dropShadow)">
+    {/* Stem */}
+    <path d="M50 25 Q55 15 65 15" stroke="#5D4037" strokeWidth="4" strokeLinecap="round" fill="none"/>
+    
+    {/* Pumpkin Body - Left Lobe */}
+    <path d="M50 30 Q30 25 20 45 Q10 65 30 85 Q45 95 50 90" fill="#FF7043" stroke="#E64A19" strokeWidth="1"/>
+    {/* Pumpkin Body - Right Lobe */}
+    <path d="M50 30 Q70 25 80 45 Q90 65 70 85 Q55 95 50 90" fill="#FF7043" stroke="#E64A19" strokeWidth="1"/>
+    {/* Pumpkin Body - Center Lobe */}
+    <ellipse cx="50" cy="58" rx="15" ry="32" fill="#FF8A65" stroke="#E64A19" strokeWidth="1"/>
+    
+    {/* Spice Details */}
+    <path d="M40 45 Q45 50 40 55" stroke="#BF360C" strokeWidth="0.5" opacity="0.5"/>
+    <path d="M60 45 Q55 50 60 55" stroke="#BF360C" strokeWidth="0.5" opacity="0.5"/>
+  </g>
+</svg>

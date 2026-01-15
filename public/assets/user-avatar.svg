@@ -1,0 +1,11 @@
+<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="avatarGrad" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stopColor="#475569" />
+      <stop offset="100%" stopColor="#1e293b" />
+    </radialGradient>
+  </defs>
+  <circle cx="50" cy="50" r="50" fill="url(#avatarGrad)" />
+  <path d="M50 25 C40 25 35 35 35 45 C35 55 40 60 50 60 C60 60 65 55 65 45 C65 35 60 25 50 25 Z" fill="#94a3b8" />
+  <path d="M25 85 C25 70 35 60 50 60 C65 60 75 70 75 85 L25 85 Z" fill="#94a3b8" />
+</svg>

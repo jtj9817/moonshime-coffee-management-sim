@@ -1,0 +1,29 @@
+<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="1.5" />
+      <feOffset dx="1" dy="1" result="offsetblur" />
+      <feFlood floodColor="#000000" floodOpacity="0.2" />
+      <feComposite in2="offsetblur" operator="in" />
+      <feMerge>
+        <feMergeNode />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#dropShadow)">
+    {/* Bottom Bun */}
+    <path d="M20 70 L80 70 Q85 80 80 85 L20 85 Q15 80 20 70" fill="#FFB74D" stroke="#EF6C00" strokeWidth="1"/>
+    {/* Egg/Cheese */}
+    <path d="M18 62 L82 62 L82 70 L18 70 Z" fill="#FFF176" stroke="#FBC02D" strokeWidth="1"/>
+    {/* Bacon/Meat */}
+    <path d="M18 56 L82 56 L82 62 L18 62 Z" fill="#E57373" stroke="#C62828" strokeWidth="1"/>
+    <path d="M25 59 L75 59" stroke="#B71C1C" strokeWidth="1" strokeDasharray="5 5"/>
+    {/* Top Bun */}
+    <path d="M20 56 L80 56 Q90 30 50 30 Q10 30 20 56" fill="#FFB74D" stroke="#EF6C00" strokeWidth="1"/>
+    {/* Seeds */}
+    <circle cx="40" cy="40" r="1" fill="#FFE0B2"/>
+    <circle cx="50" cy="38" r="1" fill="#FFE0B2"/>
+    <circle cx="60" cy="42" r="1" fill="#FFE0B2"/>
+  </g>
+</svg>

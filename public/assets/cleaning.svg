@@ -1,0 +1,24 @@
+<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="1.5" />
+      <feOffset dx="1" dy="1" result="offsetblur" />
+      <feFlood floodColor="#000000" floodOpacity="0.2" />
+      <feComposite in2="offsetblur" operator="in" />
+      <feMerge>
+        <feMergeNode />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#dropShadow)">
+    {/* Bottle Body */}
+    <path d="M30 90 L30 50 Q30 40 40 35 L40 25 L60 25 L60 35 Q70 40 70 50 L70 90 Q70 95 50 95 Q30 95 30 90 Z" fill="#E1F5FE" stroke="#039BE5" strokeWidth="1"/>
+    {/* Liquid */}
+    <path d="M31 89 L31 60 Q50 65 69 60 L69 89 Q69 93 50 93 Q31 93 31 89 Z" fill="#29B6F6" fillOpacity="0.6"/>
+    {/* Nozzle mechanism */}
+    <rect x="40" y="20" width="20" height="5" fill="#EF5350" />
+    <path d="M45 20 L45 10 L30 15" stroke="#EF5350" strokeWidth="4" strokeLinecap="round" fill="none"/>
+    <path d="M50 25 L50 80" stroke="#B3E5FC" strokeWidth="2" strokeDasharray="3 3"/>
+  </g>
+</svg>
