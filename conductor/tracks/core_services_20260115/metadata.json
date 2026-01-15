@@ -1,0 +1,8 @@
+{
+    "id": "core_services_20260115",
+    "name": "Core Services & Dependency Injection",
+    "description": "Implementation of DTOs, Interfaces, Math Services, and AI Integration logic.",
+    "status": "active",
+    "created_at": "2026-01-15",
+    "owner": "Conductor"
+}
