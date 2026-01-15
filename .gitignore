@@ -30,3 +30,9 @@ yarn-error.log
 # Docker & Sail
 docker-compose.override.yml
 .dockerignore
+
+# AI Context
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+.claude/**
