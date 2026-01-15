@@ -207,9 +207,9 @@ We will replace `types.ts` interfaces with robust Eloquent models.
 - [x] Configure core packages and environment settings.
 
 ### Step 2: Database Layer
-- [ ] Create Migrations for all core entities.
-- [ ] Create Eloquent Models & Relationships.
-- [ ] **Action:** Create `InventoryObserver` to watch for low stock.
+- [x] Create Migrations for all core entities.
+- [x] Create Eloquent Models & Relationships.
+- [x] **Action:** Create `InventoryObserver` to watch for low stock.
 
 ### Step 3: Core Services & DI
 - [ ] Define DTOs (`InventoryAdvisoryDTO`, `InventoryContextDTO`).
