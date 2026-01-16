@@ -36,6 +36,8 @@ AGENTS.md
 CLAUDE.md
 GEMINI.md
 .claude/**
+.factory/
+conductor-track-brainstorming.md
 
 composer.lock
 pnpm-lock.yaml
