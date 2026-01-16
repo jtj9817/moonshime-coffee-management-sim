@@ -35,9 +35,10 @@ Located in `app/Services/`.
     *   Handles `restock`, `consume`, and `waste` operations.
     *   Uses DB Transactions.
 
-*   **`GeminiService`**
+*   **`PrismAiService`**
     *   Implements `AiProviderInterface`.
-    *   Connects to Google Gemini API (mocked for now or using real API if key available).
+    *   Uses `echolabsdev/prism` to connect to LLM providers (Gemini, OpenAI, Anthropic, etc.).
+    *   Configurable via `.env` to switch providers without code changes.
 
 ### 4. Strategies
 Located in `app/Services/Strategies/`.

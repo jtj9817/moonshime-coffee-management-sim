@@ -1,6 +1,7 @@
 # Implementation Plan: Core Services & Dependency Injection
 
 ## Phase 1: Foundations (DTOs & Interfaces)
+- [ ] **Task 1.0:** Install Prism Package (`composer require echolabsdev/prism`).
 - [ ] **Task 1.1:** Create `app/DTOs` directory and implement `InventoryContextDTO`.
 - [ ] **Task 1.2:** Implement `InventoryAdvisoryDTO`.
 - [ ] **Task 1.3:** Create `app/Interfaces` directory and define `AiProviderInterface`.
@@ -17,12 +18,13 @@
     - Inject `InventoryMathService`.
     - Implement `restock` method with DB transaction.
     - Implement `consume` method.
-- [ ] **Task 3.2:** Implement `GeminiService`.
+- [ ] **Task 3.2:** Implement `PrismAiService`.
+    - Use Prism to generate text/structured output.
     - Implement `generateAdvisory` method.
     - Ensure it returns `InventoryAdvisoryDTO`.
 
 ## Phase 4: Wiring & Verification
 - [ ] **Task 4.1:** Create `GameServiceProvider` (`php artisan make:provider GameServiceProvider`).
 - [ ] **Task 4.2:** Register `GameServiceProvider` in `bootstrap/providers.php`.
-- [ ] **Task 4.3:** Bind `AiProviderInterface` to `GeminiService`.
+- [ ] **Task 4.3:** Bind `AiProviderInterface` to `PrismAiService`.
 - [ ] **Task 4.4:** Create a verification script `tests/verify_core_services.php` to instantiate services and run basic logic checks (as per project directive).

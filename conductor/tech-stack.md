@@ -21,3 +21,6 @@
 
 ## Additional Libraries (Inferred)
 - **Real-time:** Laravel Reverb (planned)
+
+## AI Integration
+- **LLM Abstraction:** `echolabsdev/prism` (Prism) for unified access to AI providers (Gemini, OpenAI, Anthropic).
