@@ -4,12 +4,11 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [x] **Track: Game Logic & Events (Step 4)**
-*Link: [./tracks/game_engine_20260116/](./tracks/game_engine_20260116/)*
-
----
-
 # Archived Tracks
+
+- [x] **Track: Game Logic & Events (Step 4)**
+    - **ID:** `game_engine_20260116`
+    - **Link:** [./archive/game_engine_20260116/](./archive/game_engine_20260116/)
 
 - [x] **Core Services & Dependency Injection**
     - **ID:** `core_services_20260115`
