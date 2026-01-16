@@ -7,7 +7,7 @@
 - [x] **Task 1.3:** Create `app/Interfaces` directory and define `AiProviderInterface`.
 - [x] **Task 1.4:** Define `RestockStrategyInterface`.
 
-## Phase 2: Core Math & Strategies
+## Phase 2: Core Math & Strategies [checkpoint: 9e4fc1e]
 - [x] **Task 2.1:** Implement `InventoryMathService` in `app/Services`.
     - Port logic from `resources/js/services/skuMath.ts` (if available) or implement standard formulas (EOQ, Safety Stock).
 - [x] **Task 2.2:** Implement `JustInTimeStrategy` class.
