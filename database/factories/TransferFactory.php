@@ -26,7 +26,7 @@ class TransferFactory extends Factory
             'target_location_id' => Location::factory(),
             'product_id' => Product::factory(),
             'quantity' => fake()->numberBetween(10, 100),
-            'status' => 'Draft',
+            'status' => 'draft',
         ];
     }
 }

@@ -22,7 +22,7 @@ class OrderFactory extends Factory
     {
         return [
             'vendor_id' => Vendor::factory(),
-            'status' => 'Draft',
+            'status' => 'draft',
             'total_cost' => fake()->numberBetween(1000, 10000),
             'delivery_date' => now()->addDays(3),
         ];

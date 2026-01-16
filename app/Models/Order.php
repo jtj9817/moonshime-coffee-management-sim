@@ -9,10 +9,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+use App\States\OrderState;
+use Spatie\ModelStates\HasStates;
+
 class Order extends Model
 {
     /** @use HasFactory<\Database\Factories\OrderFactory> */
-    use HasFactory, HasUuids;
+    use HasFactory, HasUuids, HasStates;
 
     protected $fillable = [
         'vendor_id',
@@ -26,6 +29,7 @@ class Order extends Model
         return [
             'delivery_date' => 'datetime',
             'total_cost' => 'integer',
+            'status' => OrderState::class,
         ];
     }
 
