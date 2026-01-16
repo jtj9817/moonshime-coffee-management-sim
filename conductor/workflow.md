@@ -82,7 +82,17 @@ All tasks follow a strict lifecycle:
         3.  **Confirm that you see:** The new user profile page, with the user's name and email displayed correctly.
         ```
 
-        **For a Backend Change:**
+        **For a Backend Change (preferred):**
+        ```
+        The automated tests have passed. For manual verification, I have created a standalone verification script at `tests/manual/verify_<task_or_phase>.php` using the `laravel-manual-testing` skill. This script performs a complete setup-inspect-cleanup cycle.
+
+        **Manual Verification Steps:**
+        1.  **Execute the verification script:** `./sail php tests/manual/verify_<task_or_phase>.php`
+        2.  **Review the console output:** Confirm that all lifecycle stages (Setup, Verification, Teardown) succeeded and produced the expected business logic outcomes.
+        3.  **Confirm state restoration:** The script should confirm the database was returned to its initial state.
+        ```
+
+        **For an API or Endpoint Change:**
         ```
         The automated tests have passed. For manual verification, please follow these steps:
 
