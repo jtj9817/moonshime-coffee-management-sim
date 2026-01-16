@@ -44,3 +44,4 @@ pnpm-lock.yaml
 
 .gemini/
 gha-creds-*.json
+.pnpm-store/
