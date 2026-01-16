@@ -41,3 +41,6 @@ conductor-track-brainstorming.md
 
 composer.lock
 pnpm-lock.yaml
+
+.gemini/
+gha-creds-*.json
