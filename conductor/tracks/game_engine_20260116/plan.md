@@ -37,7 +37,7 @@
 - [x] Task: Create manual verification script `tests/manual/verify_chaos_engine.php`.
 - [x] Task: Conductor - User Manual Verification 'Phase 3: Chaos Engine' (Protocol in workflow.md)
 
-## Phase 4: Simulation Service & Integration
+## Phase 4: Simulation Service & Integration [checkpoint: 19264ed]
 - [x] Task: Implement `SimulationService`
     - [x] Implement `advanceTime()` method.
     - [x] Ensure it fires `TimeAdvanced` and triggers Spike generation.
