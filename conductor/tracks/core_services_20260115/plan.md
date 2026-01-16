@@ -1,11 +1,11 @@
 # Implementation Plan: Core Services & Dependency Injection
 
 ## Phase 1: Foundations (DTOs & Interfaces)
-- [ ] **Task 1.0:** Install Prism Package (`composer require echolabsdev/prism`).
-- [ ] **Task 1.1:** Create `app/DTOs` directory and implement `InventoryContextDTO`.
-- [ ] **Task 1.2:** Implement `InventoryAdvisoryDTO`.
-- [ ] **Task 1.3:** Create `app/Interfaces` directory and define `AiProviderInterface`.
-- [ ] **Task 1.4:** Define `RestockStrategyInterface`.
+- [x] **Task 1.0:** Install Prism Package (`composer require echolabsdev/prism`).
+- [x] **Task 1.1:** Create `app/DTOs` directory and implement `InventoryContextDTO`.
+- [x] **Task 1.2:** Implement `InventoryAdvisoryDTO`.
+- [x] **Task 1.3:** Create `app/Interfaces` directory and define `AiProviderInterface`.
+- [x] **Task 1.4:** Define `RestockStrategyInterface`.
 
 ## Phase 2: Core Math & Strategies
 - [ ] **Task 2.1:** Implement `InventoryMathService` in `app/Services`.
