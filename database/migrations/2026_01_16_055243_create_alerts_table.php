@@ -14,6 +14,9 @@ return new class extends Migration
         Schema::create('alerts', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('type');
+            $table->string('severity')->default('info');
+            $table->foreignUuid('location_id')->nullable()->constrained()->onDelete('cascade');
+            $table->foreignUuid('product_id')->nullable()->constrained()->onDelete('cascade');
             $table->text('message');
             $table->json('data')->nullable();
             $table->boolean('is_read')->default(false);
