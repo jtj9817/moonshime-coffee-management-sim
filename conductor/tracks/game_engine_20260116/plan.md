@@ -27,15 +27,15 @@
 - [x] Task: Create manual verification script `tests/manual/verify_state_machines.php`.
 - [x] Task: Conductor - User Manual Verification 'Phase 2: State Machines' (Protocol in workflow.md)
 
-## Phase 3: Chaos Engine (SpikeEventFactory)
-- [ ] Task: Implement Spike Event Models & Types
-    - [ ] Create `app/Models/SpikeEvent.php` and migration.
-    - [ ] Create interfaces/classes for Spike types (Demand, Delay, Price, Breakdown).
-- [ ] Task: Implement `SpikeEventFactory`
-    - [ ] Implement weighted random selection logic.
-    - [ ] Add methods to "apply" and "rollback" spike effects on models.
-- [ ] Task: Create manual verification script `tests/manual/verify_chaos_engine.php`.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Chaos Engine' (Protocol in workflow.md)
+## Phase 3: Chaos Engine (SpikeEventFactory) [checkpoint: 56c7d2e]
+- [x] Task: Implement Spike Event Models & Types
+    - [x] Create `app/Models/SpikeEvent.php` and migration.
+    - [x] Create interfaces/classes for Spike types (Demand, Delay, Price, Breakdown).
+- [x] Task: Implement `SpikeEventFactory`
+    - [x] Implement weighted random selection logic.
+    - [x] Add methods to "apply" and "rollback" spike effects on models.
+- [x] Task: Create manual verification script `tests/manual/verify_chaos_engine.php`.
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Chaos Engine' (Protocol in workflow.md)
 
 ## Phase 4: Simulation Service & Integration
 - [ ] Task: Implement `SimulationService`
