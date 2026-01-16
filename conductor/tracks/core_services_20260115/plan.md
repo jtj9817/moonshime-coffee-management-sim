@@ -1,6 +1,6 @@
 # Implementation Plan: Core Services & Dependency Injection
 
-## Phase 1: Foundations (DTOs & Interfaces)
+## Phase 1: Foundations (DTOs & Interfaces) [checkpoint: 74006eb]
 - [x] **Task 1.0:** Install Prism Package (`composer require echolabsdev/prism`).
 - [x] **Task 1.1:** Create `app/DTOs` directory and implement `InventoryContextDTO`.
 - [x] **Task 1.2:** Implement `InventoryAdvisoryDTO`.
