@@ -3,14 +3,15 @@
 namespace App\Services;
 
 use App\Models\Inventory;
-use App\Services\Strategies\RestockStrategyInterface;
+use App\Interfaces\RestockStrategyInterface;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
 class InventoryManagementService
 {
     public function __construct(
-        protected RestockStrategyInterface $restockStrategy
+        protected RestockStrategyInterface $restockStrategy,
+        protected InventoryMathService $mathService
     ) {}
 
     /**
@@ -24,10 +25,10 @@ class InventoryManagementService
     /**
      * Restock inventory based on the active strategy or a fixed amount.
      */
-    public function restock(Inventory $inventory, ?int $quantity = null): int
+    public function restock(Inventory $inventory, ?int $quantity = null, array $params = []): int
     {
-        return DB::transaction(function () use ($inventory, $quantity) {
-            $amount = $quantity ?? $this->restockStrategy->calculateReorderQuantity($inventory);
+        return DB::transaction(function () use ($inventory, $quantity, $params) {
+            $amount = $quantity ?? $this->restockStrategy->calculateReorderAmount($inventory, $params);
 
             if ($amount <= 0) {
                 return 0;
