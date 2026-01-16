@@ -212,10 +212,10 @@ We will replace `types.ts` interfaces with robust Eloquent models.
 - [x] **Action:** Create `InventoryObserver` to watch for low stock.
 
 ### Step 3: Core Services & DI
-- [ ] Define DTOs (`InventoryAdvisoryDTO`, `InventoryContextDTO`).
-- [ ] Implement `InventoryMathService` (Port logic).
-- [ ] Implement `InventoryManagementService` using **Strategy Pattern**.
-- [ ] Implement `GeminiService` & `AiProviderInterface`.
+- [x] Define DTOs (`InventoryAdvisoryDTO`, `InventoryContextDTO`).
+- [x] Implement `InventoryMathService` (Port logic).
+- [x] Implement `InventoryManagementService` using **Strategy Pattern**.
+- [x] Implement `PrismAiService` & `AiProviderInterface`.
 
 ### Step 4: Game Logic & Events
 - [ ] Define Events: `OrderPlaced`, `TransferCompleted`, `SpikeOccurred`.
