@@ -22,6 +22,7 @@ class Order extends Model
         'status',
         'total_cost',
         'delivery_date',
+        'delivery_day',
     ];
 
     protected function casts(): array

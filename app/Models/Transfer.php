@@ -21,6 +21,7 @@ class Transfer extends Model
         'product_id',
         'quantity',
         'status',
+        'delivery_day',
     ];
 
     protected function casts(): array

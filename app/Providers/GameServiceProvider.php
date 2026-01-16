@@ -12,6 +12,9 @@ use App\Listeners\DeductCash;
 use App\Listeners\GenerateAlert;
 use App\Listeners\UpdateInventory;
 use App\Listeners\UpdateMetrics;
+use App\Listeners\DecayPerishables;
+use App\Listeners\ProcessDeliveries;
+use App\Listeners\GenerateSpike;
 use App\Services\InventoryManagementService;
 use App\Services\InventoryMathService;
 use App\Services\PrismAiService;
@@ -20,6 +23,10 @@ use App\Services\Strategies\SafetyStockStrategy;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
+use App\Services\SimulationService;
+use App\Models\GameState;
+use App\Models\User;
+
 class GameServiceProvider extends ServiceProvider
 {
     /**
@@ -27,6 +34,24 @@ class GameServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        // Bind GameState as singleton based on auth user
+        $this->app->singleton(GameState::class, function ($app) {
+            $user = auth()->user();
+            if (!$user) {
+                // Fallback for tests or console if needed
+                return new GameState(['day' => 1, 'cash' => 10000, 'xp' => 0]);
+            }
+            return GameState::firstOrCreate(
+                ['user_id' => $user->id],
+                ['cash' => 10000, 'xp' => 0, 'day' => 1]
+            );
+        });
+
+        // Bind Simulation Service
+        $this->app->singleton(SimulationService::class, function ($app) {
+            return new SimulationService($app->make(GameState::class));
+        });
+
         // Bind AI Provider
         $this->app->bind(AiProviderInterface::class, PrismAiService::class);
 
@@ -64,6 +89,11 @@ class GameServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Simulation Chain
+        Event::listen(TimeAdvanced::class, [DecayPerishables::class, 'onTimeAdvanced']);
+        Event::listen(TimeAdvanced::class, [ProcessDeliveries::class, 'onTimeAdvanced']);
+        Event::listen(TimeAdvanced::class, [GenerateSpike::class, 'onTimeAdvanced']);
+
         // DAG Chain for OrderPlaced
         Event::listen(OrderPlaced::class, DeductCash::class);
         Event::listen(OrderPlaced::class, GenerateAlert::class);

@@ -38,10 +38,10 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 3: Chaos Engine' (Protocol in workflow.md)
 
 ## Phase 4: Simulation Service & Integration
-- [ ] Task: Implement `SimulationService`
-    - [ ] Implement `advanceTime()` method.
-    - [ ] Ensure it fires `TimeAdvanced` and triggers Spike generation.
-- [ ] Task: Final Wiring
-    - [ ] Update `GameState` singleton to track current Day.
-- [ ] Task: Create manual verification script `tests/manual/verify_game_integration.php`.
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: Simulation Service & Integration' (Protocol in workflow.md)
+- [x] Task: Implement `SimulationService`
+    - [x] Implement `advanceTime()` method.
+    - [x] Ensure it fires `TimeAdvanced` and triggers Spike generation.
+- [x] Task: Final Wiring
+    - [x] Update `GameState` singleton to track current Day.
+- [x] Task: Create manual verification script `tests/manual/verify_game_integration.php`.
+- [x] Task: Conductor - User Manual Verification 'Phase 4: Simulation Service & Integration' (Protocol in workflow.md)
