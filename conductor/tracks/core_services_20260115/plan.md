@@ -14,14 +14,15 @@
 - [x] **Task 2.3:** Implement `SafetyStockStrategy` class.
 
 ## Phase 3: Service Orchestration
-- [ ] **Task 3.1:** Implement `InventoryManagementService`.
+- [x] **Task 3.1:** Implement `InventoryManagementService`.
     - Inject `InventoryMathService`.
     - Implement `restock` method with DB transaction.
     - Implement `consume` method.
-- [ ] **Task 3.2:** Implement `PrismAiService`.
+- [x] **Task 3.2:** Implement `PrismAiService`.
     - Use Prism to generate text/structured output.
     - Implement `generateAdvisory` method.
     - Ensure it returns `InventoryAdvisoryDTO`.
+    - **Note:** Verified with real API (gemini-3-flash-preview) using `tests/verify_ai_service.php`.
 
 ## Phase 4: Wiring & Verification
 - [ ] **Task 4.1:** Create `GameServiceProvider` (`php artisan make:provider GameServiceProvider`).
