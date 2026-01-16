@@ -1,13 +1,14 @@
 <?php
+
 /**
  * Manual Verification Script: Phase 1 Foundations
  * Purpose: Verify proper instantiation of DTOs and existence of Interfaces without PHPUnit.
  */
 
-require __DIR__ . '/../vendor/autoload.php';
+require __DIR__.'/../vendor/autoload.php';
 
 // 1. Bootstrap Laravel
-$app = require_once __DIR__ . '/../bootstrap/app.php';
+$app = require_once __DIR__.'/../bootstrap/app.php';
 $kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
 $kernel->bootstrap();
 
@@ -17,18 +18,18 @@ if (app()->environment('production')) {
     exit(1);
 }
 
-use App\DTOs\InventoryContextDTO;
 use App\DTOs\InventoryAdvisoryDTO;
+use App\DTOs\InventoryContextDTO;
 use App\Interfaces\AiProviderInterface;
 use App\Interfaces\RestockStrategyInterface;
-use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 // 3. Setup Logging
-$testRunId = 'phase1_verify_' . Carbon::now()->format('Y_m_d_His');
+$testRunId = 'phase1_verify_'.Carbon::now()->format('Y_m_d_His');
 $logFile = storage_path("logs/manual_tests/{$testRunId}.log");
 
-if (!is_dir(dirname($logFile))) {
+if (! is_dir(dirname($logFile))) {
     mkdir(dirname($logFile), 0755, true);
 }
 
@@ -38,22 +39,24 @@ config(['logging.channels.manual_test' => [
     'level' => 'debug',
 ]]);
 
-function logInfo($msg, $ctx = []) {
+function logInfo($msg, $ctx = [])
+{
     Log::channel('manual_test')->info($msg, $ctx);
     echo "[INFO] {$msg}\n";
 }
 
-function logError($msg, $ctx = []) {
+function logError($msg, $ctx = [])
+{
     Log::channel('manual_test')->error($msg, $ctx);
     echo "[ERROR] {$msg}\n";
 }
 
-echo "--- Starting Verification: Phase 1 Foundations ---\\n";
+echo '--- Starting Verification: Phase 1 Foundations ---\\n';
 logInfo("=== Test Run Started: {$testRunId} ===");
 
 try {
     // 4. Test DTO Instantiation
-    logInfo("Testing DTO Instantiation...");
+    logInfo('Testing DTO Instantiation...');
 
     // InventoryContextDTO
     $contextDTO = new InventoryContextDTO(
@@ -62,26 +65,29 @@ try {
         quantity: 100,
         averageDailySales: 5.5
     );
-    logInfo("InventoryContextDTO created successfully.", (array) $contextDTO);
-    
-    if ($contextDTO->productId !== 'prod-123') throw new Exception("InventoryContextDTO property mismatch");
+    logInfo('InventoryContextDTO created successfully.', (array) $contextDTO);
+
+    if ($contextDTO->productId !== 'prod-123') {
+        throw new Exception('InventoryContextDTO property mismatch');
+    }
 
     // InventoryAdvisoryDTO
     $advisoryDTO = new InventoryAdvisoryDTO(
         restockAmount: 50,
         reasoning: 'Manual verification test.'
     );
-    logInfo("InventoryAdvisoryDTO created successfully.", (array) $advisoryDTO);
+    logInfo('InventoryAdvisoryDTO created successfully.', (array) $advisoryDTO);
 
-    if ($advisoryDTO->restockAmount !== 50) throw new Exception("InventoryAdvisoryDTO property mismatch");
-
+    if ($advisoryDTO->restockAmount !== 50) {
+        throw new Exception('InventoryAdvisoryDTO property mismatch');
+    }
 
     // 5. Test Interface Existence
-    logInfo("Testing Interface Existence...");
+    logInfo('Testing Interface Existence...');
 
     $interfaces = [
         AiProviderInterface::class,
-        RestockStrategyInterface::class
+        RestockStrategyInterface::class,
     ];
 
     foreach ($interfaces as $interface) {
@@ -95,7 +101,7 @@ try {
     echo "SUCCESS: All foundation components verified.\n";
 
 } catch (\Exception $e) {
-    logError("Verification Failed: " . $e->getMessage());
+    logError('Verification Failed: '.$e->getMessage());
     exit(1);
 } finally {
     logInfo("=== Test Run Completed: {$testRunId} ===");

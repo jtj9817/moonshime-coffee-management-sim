@@ -4,7 +4,7 @@ use App\Models\Inventory;
 use App\Services\Strategies\JustInTimeStrategy;
 
 test('calculateReorderAmount returns correct amount for JIT strategy', function () {
-    $strategy = new JustInTimeStrategy();
+    $strategy = new JustInTimeStrategy;
     $inventory = new Inventory(['quantity' => 10]);
 
     // Daily Demand: 5, Lead Time: 3 -> Target: 15
@@ -18,7 +18,7 @@ test('calculateReorderAmount returns correct amount for JIT strategy', function 
 });
 
 test('calculateReorderAmount returns zero if inventory exceeds target', function () {
-    $strategy = new JustInTimeStrategy();
+    $strategy = new JustInTimeStrategy;
     $inventory = new Inventory(['quantity' => 20]);
 
     // Target: 15

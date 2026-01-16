@@ -9,9 +9,9 @@ class JustInTimeStrategy implements RestockStrategyInterface
 {
     /**
      * Just-In-Time Strategy: Replenish only for the demand during lead time.
-     * 
+     *
      * Formula: max(0, (DailyDemand * LeadTime) - CurrentInventory)
-     * 
+     *
      * Required Params:
      * - daily_demand (float)
      * - lead_time (int)

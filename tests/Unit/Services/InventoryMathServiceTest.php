@@ -3,7 +3,7 @@
 use App\Services\InventoryMathService;
 
 beforeEach(function () {
-    $this->service = new InventoryMathService();
+    $this->service = new InventoryMathService;
 });
 
 test('getZScore returns correct value for standard service levels', function () {
@@ -20,13 +20,13 @@ test('calculateSafetyStock returns correct integer', function () {
     // StdDevDemand = 2 -> Variance = 4
     // AvgDemand = 10
     // StdDevLeadTime = 1 -> Variance = 1
-    
+
     // Term 1: 5 * 4 = 20
     // Term 2: 100 * 1 = 100
     // Sqrt(120) = 10.954
     // SS = 1.645 * 10.954 = 18.019
     // Ceil = 19
-    
+
     $result = $this->service->calculateSafetyStock(
         dailyUsageStdDev: 2,
         avgLeadTime: 5,
@@ -41,7 +41,7 @@ test('calculateSafetyStock returns correct integer', function () {
 test('calculateReorderPoint returns correct integer', function () {
     // (Demand * LeadTime) + SafetyStock
     // (10 * 5) + 19 = 69
-    
+
     $result = $this->service->calculateReorderPoint(
         avgDailyUsage: 10,
         avgLeadTime: 5,
@@ -54,7 +54,7 @@ test('calculateReorderPoint returns correct integer', function () {
 test('calculateDaysCover returns correct float', function () {
     // OnHand / AvgDailyUsage
     // 100 / 10 = 10.0
-    
+
     expect($this->service->calculateDaysCover(100, 10))->toBe(10.0);
     expect($this->service->calculateDaysCover(100, 0))->toBe(999.0);
 });

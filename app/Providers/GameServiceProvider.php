@@ -2,10 +2,12 @@
 
 namespace App\Providers;
 
+use App\Interfaces\AiProviderInterface;
+use App\Interfaces\RestockStrategyInterface;
 use App\Services\InventoryManagementService;
 use App\Services\InventoryMathService;
+use App\Services\PrismAiService;
 use App\Services\Strategies\JustInTimeStrategy;
-use App\Services\Strategies\RestockStrategyInterface;
 use App\Services\Strategies\SafetyStockStrategy;
 use Illuminate\Support\ServiceProvider;
 
@@ -16,9 +18,12 @@ class GameServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        // Bind AI Provider
+        $this->app->bind(AiProviderInterface::class, PrismAiService::class);
+
         // Bind stateless math service as singleton
         $this->app->singleton(InventoryMathService::class, function ($app) {
-            return new InventoryMathService();
+            return new InventoryMathService;
         });
 
         // Default Strategy for now (Just In Time)
@@ -27,7 +32,7 @@ class GameServiceProvider extends ServiceProvider
 
         // Bind Strategies explicitly for easier resolution when switching
         $this->app->bind(JustInTimeStrategy::class, function ($app) {
-            return new JustInTimeStrategy();
+            return new JustInTimeStrategy;
         });
 
         $this->app->bind(SafetyStockStrategy::class, function ($app) {
@@ -39,7 +44,8 @@ class GameServiceProvider extends ServiceProvider
         // Bind Management Service
         $this->app->bind(InventoryManagementService::class, function ($app) {
             return new InventoryManagementService(
-                $app->make(RestockStrategyInterface::class)
+                $app->make(RestockStrategyInterface::class),
+                $app->make(InventoryMathService::class)
             );
         });
     }

@@ -78,9 +78,9 @@ class CoreGameStateSeeder extends Seeder
         ]);
 
         Inventory::factory()->create([
-             'location_id' => $location->id,
-             'product_id' => $cups->id,
-             'quantity' => 500,
+            'location_id' => $location->id,
+            'product_id' => $cups->id,
+            'quantity' => 500,
         ]);
     }
 }

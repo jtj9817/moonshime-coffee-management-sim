@@ -25,7 +25,7 @@
     - **Note:** Verified with real API (gemini-3-flash-preview) using `tests/verify_ai_service.php`.
 
 ## Phase 4: Wiring & Verification
-- [ ] **Task 4.1:** Create `GameServiceProvider` (`php artisan make:provider GameServiceProvider`).
-- [ ] **Task 4.2:** Register `GameServiceProvider` in `bootstrap/providers.php`.
-- [ ] **Task 4.3:** Bind `AiProviderInterface` to `PrismAiService`.
-- [ ] **Task 4.4:** Create a verification script `tests/verify_core_services.php` to instantiate services and run basic logic checks (as per project directive).
+- [x] **Task 4.1:** Create `GameServiceProvider` (`php artisan make:provider GameServiceProvider`).
+- [x] **Task 4.2:** Register `GameServiceProvider` in `bootstrap/providers.php`.
+- [x] **Task 4.3:** Bind `AiProviderInterface` to `PrismAiService`.
+- [x] **Task 4.4:** Create a verification script `tests/verify_core_services.php` to instantiate services and run basic logic checks (as per project directive).

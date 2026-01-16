@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\Inventory;
 use App\Interfaces\RestockStrategyInterface;
+use App\Models\Inventory;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
@@ -47,7 +47,7 @@ class InventoryManagementService
     public function consume(Inventory $inventory, int $quantity): void
     {
         if ($quantity < 0) {
-            throw new InvalidArgumentException("Consumption quantity must be positive.");
+            throw new InvalidArgumentException('Consumption quantity must be positive.');
         }
 
         DB::transaction(function () use ($inventory, $quantity) {
@@ -69,16 +69,16 @@ class InventoryManagementService
     public function waste(Inventory $inventory, int $quantity, string $reason = 'spoilage'): void
     {
         if ($quantity < 0) {
-            throw new InvalidArgumentException("Waste quantity must be positive.");
+            throw new InvalidArgumentException('Waste quantity must be positive.');
         }
 
         DB::transaction(function () use ($inventory, $quantity) {
-             if ($inventory->quantity < $quantity) {
-                throw new InvalidArgumentException("Cannot waste more than available stock.");
+            if ($inventory->quantity < $quantity) {
+                throw new InvalidArgumentException('Cannot waste more than available stock.');
             }
 
             $inventory->decrement('quantity', $quantity);
-            
+
             // Future: Log waste event to database (Audit Log)
         });
     }

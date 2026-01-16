@@ -4,7 +4,6 @@ namespace App\Observers;
 
 use App\Events\LowStockDetected;
 use App\Models\Inventory;
-use Illuminate\Support\Facades\Log;
 
 class InventoryObserver
 {

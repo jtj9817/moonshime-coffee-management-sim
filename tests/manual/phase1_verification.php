@@ -1,11 +1,10 @@
 <?php
 
-use App\Models\Location;
-use App\Models\Vendor;
-use App\Models\Product;
 use App\Models\Inventory;
+use App\Models\Location;
+use App\Models\Product;
+use App\Models\Vendor;
 use Database\Seeders\CoreGameStateSeeder;
-use Illuminate\Support\Facades\DB;
 
 echo "\n\n--- Starting Phase 1 Verification Script ---\n";
 
@@ -17,11 +16,11 @@ $counts = [
     'inventories' => Inventory::count(),
 ];
 
-echo "Initial State: " . json_encode($counts) . "\n";
+echo 'Initial State: '.json_encode($counts)."\n";
 
 // 2. Run Seeder
 echo ">> Running CoreGameStateSeeder...\n";
-$seeder = new CoreGameStateSeeder();
+$seeder = new CoreGameStateSeeder;
 $seeder->run();
 
 // 3. Verify Creation
@@ -32,7 +31,7 @@ $newCounts = [
     'inventories' => Inventory::count(),
 ];
 
-echo "Post-Seed State: " . json_encode($newCounts) . "\n";
+echo 'Post-Seed State: '.json_encode($newCounts)."\n";
 
 // Validate increases
 if ($newCounts['locations'] <= $counts['locations']) {
@@ -52,7 +51,7 @@ echo ">> Inspecting created Location: {$location->name} (ID: {$location->id})\n"
 $inventoryItems = $location->inventories;
 echo ">> Found {$inventoryItems->count()} inventory items.\n";
 
-foreach($inventoryItems as $item) {
+foreach ($inventoryItems as $item) {
     echo "   - Item: {$item->product->name} (Qty: {$item->quantity}) | Vendor: {$item->product->vendors->first()?->name}\n";
 }
 
@@ -68,13 +67,13 @@ echo "   - Deleted Location.\n";
 // We can safely target the latest N records.
 
 $vendorsToDelete = Vendor::latest('created_at')->take(3)->get();
-foreach($vendorsToDelete as $v) {
+foreach ($vendorsToDelete as $v) {
     $v->delete();
     echo "   - Deleted Vendor: {$v->name}\n";
 }
 
 $productsToDelete = Product::latest('created_at')->take(5)->get();
-foreach($productsToDelete as $p) {
+foreach ($productsToDelete as $p) {
     $p->delete();
     echo "   - Deleted Product: {$p->name}\n";
 }
@@ -86,7 +85,7 @@ $finalCounts = [
     'products' => Product::count(),
 ];
 
-echo "Final State: " . json_encode($finalCounts) . "\n";
+echo 'Final State: '.json_encode($finalCounts)."\n";
 
 if ($finalCounts['locations'] !== $counts['locations']) {
     echo "WARNING: Location count mismatch (Expected {$counts['locations']}, got {$finalCounts['locations']})\n";
@@ -95,4 +94,3 @@ if ($finalCounts['locations'] !== $counts['locations']) {
 }
 
 echo "--- Verification Complete ---\n";
-

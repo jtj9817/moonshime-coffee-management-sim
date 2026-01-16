@@ -17,7 +17,7 @@ class VendorFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->company() . ' Supplies',
+            'name' => $this->faker->company().' Supplies',
             'reliability_score' => $this->faker->randomFloat(2, 80, 100),
             'metrics' => ['on_time_rate' => 0.95],
         ];

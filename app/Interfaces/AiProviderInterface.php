@@ -2,8 +2,8 @@
 
 namespace App\Interfaces;
 
-use App\DTOs\InventoryContextDTO;
 use App\DTOs\InventoryAdvisoryDTO;
+use App\DTOs\InventoryContextDTO;
 
 interface AiProviderInterface
 {

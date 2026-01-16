@@ -42,7 +42,7 @@ test('low stock event fires when inventory drops below threshold', function () {
     Event::fake([LowStockDetected::class]);
 
     $inventory = Inventory::factory()->create([
-        'quantity' => 20
+        'quantity' => 20,
     ]);
 
     // Update to low stock
@@ -57,7 +57,7 @@ test('low stock event does not fire if already low', function () {
     Event::fake([LowStockDetected::class]);
 
     $inventory = Inventory::factory()->create([
-        'quantity' => 5
+        'quantity' => 5,
     ]);
 
     // Update, staying low

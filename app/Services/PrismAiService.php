@@ -5,11 +5,11 @@ namespace App\Services;
 use App\DTOs\InventoryAdvisoryDTO;
 use App\DTOs\InventoryContextDTO;
 use App\Interfaces\AiProviderInterface;
-use Prism\Prism\Facades\Prism;
 use Prism\Prism\Enums\Provider;
+use Prism\Prism\Facades\Prism;
+use Prism\Prism\Schema\NumberSchema;
 use Prism\Prism\Schema\ObjectSchema;
 use Prism\Prism\Schema\StringSchema;
-use Prism\Prism\Schema\NumberSchema;
 
 class PrismAiService implements AiProviderInterface
 {
@@ -33,12 +33,12 @@ class PrismAiService implements AiProviderInterface
 
         // Generate structured output
         $response = Prism::structured()
-            ->using(Provider::Gemini, 'gemini-3-flash-preview') 
+            ->using(Provider::Gemini, 'gemini-3-flash-preview')
             ->withSchema($schema)
             ->withPrompt($prompt)
             ->withClientOptions(['timeout' => 30])
             ->asStructured();
-            
+
         $data = $response->structured;
 
         return new InventoryAdvisoryDTO(

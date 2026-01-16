@@ -14,13 +14,13 @@ class SafetyStockStrategy implements RestockStrategyInterface
 
     /**
      * Safety Stock Strategy.
-     * 
+     *
      * Prioritizes stock availability.
      * Logic:
      * 1. Calculate Safety Stock based on variability and service level.
      * 2. Calculate Reorder Point (ROP).
      * 3. If Current Inventory <= ROP, order up to (ROP + Safety Stock).
-     * 
+     *
      * Required Params:
      * - avg_daily_usage (float)
      * - avg_lead_time (float)
@@ -62,7 +62,7 @@ class SafetyStockStrategy implements RestockStrategyInterface
         }
 
         // Target Level: ROP + Safety Stock (Conservative "Order Up To")
-        // Note: In a real Min-Max, Max might be ROP + EOQ. 
+        // Note: In a real Min-Max, Max might be ROP + EOQ.
         // For this strategy, we ensure we recover the buffer.
         $targetLevel = $rop + $safetyStock;
 
