@@ -1,8 +1,0 @@
-{
-  "track_id": "game_engine_20260116",
-  "type": "feature",
-  "status": "new",
-  "created_at": "2026-01-16T12:00:00Z",
-  "updated_at": "2026-01-16T12:00:00Z",
-  "description": "Implementation of core Game Engine logic: turn-based clock, DAG event side-effects, state machines, and chaos factory."
-}
