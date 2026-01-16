@@ -15,17 +15,17 @@
 - [x] Task: Create manual verification script `tests/manual/verify_dag_events.php` (using `laravel-manual-testing` skill).
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Events & Listeners' (Protocol in workflow.md)
 
-## Phase 2: State Machines
-- [ ] Task: Install and Configure State Machine
-    - [ ] Install `spatie/laravel-model-states` (if not already present).
-    - [ ] Create base state classes for `Order` and `Transfer`.
-- [ ] Task: Implement `Order` States
-    - [ ] Define states: `Draft`, `Pending`, `Shipped`, `Delivered`, `Cancelled`.
-    - [ ] Implement transition logic and validation (Cash check).
-- [ ] Task: Implement `Transfer` States
-    - [ ] Define states: `Draft`, `InTransit`, `Completed`, `Cancelled`.
-- [ ] Task: Create manual verification script `tests/manual/verify_state_machines.php`.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: State Machines' (Protocol in workflow.md)
+## Phase 2: State Machines [checkpoint: 10e049a]
+- [x] Task: Install and Configure State Machine
+    - [x] Install `spatie/laravel-model-states` (if not already present).
+    - [x] Create base state classes for `Order` and `Transfer`.
+- [x] Task: Implement `Order` States
+    - [x] Define states: `Draft`, `Pending`, `Shipped`, `Delivered`, `Cancelled`.
+    - [x] Implement transition logic and validation (Cash check).
+- [x] Task: Implement `Transfer` States
+    - [x] Define states: `Draft`, `InTransit`, `Completed`, `Cancelled`.
+- [x] Task: Create manual verification script `tests/manual/verify_state_machines.php`.
+- [x] Task: Conductor - User Manual Verification 'Phase 2: State Machines' (Protocol in workflow.md)
 
 ## Phase 3: Chaos Engine (SpikeEventFactory)
 - [ ] Task: Implement Spike Event Models & Types
