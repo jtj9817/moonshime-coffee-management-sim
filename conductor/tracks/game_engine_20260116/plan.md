@@ -1,19 +1,19 @@
 # Implementation Plan: Game Logic & Events (Step 4)
 
 ## Phase 1: Events & Listeners (The DAG)
-- [ ] Task: Define Event Classes
-    - [ ] Create `app/Events/OrderPlaced.php`
-    - [ ] Create `app/Events/TransferCompleted.php`
-    - [ ] Create `app/Events/SpikeOccurred.php`
-    - [ ] Create `app/Events/TimeAdvanced.php`
-- [ ] Task: Implement DAG Listeners
-    - [ ] Create `app/Listeners/DeductCash.php` (The Trigger/Validator)
-    - [ ] Create `app/Listeners/GenerateAlert.php`
-    - [ ] Create `app/Listeners/UpdateInventory.php`
-    - [ ] Create `app/Listeners/UpdateMetrics.php` (XP/Reliability)
-- [ ] Task: Register Event-Listener Mapping in `AppServiceProvider` or dedicated provider.
-- [ ] Task: Create manual verification script `tests/manual/verify_dag_events.php` (using `laravel-manual-testing` skill).
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Events & Listeners' (Protocol in workflow.md)
+- [x] Task: Define Event Classes
+    - [x] Create `app/Events/OrderPlaced.php`
+    - [x] Create `app/Events/TransferCompleted.php`
+    - [x] Create `app/Events/SpikeOccurred.php`
+    - [x] Create `app/Events/TimeAdvanced.php`
+- [x] Task: Implement DAG Listeners
+    - [x] Create `app/Listeners/DeductCash.php` (The Trigger/Validator)
+    - [x] Create `app/Listeners/GenerateAlert.php`
+    - [x] Create `app/Listeners/UpdateInventory.php`
+    - [x] Create `app/Listeners/UpdateMetrics.php` (XP/Reliability)
+- [x] Task: Register Event-Listener Mapping in `AppServiceProvider` or dedicated provider.
+- [x] Task: Create manual verification script `tests/manual/verify_dag_events.php` (using `laravel-manual-testing` skill).
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Events & Listeners' (Protocol in workflow.md)
 
 ## Phase 2: State Machines
 - [ ] Task: Install and Configure State Machine

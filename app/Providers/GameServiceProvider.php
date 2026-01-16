@@ -2,13 +2,22 @@
 
 namespace App\Providers;
 
+use App\Events\OrderPlaced;
+use App\Events\SpikeOccurred;
+use App\Events\TimeAdvanced;
+use App\Events\TransferCompleted;
 use App\Interfaces\AiProviderInterface;
 use App\Interfaces\RestockStrategyInterface;
+use App\Listeners\DeductCash;
+use App\Listeners\GenerateAlert;
+use App\Listeners\UpdateInventory;
+use App\Listeners\UpdateMetrics;
 use App\Services\InventoryManagementService;
 use App\Services\InventoryMathService;
 use App\Services\PrismAiService;
 use App\Services\Strategies\JustInTimeStrategy;
 use App\Services\Strategies\SafetyStockStrategy;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
 class GameServiceProvider extends ServiceProvider
@@ -55,6 +64,17 @@ class GameServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // DAG Chain for OrderPlaced
+        Event::listen(OrderPlaced::class, DeductCash::class);
+        Event::listen(OrderPlaced::class, GenerateAlert::class);
+        Event::listen(OrderPlaced::class, UpdateMetrics::class);
+
+        // DAG Chain for TransferCompleted
+        Event::listen(TransferCompleted::class, GenerateAlert::class);
+        Event::listen(TransferCompleted::class, UpdateInventory::class);
+        Event::listen(TransferCompleted::class, UpdateMetrics::class);
+
+        // DAG Chain for SpikeOccurred
+        Event::listen(SpikeOccurred::class, GenerateAlert::class);
     }
 }

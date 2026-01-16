@@ -4,7 +4,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Game Logic & Events (Step 4)**
+- [~] **Track: Game Logic & Events (Step 4)**
 *Link: [./tracks/game_engine_20260116/](./tracks/game_engine_20260116/)*
 
 ---
