@@ -13,7 +13,7 @@
 - [x] **Task 2.2:** Implement `JustInTimeStrategy` class.
 - [x] **Task 2.3:** Implement `SafetyStockStrategy` class.
 
-## Phase 3: Service Orchestration
+## Phase 3: Service Orchestration [checkpoint: 58ce569]
 - [x] **Task 3.1:** Implement `InventoryManagementService`.
     - Inject `InventoryMathService`.
     - Implement `restock` method with DB transaction.
