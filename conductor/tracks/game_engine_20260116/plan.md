@@ -1,6 +1,6 @@
 # Implementation Plan: Game Logic & Events (Step 4)
 
-## Phase 1: Events & Listeners (The DAG)
+## Phase 1: Events & Listeners (The DAG) [checkpoint: 0bddba3]
 - [x] Task: Define Event Classes
     - [x] Create `app/Events/OrderPlaced.php`
     - [x] Create `app/Events/TransferCompleted.php`
