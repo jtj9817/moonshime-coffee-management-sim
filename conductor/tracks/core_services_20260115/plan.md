@@ -8,10 +8,10 @@
 - [x] **Task 1.4:** Define `RestockStrategyInterface`.
 
 ## Phase 2: Core Math & Strategies
-- [ ] **Task 2.1:** Implement `InventoryMathService` in `app/Services`.
+- [x] **Task 2.1:** Implement `InventoryMathService` in `app/Services`.
     - Port logic from `resources/js/services/skuMath.ts` (if available) or implement standard formulas (EOQ, Safety Stock).
-- [ ] **Task 2.2:** Implement `JustInTimeStrategy` class.
-- [ ] **Task 2.3:** Implement `SafetyStockStrategy` class.
+- [x] **Task 2.2:** Implement `JustInTimeStrategy` class.
+- [x] **Task 2.3:** Implement `SafetyStockStrategy` class.
 
 ## Phase 3: Service Orchestration
 - [ ] **Task 3.1:** Implement `InventoryManagementService`.

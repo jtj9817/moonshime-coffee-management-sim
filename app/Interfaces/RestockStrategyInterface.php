@@ -6,5 +6,5 @@ use App\Models\Inventory;
 
 interface RestockStrategyInterface
 {
-    public function calculateReorderAmount(Inventory $inventory): int;
+    public function calculateReorderAmount(Inventory $inventory, array $params = []): int;
 }

@@ -46,12 +46,28 @@ class InventoryMathService
      * Calculate Reorder Point (ROP).
      * Formula: (Demand * LeadTime) + SafetyStock
      */
-    public function calculateROP(
+    public function calculateReorderPoint(
         float $avgDailyUsage,
         float $avgLeadTime,
         int $safetyStock
     ): int {
         return (int) ceil(($avgDailyUsage * $avgLeadTime) + $safetyStock);
+    }
+
+    /**
+     * Calculate Economic Order Quantity (EOQ).
+     * Formula: sqrt( (2 * AnnualDemand * SetupCost) / HoldingCostPerUnit )
+     */
+    public function calculateEOQ(
+        float $annualDemand,
+        float $setupCost,
+        float $holdingCostPerUnit
+    ): int {
+        if ($holdingCostPerUnit <= 0) {
+            return 0;
+        }
+
+        return (int) ceil(sqrt((2 * $annualDemand * $setupCost) / $holdingCostPerUnit));
     }
 
     /**
