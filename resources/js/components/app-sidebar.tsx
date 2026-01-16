@@ -1,5 +1,17 @@
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
+import {
+    Activity,
+    ArrowRightLeft,
+    BarChart3,
+    BookOpen,
+    Folder,
+    Layers,
+    LayoutDashboard,
+    Package,
+    PieChart,
+    ShoppingCart,
+    Users,
+} from 'lucide-react';
 
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -13,16 +25,56 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
+import game from '@/routes/game';
 import { type NavItem } from '@/types';
 
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
     {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
+        title: 'Mission Control',
+        href: game.dashboard(),
+        icon: LayoutDashboard,
+    },
+    {
+        title: 'Strategy Deck',
+        href: game.strategy(),
+        icon: Layers,
+    },
+    {
+        title: 'Pantry',
+        href: game.inventory(),
+        icon: Package,
+    },
+    {
+        title: 'Procurement',
+        href: game.ordering(),
+        icon: ShoppingCart,
+    },
+    {
+        title: 'Logistics',
+        href: game.transfers(),
+        icon: ArrowRightLeft,
+    },
+    {
+        title: 'Suppliers',
+        href: game.vendors(),
+        icon: Users,
+    },
+    {
+        title: 'Analytics',
+        href: game.analytics(),
+        icon: BarChart3,
+    },
+    {
+        title: 'War Room',
+        href: game.spikeHistory(),
+        icon: Activity,
+    },
+    {
+        title: 'Wastage',
+        href: game.reports(),
+        icon: PieChart,
     },
 ];
 
@@ -46,7 +98,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href={dashboard()} prefetch>
+                            <Link href={game.dashboard.url()} prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>

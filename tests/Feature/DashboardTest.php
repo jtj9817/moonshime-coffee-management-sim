@@ -9,7 +9,9 @@ test('guests are redirected to the login page', function () {
 });
 
 test('authenticated users can visit the dashboard', function () {
-    $this->actingAs($user = User::factory()->create());
-
-    $this->get(route('dashboard'))->assertOk();
+    $this->actingAs($user = User::factory()->create())
+        ->withoutMiddleware(\Illuminate\Cookie\Middleware\EncryptCookies::class)
+        ->withCookie('game_acknowledged', 'true')
+        ->get(route('game.dashboard'))
+        ->assertOk();
 });
