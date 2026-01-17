@@ -33,7 +33,7 @@
     - [ ] Verify routes are restored when the event expires.
 - [x] Task: Conductor - User Manual Verification 'Causal Graph & Event Propagation' (Protocol in workflow.md)
 
-## Phase 3: Advanced Algorithms (BFS & Dijkstra)
+## Phase 3: Advanced Algorithms (BFS & Dijkstra) [checkpoint: 02af56d]
 - [x] Task: Implement BFS Reachability in `LogisticsService`
     - [x] Implement `checkReachability(Location $target)` using Reverse-BFS.
     - [x] Return boolean indicating if *any* supply source is accessible.
@@ -43,7 +43,7 @@
 - [x] Task: TDD - Verify Graph Algorithms
     - [x] Test BFS correctly identifies isolated nodes.
     - [x] Test Dijkstra finds the cheapest valid path, avoiding blocked routes.
-- [~] Task: Conductor - User Manual Verification 'Advanced Algorithms' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Advanced Algorithms' (Protocol in workflow.md)
 
 ## Phase 4: Simulation Loop Integration
 - [ ] Task: Implement Alert Generation Logic
