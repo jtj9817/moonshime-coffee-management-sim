@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SpikeEvent extends Model
 {
@@ -18,6 +19,8 @@ class SpikeEvent extends Model
         'duration',
         'location_id',
         'product_id',
+        'affected_route_id',
+        'parent_id',
         'starts_at_day',
         'ends_at_day',
         'is_active',
@@ -41,5 +44,20 @@ class SpikeEvent extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function affectedRoute(): BelongsTo
+    {
+        return $this->belongsTo(Route::class, 'affected_route_id');
+    }
+
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(SpikeEvent::class, 'parent_id');
+    }
+
+    public function children(): HasMany
+    {
+        return $this->hasMany(SpikeEvent::class, 'parent_id');
     }
 }
