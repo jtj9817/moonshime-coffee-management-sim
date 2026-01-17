@@ -13,7 +13,7 @@
     - [x] Update `docs/technical-design-document.md` to reflect this standard.
 - [x] Task: Conductor - User Manual Verification 'Architectural Cleanup & Standardisation' (Protocol in workflow.md)
 
-## Phase 2: Data Integrity & Persistence
+## Phase 2: Data Integrity & Persistence [checkpoint: e885170]
 - [x] Task: Audit and Update Route Migrations
     - [x] Update `routes` table migration to add strict foreign key constraints for `source_id` and `target_id`.
     - [x] Refactor `weights` JSON to explicit `cost`, `transit_days`, and `capacity` columns.
@@ -21,7 +21,7 @@
 - [x] Task: Verify SpikeEvent DAG Persistence
     - [x] Audit `SpikeEvent` model and database for `parent_id` and `type` fields.
     - [x] Write a unit test ensuring causal chains (Root -> Symptom) persist correctly.
-- [~] Task: Conductor - User Manual Verification 'Data Integrity & Persistence' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Data Integrity & Persistence' (Protocol in workflow.md)
 
 ## Phase 3: Archive Synchronization & Documentation
 - [ ] Task: Audit Archived Plans
