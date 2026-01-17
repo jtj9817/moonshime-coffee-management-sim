@@ -28,10 +28,10 @@
 - [x] Task: Implement Event Listeners for Route State
     - [ ] Create `SpikeStarted` listener: Sets `Route->is_active = false` or increases weight.
     - [ ] Create `SpikeEnded` listener: Restores `Route->is_active = true` and weights.
-- [~] Task: TDD - Verify Event Propagation
-    - [ ] Write tests confirming a "Blizzard" event disables vulnerable routes.
-    - [ ] Verify routes are restored when the event expires.
-- [ ] Task: Conductor - User Manual Verification 'Causal Graph & Event Propagation' (Protocol in workflow.md)
+- [x] Task: TDD - Verify Event Propagation
+    - [x] Write tests confirming a "Blizzard" event disables vulnerable routes.
+    - [x] Verify routes are restored when the event expires.
+- [~] Task: Conductor - User Manual Verification 'Causal Graph & Event Propagation' (Protocol in workflow.md)
 
 ## Phase 3: Advanced Algorithms (BFS & Dijkstra)
 - [ ] Task: Implement BFS Reachability in `LogisticsService`

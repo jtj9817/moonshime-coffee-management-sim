@@ -64,6 +64,8 @@ test('it triggers spike generation on time advancement', function () {
             ->once()
             ->with(2)
             ->andReturn(SpikeEvent::factory()->make(['starts_at_day' => 3]));
+        
+        $mock->shouldReceive('apply')->once();
     });
 
     // We need to ensure the listener uses the mocked factory.
