@@ -1,6 +1,6 @@
 # Implementation Plan - Hybrid Event-Topology
 
-## Phase 1: Physical Graph Foundation (Logistics)
+## Phase 1: Physical Graph Foundation (Logistics) [checkpoint: 529dec3]
 - [x] Task: Create `Route` Model and Migration
     - [ ] Create migration for `routes` table (source_id, target_id, transport_mode, weights, is_active).
     - [ ] Create `Route` Eloquent model with relationships to `Location`.
@@ -16,7 +16,7 @@
 - [x] Task: TDD - Verify Physical Graph Construction
     - [ ] Write tests to verify graph connectivity and `Route` attribute persistence.
     - [ ] Verify `LogisticsService` correctly filters inactive routes.
-- [~] Task: Conductor - User Manual Verification 'Physical Graph Foundation' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Physical Graph Foundation' (Protocol in workflow.md)
 
 ## Phase 2: Causal Graph & Event Propagation
 - [ ] Task: Update `SpikeEvent` Model
