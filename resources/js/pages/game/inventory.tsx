@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import { AlertTriangle, CheckCircle2, Package } from 'lucide-react';
+import { type ReactNode } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -47,7 +48,7 @@ export default function Inventory({ inventory, currentLocation }: InventoryProps
     };
 
     return (
-        <GameLayout breadcrumbs={breadcrumbs}>
+        <>
             <Head title="Inventory" />
 
             <div className="flex flex-col gap-6 p-6">
@@ -142,6 +143,10 @@ export default function Inventory({ inventory, currentLocation }: InventoryProps
                     </Table>
                 </div>
             </div>
-        </GameLayout>
+        </>
     );
 }
+
+Inventory.layout = (page: ReactNode) => (
+    <GameLayout breadcrumbs={breadcrumbs}>{page}</GameLayout>
+);

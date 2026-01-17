@@ -1,6 +1,6 @@
 import { Head, useForm } from '@inertiajs/react';
 import { ArrowRight, ArrowRightLeft, MapPin, Plus, Truck, AlertTriangle, Info } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -45,7 +45,25 @@ interface TransfersProps {
     }>;
 }
 
-// ... existing getStatusBadge function ...
+const breadcrumbs: BreadcrumbItem[] = [
+    { title: 'Mission Control', href: '/game/dashboard' },
+    { title: 'Logistics', href: '/game/transfers' },
+];
+
+function getStatusBadge(status: string) {
+    switch (status) {
+        case 'pending':
+            return <Badge variant="secondary">Pending</Badge>;
+        case 'in_transit':
+            return <Badge variant="default" className="bg-blue-500">In Transit</Badge>;
+        case 'completed':
+            return <Badge variant="default" className="bg-emerald-500">Completed</Badge>;
+        case 'cancelled':
+            return <Badge variant="destructive">Cancelled</Badge>;
+        default:
+            return <Badge variant="outline">{status}</Badge>;
+    }
+}
 
 export default function Transfers({ transfers, suggestions }: TransfersProps) {
     const { locations, products } = useGame();
@@ -96,7 +114,7 @@ export default function Transfers({ transfers, suggestions }: TransfersProps) {
     };
 
     return (
-        <GameLayout breadcrumbs={breadcrumbs}>
+        <>
             <Head title="Logistics" />
 
             <div className="flex flex-col gap-6 p-6">
@@ -352,6 +370,10 @@ export default function Transfers({ transfers, suggestions }: TransfersProps) {
                     </Table>
                 </div>
             </div>
-        </GameLayout>
+        </>
     );
 }
+
+Transfers.layout = (page: ReactNode) => (
+    <GameLayout breadcrumbs={breadcrumbs}>{page}</GameLayout>
+);

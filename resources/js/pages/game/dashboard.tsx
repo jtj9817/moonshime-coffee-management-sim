@@ -12,6 +12,7 @@ import {
     TrendingUp,
     Zap,
 } from 'lucide-react';
+import { type ReactNode } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -157,7 +158,7 @@ export default function Dashboard({ alerts, kpis, quests }: DashboardProps) {
     const { locations, currentSpike, gameState } = useGame();
 
     return (
-        <GameLayout breadcrumbs={breadcrumbs}>
+        <>
             <Head title="Mission Control" />
 
             <div className="flex flex-col gap-6 p-6">
@@ -240,6 +241,10 @@ export default function Dashboard({ alerts, kpis, quests }: DashboardProps) {
                     </div>
                 </div>
             </div>
-        </GameLayout>
+        </>
     );
 }
+
+Dashboard.layout = (page: ReactNode) => (
+    <GameLayout breadcrumbs={breadcrumbs}>{page}</GameLayout>
+);
