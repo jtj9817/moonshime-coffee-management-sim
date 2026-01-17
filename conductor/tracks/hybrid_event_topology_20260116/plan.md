@@ -57,7 +57,7 @@
     - [x] Simulate a tick where a Blizzard blocks supply, and verify an Alert is spawned for a low-stock store.
 - [x] Task: Conductor - User Manual Verification 'Simulation Loop Integration' (Protocol in workflow.md)
 
-## Phase 5: UI Integration ("The No-Map Dashboard")
+## Phase 5: UI Integration ("The No-Map Dashboard") [checkpoint: e739122]
 - [x] Task: Update Dashboard Logic
     - [x] Expose "Logistics Health" metric (percentage of active routes vs total) via Inertia props.
     - [x] Update `StatWidget` or create `LogisticsStatusWidget` to display this metric.
