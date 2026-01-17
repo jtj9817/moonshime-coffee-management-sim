@@ -37,13 +37,13 @@
 - [x] Task: Implement BFS Reachability in `LogisticsService`
     - [x] Implement `checkReachability(Location $target)` using Reverse-BFS.
     - [x] Return boolean indicating if *any* supply source is accessible.
-- [~] Task: Implement Dijkstra Pathfinding in `LogisticsService`
-    - [ ] Implement `findBestRoute(Location $source, Location $target)` minimizing dynamic cost.
-    - [ ] Incorporate time/urgency multipliers into the weight calculation.
-- [ ] Task: TDD - Verify Graph Algorithms
-    - [ ] Test BFS correctly identifies isolated nodes.
-    - [ ] Test Dijkstra finds the cheapest valid path, avoiding blocked routes.
-- [ ] Task: Conductor - User Manual Verification 'Advanced Algorithms' (Protocol in workflow.md)
+- [x] Task: Implement Dijkstra Pathfinding in `LogisticsService`
+    - [x] Implement `findBestRoute(Location $source, Location $target)` minimizing dynamic cost.
+    - [x] Incorporate time/urgency multipliers into the weight calculation.
+- [x] Task: TDD - Verify Graph Algorithms
+    - [x] Test BFS correctly identifies isolated nodes.
+    - [x] Test Dijkstra finds the cheapest valid path, avoiding blocked routes.
+- [~] Task: Conductor - User Manual Verification 'Advanced Algorithms' (Protocol in workflow.md)
 
 ## Phase 4: Simulation Loop Integration
 - [ ] Task: Implement Alert Generation Logic
