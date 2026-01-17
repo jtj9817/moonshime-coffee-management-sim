@@ -18,7 +18,8 @@ This file tracks all major tracks for the project. Each track has its own detail
     - **ID:** `core_services_20260115`
     - **Link:** [./archive/core_services_20260115/](./archive/core_services_20260115/)
 
----
-
 - [x] **Track: UI Integration ("The No-Map Dashboard")**
-*Link: [./tracks/ui_integration_20260116/](./tracks/ui_integration_20260116/)*
+    - **ID:** `ui_integration_20260116`
+    - **Link:** [./archive/ui_integration_20260116/](./archive/ui_integration_20260116/)
+
+---
