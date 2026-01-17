@@ -16,6 +16,7 @@ class Location extends Model
         'name',
         'address',
         'max_storage',
+        'type',
     ];
 
     public function inventories(): HasMany
