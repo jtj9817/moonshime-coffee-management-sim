@@ -32,12 +32,15 @@
 - [x] Task: Conductor - User Manual Verification 'Archive Synchronization & Documentation' (Protocol in workflow.md)
 
 ## Phase 4: Gameplay Loop Verification
-- [ ] Task: Implement Gameplay Loop Feature Test
-    - [ ] Write a test for the full sequence: Initial State (Day 1) -> Decision-making -> Stochastic States (Day 2+).
-    - [ ] Verify that Day 1 remains stable and deterministic with no random events.
-    - [ ] Verify `SpikeEventFactory` activates correctly at Day 2 using logic from `tests/Feature/ChaosEngineTest.php`.
-    - [ ] Verify that user decisions (Policies/Orders) persist correctly across simulation ticks.
-- [ ] Task: Conductor - User Manual Verification 'Gameplay Loop Verification' (Protocol in workflow.md)
+- [x] Task: Implement Gameplay Loop Feature Test
+    - [x] Write a test for the full sequence: Initial State (Day 1) -> Decision-making -> Stochastic States (Day 2+).
+    - [x] Verify that Day 1 remains stable and deterministic with no random events.
+    - [x] Verify full 5-day simulation cycle:
+        - [x] Day 2: Spike activation and initial stochastic changes.
+        - [x] Day 3-4: Decision persistence and state progression.
+        - [x] Day 5: Spike expiration and state restoration/cleanup.
+    - [x] Verify that user decisions (Policies/Orders) persist correctly across simulation ticks.
+- [x] Task: Conductor - User Manual Verification 'Gameplay Loop Verification' (Protocol in workflow.md)
 
 ## Phase 5: Advanced Stress Testing
 - [ ] Task: Implement "The Cascade" Stress Test (Scenario A)
