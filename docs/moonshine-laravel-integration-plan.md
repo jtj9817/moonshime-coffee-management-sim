@@ -218,16 +218,16 @@ We will replace `types.ts` interfaces with robust Eloquent models.
 - [x] Implement `PrismAiService` & `AiProviderInterface`.
 
 ### Step 4: Game Logic & Events
-- [ ] Define Events: `OrderPlaced`, `TransferCompleted`, `SpikeOccurred`.
-- [ ] Implement **State Machines** for `Order` and `Transfer` models.
-- [ ] Implement **`SpikeEventFactory`** for simulation events.
-- [ ] Create Listeners to handle `GameState` updates (XP gain, Cash deduction).
-- [ ] Implement `SimulationService` (The clock).
+- [x] Define Events: `OrderPlaced`, `TransferCompleted`, `SpikeOccurred`.
+- [x] Implement **State Machines** for `Order` and `Transfer` models.
+- [x] Implement **`SpikeEventFactory`** for simulation events.
+- [x] Create Listeners to handle `GameState` updates (XP gain, Cash deduction).
+- [x] Implement `SimulationService` (The clock).
 
 ### Step 5: Frontend Connection & Infrastructure
-- [ ] **Infrastructure:** Configure `HandleInertiaRequests` middleware to share `auth` and `game` state.
+- [x] **Infrastructure:** Configure `HandleInertiaRequests` middleware to share `auth` and `game` state.
 - [ ] **Type Safety:** Configure `spatie/laravel-typescript-transformer` to generate `types/generated.d.ts`.
-- [ ] **Routing:** Setup **Laravel Wayfinder** to generate typed route helpers.
-- [ ] **Layouts:** Implement `GameLayout.tsx` with persistent navigation and Sidebar.
-- [ ] **Components:** Refactor existing React components into "dumb" UI atoms and "smart" Inertia Pages.
-- [ ] **Routing:** Update `routes/web.php` and bind Inertia Pages to Controllers.
+- [x] **Routing:** Setup **Laravel Wayfinder** to generate typed route helpers.
+- [x] **Layouts:** Implement `GameLayout.tsx` with persistent navigation and Sidebar.
+- [x] **Components:** Refactor existing React components into "dumb" UI atoms and "smart" Inertia Pages.
+- [x] **Routing:** Update `routes/web.php` and bind Inertia Pages to Controllers.

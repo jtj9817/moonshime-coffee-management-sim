@@ -24,12 +24,12 @@
 - [x] Task: Conductor - User Manual Verification 'Data Integrity & Persistence' (Protocol in workflow.md)
 
 ## Phase 3: Archive Synchronization & Documentation
-- [ ] Task: Audit Archived Plans
-    - [ ] Sync `hybrid_event_topology_20260116/plan.md` by marking completed tasks as `[x]`.
-    - [ ] Ensure all archived task descriptions accurately reflect the current code state.
-- [ ] Task: Documentation Audit
-    - [ ] Verify all manual verification scripts in `tests/manual/` are functional and documented.
-- [ ] Task: Conductor - User Manual Verification 'Archive Synchronization & Documentation' (Protocol in workflow.md)
+- [x] Task: Audit Archived Plans
+    - [x] Sync `hybrid_event_topology_20260116/plan.md` by marking completed tasks as `[x]`.
+    - [x] Ensure all archived task descriptions accurately reflect the current code state.
+- [x] Task: Documentation Audit
+    - [x] Verify all manual verification scripts in `tests/manual/` are functional and documented.
+- [~] Task: Conductor - User Manual Verification 'Archive Synchronization & Documentation' (Protocol in workflow.md)
 
 ## Phase 4: Gameplay Loop Verification
 - [ ] Task: Implement Gameplay Loop Feature Test
