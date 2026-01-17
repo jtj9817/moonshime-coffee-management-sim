@@ -5,20 +5,23 @@ namespace App\Services;
 use App\Models\SpikeEvent;
 use App\Models\Location;
 use App\Models\Product;
+use App\Models\Route;
 use App\Services\Spikes\DemandSpike;
 use App\Services\Spikes\DelaySpike;
 use App\Services\Spikes\PriceSpike;
 use App\Services\Spikes\BreakdownSpike;
+use App\Services\Spikes\BlizzardSpike;
 use App\Interfaces\SpikeTypeInterface;
 use Exception;
 
 class SpikeEventFactory
 {
     protected array $weights = [
-        'demand' => 40,
+        'demand' => 30,
         'delay' => 20,
-        'price' => 30,
+        'price' => 20,
         'breakdown' => 10,
+        'blizzard' => 20,
     ];
 
     /**
@@ -32,7 +35,20 @@ class SpikeEventFactory
         $magnitude = $this->generateMagnitude($type);
         
         $locationId = null;
-        if ($type === 'breakdown' || (rand(0, 100) > 50)) {
+        $affectedRouteId = null;
+        $productId = null;
+
+        if ($type === 'blizzard') {
+            // Target a vulnerable route
+            $route = Route::where('weather_vulnerability', true)
+                ->inRandomOrder()
+                ->first();
+            
+            if (!$route) {
+                return null; // Cannot generate blizzard without vulnerable routes
+            }
+            $affectedRouteId = $route->id;
+        } elseif ($type === 'breakdown' || (rand(0, 100) > 50)) {
             $locationId = Location::inRandomOrder()->first()?->id;
             
             // Breakdown MUST have a location
@@ -41,8 +57,7 @@ class SpikeEventFactory
             }
         }
 
-        $productId = null;
-        if ($type !== 'breakdown' && (rand(0, 100) > 50)) {
+        if ($type !== 'breakdown' && $type !== 'blizzard' && (rand(0, 100) > 50)) {
             $productId = Product::inRandomOrder()->first()?->id;
         }
 
@@ -52,6 +67,7 @@ class SpikeEventFactory
             'duration' => $duration,
             'location_id' => $locationId,
             'product_id' => $productId,
+            'affected_route_id' => $affectedRouteId,
             'starts_at_day' => $currentDay + 1,
             'ends_at_day' => $currentDay + 1 + $duration,
             'is_active' => false,
@@ -84,6 +100,7 @@ class SpikeEventFactory
             'delay' => new DelaySpike(),
             'price' => new PriceSpike(),
             'breakdown' => new BreakdownSpike(),
+            'blizzard' => new BlizzardSpike(),
             default => throw new Exception("Unknown spike type: {$type}"),
         };
     }
@@ -111,6 +128,7 @@ class SpikeEventFactory
             'delay' => (float)rand(1, 3), // 1 to 3 days
             'price' => 1.0 + (rand(10, 50) / 100), // 1.1 to 1.5
             'breakdown' => rand(20, 70) / 100, // 20% to 70% reduction
+            'blizzard' => 1.0, // Binary effect (active/inactive) mostly
             default => 1.0,
         };
     }

@@ -19,10 +19,10 @@
 - [x] Task: Conductor - User Manual Verification 'Physical Graph Foundation' (Protocol in workflow.md)
 
 ## Phase 2: Causal Graph & Event Propagation
-- [~] Task: Update `SpikeEvent` Model
+- [x] Task: Update `SpikeEvent` Model
     - [ ] Add `affected_route_id` (nullable) or polymorphic relation to `SpikeEvent`.
     - [ ] Add recursive relationship fields (`parent_id`, `type`) for DAG structure (Root/Symptom/Task).
-- [ ] Task: Implement `SpikeEventFactory` Updates
+- [~] Task: Implement `SpikeEventFactory` Updates
     - [ ] Update factory to generate "Graph-Targeting" events (e.g., Blizzard targeting Road routes).
     - [ ] Implement logic to select target `Routes` based on `weather_vulnerability`.
 - [ ] Task: Implement Event Listeners for Route State

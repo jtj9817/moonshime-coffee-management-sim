@@ -17,15 +17,18 @@ class RouteFactory extends Factory
      */
     public function definition(): array
     {
+        $mode = $this->faker->randomElement(['Truck', 'Air', 'Ship']);
+        
         return [
             'source_id' => Location::factory(),
             'target_id' => Location::factory(),
-            'transport_mode' => $this->faker->randomElement(['Truck', 'Air', 'Ship']),
+            'transport_mode' => $mode,
             'weights' => [
                 'cost' => $this->faker->numberBetween(10, 100),
                 'time' => $this->faker->numberBetween(1, 10),
             ],
             'is_active' => true,
+            'weather_vulnerability' => in_array($mode, ['Truck', 'Air']),
         ];
     }
 }

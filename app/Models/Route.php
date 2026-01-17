@@ -16,11 +16,13 @@ class Route extends Model
         'transport_mode',
         'weights',
         'is_active',
+        'weather_vulnerability',
     ];
 
     protected $casts = [
         'weights' => 'array',
         'is_active' => 'boolean',
+        'weather_vulnerability' => 'boolean',
     ];
 
     public function source(): BelongsTo
