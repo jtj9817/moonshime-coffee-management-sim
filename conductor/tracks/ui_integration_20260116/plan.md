@@ -27,7 +27,7 @@
     - [x] Implement the client-side logic to fetch the cheapest path via the new API.
     - [x] Update cost calculations and form submission to reflect the selected alternative route.
 
-## Phase 4: Full System Integration & Checkpointing
+## Phase 4: Full System Integration & Checkpointing [checkpoint: 6df6b60]
 - [x] Task: Integration Test - Full Disruption Lifecycle
     - [x] Write a comprehensive test: Trigger Blizzard -> Verify Dashboard Metric Update -> Verify Restock Form Blockage -> Verify Alternative Suggestion.
 - [x] Task: Conductor - User Manual Verification 'Full System Integration & Checkpointing' (Protocol in workflow.md)
