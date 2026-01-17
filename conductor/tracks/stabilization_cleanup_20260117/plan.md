@@ -31,7 +31,7 @@
     - [x] Verify all manual verification scripts in `tests/manual/` are functional and documented.
 - [x] Task: Conductor - User Manual Verification 'Archive Synchronization & Documentation' (Protocol in workflow.md)
 
-## Phase 4: Gameplay Loop Verification [checkpoint: 3e40466]
+## Phase 4: Gameplay Loop Verification [checkpoint: d5912b9]
 - [x] Task: Implement Gameplay Loop Feature Test
     - [x] Write a test for the full sequence: Initial State (Day 1) -> Decision-making -> Stochastic States (Day 2+).
     - [x] Verify that Day 1 remains stable and deterministic with no random events.
@@ -40,10 +40,18 @@
         - [x] Day 3-4: Decision persistence and state progression.
         - [x] Day 5: Spike expiration and state restoration/cleanup.
     - [x] Verify that user decisions (Policies/Orders) persist correctly across simulation ticks.
-- [x] Task: Conductor - User Manual Verification 'Gameplay Loop Verification' (Protocol in workflow.md)
+    - [x] Simulate player agency (placing alternative orders during disruptions) and economic impact (cash deduction).
+- [~] Task: Implement Inventory & Economic Layer Gameplay Tests
+    - [ ] Task: Inventory Changes on Order Delivery (Multi-product, missing records, atomic updates)
+    - [ ] Task: Emergency Order Delivery Timing (Route-based transit days, simultaneous deliveries)
+    - [ ] Task: Daily Storage Cost Application (Scaling, zero-cost, negative cash handling)
+    - [ ] Task: Multiple Product Handling (Complex order/storage cost scenarios)
+    - [ ] Task: Order Cancellation and Inventory Rollback (Refunds, blocking delivered cancellations)
+    - [ ] Task: Route Capacity and Throughput Limits (Capacity exhaustion, max daily shipments)
+- [ ] Task: Conductor - User Manual Verification 'Gameplay Loop Verification' (Protocol in workflow.md)
 
 ## Phase 5: Advanced Stress Testing
-- [ ] Task: Implement "The Cascade" Stress Test (Scenario A)
+- [~] Task: Implement "The Cascade" Stress Test (Scenario A)
     - [ ] Trigger a Root Spike and verify 10+ Symptom Alerts are generated across the graph.
     - [ ] Verify automatic system recovery (Route restoration and Alert resolution) upon spike expiration.
 - [ ] Task: Implement "The Decision Stressor" Stress Test (Scenario B)
