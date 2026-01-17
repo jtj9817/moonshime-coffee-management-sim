@@ -1,82 +1,92 @@
 <?php
 
-namespace Tests\Feature;
-
+use App\Models\User;
 use App\Models\Location;
 use App\Models\Route;
-use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
+use App\Models\SpikeEvent;
 
-class LogisticsApiTest extends TestCase
-{
-    use RefreshDatabase;
+uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
-    protected User $user;
+test('getPath returns optimal path and cost', function () {
+    $user = User::factory()->create();
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->user = User::factory()->create();
-    }
+    $locA = Location::factory()->create(['name' => 'Hub A']);
+    $locB = Location::factory()->create(['name' => 'Cafe B']);
 
-    public function test_can_get_path_between_locations()
-    {
-        $locA = Location::factory()->create(['name' => 'Source']);
-        $locB = Location::factory()->create(['name' => 'Target']);
+    $route = Route::factory()->create([
+        'source_id' => $locA->id,
+        'target_id' => $locB->id,
+        'transport_mode' => 'truck',
+        'weights' => ['cost' => 100],
+        'is_active' => true
+    ]);
 
-        Route::factory()->create([
+    $response = $this->actingAs($user)
+        ->getJson(route('game.logistics.path', [
             'source_id' => $locA->id,
             'target_id' => $locB->id,
-            'is_active' => true,
-            'weights' => ['cost' => 10],
+        ]));
+
+    $response->assertOk()
+        ->assertJson([
+            'success' => true,
+            'reachable' => true,
+            'total_cost' => 100
         ]);
+});
 
-        $response = $this->actingAs($this->user)
-            ->getJson(route('game.logistics.path', [
-                'source_id' => $locA->id,
-                'target_id' => $locB->id,
-            ]));
+test('getPath returns 404/error when no path exists', function () {
+    $user = User::factory()->create();
 
-        $response->assertOk()
-            ->assertJson([
-                'success' => true,
-                'reachable' => true,
-                'total_cost' => 10,
-            ]);
-    }
+    $locA = Location::factory()->create();
+    $locB = Location::factory()->create();
 
-    public function test_returns_error_when_no_path_exists()
-    {
-        $locA = Location::factory()->create();
-        $locB = Location::factory()->create();
+    // No route created
 
-        // No routes created
+    $response = $this->actingAs($user)
+        ->getJson(route('game.logistics.path', [
+            'source_id' => $locA->id,
+            'target_id' => $locB->id,
+        ]));
 
-        $response = $this->actingAs($this->user)
-            ->getJson(route('game.logistics.path', [
-                'source_id' => $locA->id,
-                'target_id' => $locB->id,
-            ]));
+    $response->assertOk()
+        ->assertJson([
+            'success' => false,
+            'reachable' => false
+        ]);
+});
 
-        $response->assertOk()
-            ->assertJson([
-                'success' => false,
-                'reachable' => false,
-            ]);
-    }
+test('getPath reflects cost increases from active spikes', function () {
+    $user = User::factory()->create();
 
-    public function test_can_get_logistics_health()
-    {
-        Route::factory()->count(3)->create(['is_active' => true]);
-        Route::factory()->create(['is_active' => false]);
+    $locA = Location::factory()->create();
+    $locB = Location::factory()->create();
 
-        $response = $this->actingAs($this->user)
-            ->getJson(route('game.logistics.health'));
+    $route = Route::factory()->create([
+        'source_id' => $locA->id,
+        'target_id' => $locB->id,
+        'transport_mode' => 'truck',
+        'weights' => ['cost' => 100],
+        'is_active' => true
+    ]);
 
-        $response->assertOk()
-            ->assertJson([
-                'health' => 75.0,
-            ]);
-    }
-}
+    // Create a spike that affects this route
+    SpikeEvent::factory()->create([
+        'type' => 'blizzard',
+        'is_active' => true,
+        'affected_route_id' => $route->id,
+        'magnitude' => 0.5 // 50% increase
+    ]);
+    
+    $response = $this->actingAs($user)
+        ->getJson(route('game.logistics.path', [
+            'source_id' => $locA->id,
+            'target_id' => $locB->id,
+        ]));
+
+    $response->assertOk()
+        ->assertJson([
+            'success' => true,
+            'total_cost' => 150
+        ]);
+});

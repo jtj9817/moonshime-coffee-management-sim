@@ -20,7 +20,7 @@ class GameController extends Controller
     /**
      * Display the game dashboard.
      */
-    public function dashboard(): Response
+    public function dashboard(\App\Services\LogisticsService $logisticsService): Response
     {
         $alerts = Alert::where('is_read', false)
             ->orderBy('severity', 'desc')
@@ -31,6 +31,8 @@ class GameController extends Controller
             'alerts' => $alerts,
             'kpis' => $this->calculateKPIs(),
             'quests' => $this->getActiveQuests(),
+            'logistics_health' => $logisticsService->getLogisticsHealth(),
+            'active_spikes_count' => SpikeEvent::where('is_active', true)->count(),
         ]);
     }
 

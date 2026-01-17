@@ -75,6 +75,7 @@ export default function Transfers({ transfers, suggestions }: TransfersProps) {
         message?: string;
     } | null>(null);
     const [loadingRoute, setLoadingRoute] = useState(false);
+    const [showAlternative, setShowAlternative] = useState(false);
 
     const { data, setData, post, processing, errors, reset } = useForm({
         source_location_id: '',
@@ -87,6 +88,7 @@ export default function Transfers({ transfers, suggestions }: TransfersProps) {
             fetchRoute();
         } else {
             setRouteInfo(null);
+            setShowAlternative(false);
         }
     }, [data.source_location_id, data.target_location_id]);
 
@@ -189,7 +191,7 @@ export default function Transfers({ transfers, suggestions }: TransfersProps) {
                                     )}
 
                                     {routeInfo && !loadingRoute && (
-                                        <div className={`rounded-lg border p-3 ${routeInfo.reachable ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-900 dark:bg-emerald-950/30' : 'border-rose-200 bg-rose-50 dark:border-rose-900 dark:bg-rose-950/30'}`}>
+                                        <div className={`space-y-3 rounded-lg border p-3 ${routeInfo.reachable ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-900 dark:bg-emerald-950/30' : 'border-rose-200 bg-rose-50 dark:border-rose-900 dark:bg-rose-950/30'}`}>
                                             <div className="flex items-start gap-2">
                                                 {routeInfo.reachable ? (
                                                     <Truck className="mt-0.5 h-4 w-4 text-emerald-600" />
@@ -198,26 +200,62 @@ export default function Transfers({ transfers, suggestions }: TransfersProps) {
                                                 )}
                                                 <div className="flex-1">
                                                     <p className={`text-sm font-bold ${routeInfo.reachable ? 'text-emerald-800 dark:text-emerald-400' : 'text-rose-800 dark:text-rose-400'}`}>
-                                                        {routeInfo.reachable ? 'Route Active' : 'Route Blocked'}
+                                                        {routeInfo.reachable ? (showAlternative ? 'Alternative Route Active' : 'Route Active') : 'Route Blocked'}
                                                     </p>
-                                                    <p className="text-xs text-stone-600 dark:text-stone-400">
-                                                        {routeInfo.reachable 
-                                                            ? `Optimal path found. Estimated cost: ${routeInfo.total_cost} units.` 
-                                                            : routeInfo.message || 'No available routes due to severe weather or distance.'}
-                                                    </p>
-                                                    {routeInfo.reachable && routeInfo.path && (
-                                                        <div className="mt-2 flex flex-wrap items-center gap-1">
-                                                            {routeInfo.path.map((step, i) => (
-                                                                <span key={i} className="flex items-center gap-1 text-[10px] font-medium text-stone-500">
-                                                                    {step.source}
-                                                                    <ArrowRight size={10} />
-                                                                    {i === routeInfo.path!.length - 1 && step.target}
-                                                                </span>
-                                                            ))}
+                                                    
+                                                    {routeInfo.reachable && (
+                                                        <div className="mt-1">
+                                                            <div className="flex items-center justify-between">
+                                                                <p className="text-xs text-stone-600 dark:text-stone-400">
+                                                                    Estimated cost: <span className="font-bold text-stone-900 dark:text-white">{routeInfo.total_cost} units</span>
+                                                                </p>
+                                                                {routeInfo.path && routeInfo.path.length > 1 && !showAlternative && (
+                                                                    <Badge variant="outline" className="text-[10px] border-amber-500 text-amber-600">Premium Route</Badge>
+                                                                )}
+                                                            </div>
+                                                            
+                                                            {routeInfo.path && (
+                                                                <div className="mt-2 flex flex-wrap items-center gap-1">
+                                                                    {routeInfo.path.map((step, i) => (
+                                                                        <span key={i} className="flex items-center gap-1 text-[10px] font-medium text-stone-500">
+                                                                            {step.source}
+                                                                            <ArrowRight size={10} />
+                                                                            {i === routeInfo.path!.length - 1 && step.target}
+                                                                        </span>
+                                                                    ))}
+                                                                </div>
+                                                            )}
                                                         </div>
+                                                    )}
+
+                                                    {!routeInfo.reachable && (
+                                                        <p className="text-xs text-stone-600 dark:text-stone-400">
+                                                            {routeInfo.message || 'No available routes due to severe weather or distance.'}
+                                                        </p>
                                                     )}
                                                 </div>
                                             </div>
+
+                                            {/* Alternative Button */}
+                                            {routeInfo.reachable && routeInfo.path && routeInfo.path.length > 1 && !showAlternative && (
+                                                <div className="mt-2 rounded border border-amber-200 bg-amber-50 p-2 dark:border-amber-900 dark:bg-amber-950/30">
+                                                    <div className="flex items-center justify-between gap-4">
+                                                        <div className="flex items-center gap-2 text-xs text-amber-800 dark:text-amber-400">
+                                                            <Info size={14} />
+                                                            Direct route blocked. Use multi-hub alternative?
+                                                        </div>
+                                                        <Button 
+                                                            type="button"
+                                                            size="sm"
+                                                            variant="outline"
+                                                            className="h-7 border-amber-500 text-[10px] font-bold text-amber-600 hover:bg-amber-100"
+                                                            onClick={() => setShowAlternative(true)}
+                                                        >
+                                                            Switch to Alternative
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     )}
 
@@ -259,10 +297,17 @@ export default function Transfers({ transfers, suggestions }: TransfersProps) {
                                 <DialogFooter>
                                     <Button 
                                         type="submit" 
-                                        disabled={processing || !routeInfo?.reachable}
+                                        disabled={
+                                            processing || 
+                                            !routeInfo?.reachable || 
+                                            (routeInfo.path && routeInfo.path.length > 1 && !showAlternative)
+                                        }
                                         className="bg-amber-600 hover:bg-amber-700"
                                     >
-                                        {processing ? 'Creating...' : 'Confirm Transfer'}
+                                        {processing 
+                                            ? 'Creating...' 
+                                            : (showAlternative ? 'Confirm Alternative' : 'Confirm Transfer')
+                                        }
                                     </Button>
                                 </DialogFooter>
                             </form>

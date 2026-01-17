@@ -40,14 +40,25 @@ class LogisticsService
     }
 
     /**
-     * Calculate the cost of traversing a route.
+     * Calculate the cost of traversing a route, including spike effects.
      *
      * @param \App\Models\Route $route
      * @return int
      */
     public function calculateCost(\App\Models\Route $route): int
     {
-        return $route->weights['cost'] ?? 0;
+        $baseCost = $route->weights['cost'] ?? 0;
+
+        // Check for active spikes affecting this specific route
+        $spikeMultiplier = \App\Models\SpikeEvent::where('affected_route_id', $route->id)
+            ->where('is_active', true)
+            ->sum('magnitude');
+
+        if ($spikeMultiplier > 0) {
+            return (int) ($baseCost * (1 + $spikeMultiplier));
+        }
+
+        return $baseCost;
     }
 
     /**

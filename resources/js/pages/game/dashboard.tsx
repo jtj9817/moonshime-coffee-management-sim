@@ -17,6 +17,7 @@ import { type ReactNode } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { LogisticsStatusWidget } from '@/components/game/LogisticsStatusWidget';
 import { useGame } from '@/contexts/game-context';
 import GameLayout from '@/layouts/game-layout';
 import { AlertModel, DashboardKPI, QuestModel, type BreadcrumbItem } from '@/types';
@@ -25,6 +26,8 @@ interface DashboardProps {
     alerts: AlertModel[];
     kpis: DashboardKPI[];
     quests: QuestModel[];
+    logistics_health: number;
+    active_spikes_count: number;
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -154,8 +157,11 @@ function LocationCard({ location, alerts }: { location: { id: string; name: stri
     );
 }
 
-export default function Dashboard({ alerts, kpis, quests }: DashboardProps) {
+export default function Dashboard({ alerts, kpis, quests, logistics_health, active_spikes_count }: DashboardProps) {
     const { locations, currentSpike, gameState } = useGame();
+
+    // Filter out the redundant logistics health KPI as we have a dedicated widget now
+    const filteredKpis = kpis.filter(kpi => kpi.label !== 'Logistics Health');
 
     return (
         <>
@@ -189,7 +195,12 @@ export default function Dashboard({ alerts, kpis, quests }: DashboardProps) {
 
                 {/* KPIs */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-                    {kpis.map((kpi, index) => (
+                    <LogisticsStatusWidget 
+                        health={logistics_health} 
+                        activeSpikesCount={active_spikes_count} 
+                    />
+                    
+                    {filteredKpis.map((kpi, index) => (
                         <Card key={index}>
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                 <CardTitle className="text-sm font-medium text-stone-500 dark:text-stone-400">
