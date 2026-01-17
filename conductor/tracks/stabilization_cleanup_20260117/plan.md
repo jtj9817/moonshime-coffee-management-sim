@@ -1,6 +1,6 @@
 # Implementation Plan - Logistics Stabilization & Cleanup
 
-## Phase 1: Architectural Cleanup & Standardisation
+## Phase 1: Architectural Cleanup & Standardisation [checkpoint: 41e2538]
 - [x] Task: Refactor `GameController::calculateKPIs`
     - [x] Identify and remove redundant "Logistics Health" from the generic KPI array.
     - [x] Update frontend `dashboard.tsx` to use the dedicated top-level `logistics_health` prop and remove manual filtering logic.
@@ -11,7 +11,7 @@
     - [x] Update `resources/js/pages/game/transfers.tsx` to implement "Informational Blocking".
     - [x] Ensure blocked options remain visible with status messages but prevent submission.
     - [x] Update `docs/technical-design-document.md` to reflect this standard.
-- [~] Task: Conductor - User Manual Verification 'Architectural Cleanup & Standardisation' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Architectural Cleanup & Standardisation' (Protocol in workflow.md)
 
 ## Phase 2: Data Integrity & Persistence
 - [ ] Task: Audit and Update Route Migrations
