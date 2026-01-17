@@ -47,7 +47,7 @@
         - [x] Route Capacity and Throughput Limits (Capacity exhaustion, max daily shipments)
 - [x] Task: Conductor - User Manual Verification 'Gameplay Loop Verification' (Protocol in workflow.md)
 
-## Phase 5: Advanced Stress Testing [checkpoint: 9009fef]
+## Phase 5: Advanced Stress Testing [checkpoint: 0caed80]
 - [x] Task: Implement "The Cascade" Stress Test (Scenario A)
     - [x] Trigger a Root Spike and verify 10+ Symptom Alerts are generated across the graph.
     - [x] Verify automatic system recovery (Route restoration and Alert resolution) upon spike expiration.
