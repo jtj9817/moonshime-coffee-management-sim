@@ -1,7 +1,7 @@
 # Implementation Plan - Hybrid Event-Topology
 
 ## Phase 1: Physical Graph Foundation (Logistics)
-- [ ] Task: Create `Route` Model and Migration
+- [x] Task: Create `Route` Model and Migration
     - [ ] Create migration for `routes` table (source_id, target_id, transport_mode, weights, is_active).
     - [ ] Create `Route` Eloquent model with relationships to `Location`.
     - [ ] Create Factory for `Route` to support testing.

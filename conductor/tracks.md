@@ -12,7 +12,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Implement 'hybrid-event-topology' plan: Physical Graph (Logistics) and Causal Graph (DAG).**
+- [~] **Track: Implement 'hybrid-event-topology' plan: Physical Graph (Logistics) and Causal Graph (DAG).**
 *Link: [./tracks/hybrid_event_topology_20260116/](./tracks/hybrid_event_topology_20260116/)*
 
 - [x] **Core Services & Dependency Injection**
