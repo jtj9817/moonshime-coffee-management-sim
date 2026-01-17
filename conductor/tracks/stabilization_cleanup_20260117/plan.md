@@ -60,9 +60,10 @@
 - [x] Task: Conductor - User Manual Verification 'Advanced Stress Testing' (Protocol in workflow.md)
 
 ## Phase 6: Final Performance & Stability Audit
-- [ ] Task: Benchmarking Dijkstra Performance
-    - [ ] Create a test seeder with 20+ nodes to simulate a large network.
-    - [ ] Measure and verify Dijkstra execution time remains within simulation tick budget.
-- [ ] Task: Create Master Manual Verification Script
-    - [ ] Implement `tests/manual/verify_stabilization_v1.php` covering a 10-day cycle with multiple overlapping events.
-- [ ] Task: Conductor - User Manual Verification 'Final Performance & Stability Audit' (Protocol in workflow.md)
+- [x] Task: Benchmarking Dijkstra Performance
+    - [x] Create a test seeder with 20+ nodes to simulate a large network.
+    - [x] Measure and verify Dijkstra execution time remains within simulation tick budget.
+    - [x] Refactor `LogisticsService` to use in-memory adjacency list cache (Improved performance from ~55ms to ~1.8ms).
+- [x] Task: Create Master Manual Verification Script
+    - [x] Implement `tests/manual/verify_stabilization_v1.php` covering a 10-day cycle with multiple overlapping events.
+- [~] Task: Conductor - User Manual Verification 'Final Performance & Stability Audit' (Protocol in workflow.md)

@@ -23,6 +23,9 @@ class SimulationService
      */
     public function advanceTime(): void
     {
+        // Clear logistics cache to ensure pathfinding respects new state (spikes, route status)
+        app(\App\Services\LogisticsService::class)->clearCache();
+
         \Illuminate\Support\Facades\DB::transaction(function () {
             $this->gameState->increment('day');
             $this->gameState->refresh();

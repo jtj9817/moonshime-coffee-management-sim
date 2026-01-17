@@ -3,10 +3,26 @@
 namespace App\Services;
 
 use App\Models\Location;
+use App\Models\Route;
+use App\Models\SpikeEvent;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class LogisticsService
 {
+    /**
+     * In-memory cache for the graph structure to avoid redundant DB queries during a single request/tick.
+     */
+    protected ?array $graphCache = null;
+
+    /**
+     * Clear the in-memory graph cache.
+     */
+    public function clearCache(): void
+    {
+        $this->graphCache = null;
+    }
+
     /**
      * Get the overall logistics health (percentage of active routes).
      *
@@ -14,12 +30,12 @@ class LogisticsService
      */
     public function getLogisticsHealth(): float
     {
-        $totalRoutes = \App\Models\Route::count();
+        $totalRoutes = Route::count();
         if ($totalRoutes === 0) {
             return 100.0;
         }
 
-        $activeRoutes = \App\Models\Route::where('is_active', true)->count();
+        $activeRoutes = Route::where('is_active', true)->count();
 
         return ($activeRoutes / $totalRoutes) * 100;
     }
@@ -33,7 +49,7 @@ class LogisticsService
      */
     public function getValidRoutes(Location $source, Location $target): Collection
     {
-        return $source->outgoingRoutes() // Assuming relationship exists, or query directly
+        return Route::where('source_id', $source->id)
             ->where('target_id', $target->id)
             ->where('is_active', true)
             ->get();
@@ -42,15 +58,15 @@ class LogisticsService
     /**
      * Calculate the cost of traversing a route, including spike effects.
      *
-     * @param \App\Models\Route $route
+     * @param Route $route
      * @return int
      */
-    public function calculateCost(\App\Models\Route $route): int
+    public function calculateCost(Route $route): int
     {
         $baseCost = $route->cost;
 
         // Check for active spikes affecting this specific route
-        $spikeMultiplier = \App\Models\SpikeEvent::where('affected_route_id', $route->id)
+        $spikeMultiplier = SpikeEvent::where('affected_route_id', $route->id)
             ->where('is_active', true)
             ->sum('magnitude');
 
@@ -62,6 +78,46 @@ class LogisticsService
     }
 
     /**
+     * Build an adjacency list of the graph for efficient traversal.
+     * Pre-calculates costs including active spikes.
+     *
+     * @return array
+     */
+    protected function getAdjacencyList(): array
+    {
+        if ($this->graphCache !== null) {
+            return $this->graphCache;
+        }
+
+        // 1. Get all active spikes affecting routes
+        $routeSpikes = SpikeEvent::where('is_active', true)
+            ->whereNotNull('affected_route_id')
+            ->select('affected_route_id')
+            ->selectRaw('SUM(magnitude) as total_magnitude')
+            ->groupBy('affected_route_id')
+            ->pluck('total_magnitude', 'affected_route_id')
+            ->toArray();
+
+        // 2. Load all active routes with targets
+        $routes = Route::where('is_active', true)->with('target')->get();
+
+        $adj = [];
+        foreach ($routes as $route) {
+            $magnitude = $routeSpikes[$route->id] ?? 0;
+            $effectiveCost = (int) ($route->cost * (1 + $magnitude));
+
+            $adj[$route->source_id][] = [
+                'route' => $route,
+                'target' => $route->target,
+                'cost' => $effectiveCost,
+            ];
+        }
+
+        $this->graphCache = $adj;
+        return $adj;
+    }
+
+    /**
      * Check if a location is reachable from any supply source (Warehouse or Vendor) using active routes.
      * Uses Reverse-BFS.
      *
@@ -70,6 +126,17 @@ class LogisticsService
      */
     public function checkReachability(Location $target): bool
     {
+        // For reverse BFS, we need an adjacency list of INCOMING routes
+        // Since getAdjacencyList is optimized for outgoing (Dijkstra), 
+        // we'll do a quick specialized version here or keep existing logic if it's not a hotspot.
+        // Given we want performance, let's optimize it too.
+        
+        $allActiveRoutes = Route::where('is_active', true)->with('source')->get();
+        $incomingAdj = [];
+        foreach ($allActiveRoutes as $route) {
+            $incomingAdj[$route->target_id][] = $route->source;
+        }
+
         $queue = [$target];
         $visited = [$target->id => true];
 
@@ -81,12 +148,8 @@ class LogisticsService
                 return true;
             }
 
-            // Get active incoming routes
-            // Eager load source to avoid N+1 if traversing deep, but for BFS strictly logic:
-            $incomingRoutes = $current->incomingRoutes()->where('is_active', true)->with('source')->get();
-
-            foreach ($incomingRoutes as $route) {
-                $source = $route->source;
+            $sources = $incomingAdj[$current->id] ?? [];
+            foreach ($sources as $source) {
                 if ($source && !isset($visited[$source->id])) {
                     $visited[$source->id] = true;
                     $queue[] = $source;
@@ -106,16 +169,13 @@ class LogisticsService
      */
     public function findBestRoute(Location $source, Location $target): ?Collection
     {
+        $adj = $this->getAdjacencyList();
+        
         $distances = [];
         $previous = [];
-        $routeUsed = []; // To store the specific Route object used to reach a node
+        $routeUsed = []; 
         $queue = new \SplPriorityQueue();
 
-        // Init
-        // We use string IDs, so we need a map.
-        // Since we don't know all nodes upfront easily without scanning DB,
-        // we'll initialize on demand or just use array map.
-        
         $distances[$source->id] = 0;
         $queue->insert($source, 0);
 
@@ -126,21 +186,21 @@ class LogisticsService
                 break; // Found target
             }
 
-            // Get outgoing routes
-            // Eager load target to ensure we have the node object for the queue
-            $outgoing = $current->outgoingRoutes()->where('is_active', true)->with('target')->get();
+            // Use cached adjacency list
+            $outgoing = $adj[$current->id] ?? [];
 
-            foreach ($outgoing as $route) {
-                $neighbor = $route->target;
+            foreach ($outgoing as $edge) {
+                $neighbor = $edge['target'];
+                $cost = $edge['cost'];
+                
                 if (!$neighbor) continue;
 
-                $alt = $distances[$current->id] + $this->calculateCost($route);
+                $alt = $distances[$current->id] + $cost;
 
                 if (!isset($distances[$neighbor->id]) || $alt < $distances[$neighbor->id]) {
                     $distances[$neighbor->id] = $alt;
                     $previous[$neighbor->id] = $current;
-                    $routeUsed[$neighbor->id] = $route;
-                    // Priority Queue is Max-Heap, so use negative priority for Min-Heap behavior
+                    $routeUsed[$neighbor->id] = $edge['route'];
                     $queue->insert($neighbor, -$alt);
                 }
             }
@@ -178,10 +238,10 @@ class LogisticsService
     /**
      * Determine if a route is considered "premium" (e.g., an expensive alternative).
      *
-     * @param \App\Models\Route $route
+     * @param Route $route
      * @return bool
      */
-    public function isPremiumRoute(\App\Models\Route $route): bool
+    public function isPremiumRoute(Route $route): bool
     {
         $premiumModes = ['air', 'courier', 'express'];
         if (in_array(strtolower($route->transport_mode), $premiumModes)) {
@@ -189,7 +249,7 @@ class LogisticsService
         }
 
         // Compare against other active routes between the same locations
-        $cheapestBaseRoute = \App\Models\Route::where('source_id', $route->source_id)
+        $cheapestBaseRoute = Route::where('source_id', $route->source_id)
             ->where('target_id', $route->target_id)
             ->where('is_active', true)
             ->orderBy('cost', 'asc')
