@@ -16,16 +16,17 @@ test('authenticated users can visit the dashboard', function () {
         ->assertOk();
 });
 
-test('dashboard includes logistics health KPI', function () {
+test('dashboard excludes logistics health from generic kpis array', function () {
     $this->actingAs($user = User::factory()->create())
         ->withoutMiddleware(\Illuminate\Cookie\Middleware\EncryptCookies::class)
         ->withCookie('game_acknowledged', 'true')
         ->get(route('game.dashboard'))
         ->assertInertia(fn ($page) => $page
-            ->has('kpis', 5)
-            ->has('kpis.4', fn ($kpi) => $kpi
-                ->where('label', 'Logistics Health')
-                ->etc()
-            )
+            ->has('kpis', 4)
+            ->where('kpis.0.label', 'Inventory Value')
+            ->where('kpis.1.label', 'Low Stock Items')
+            ->where('kpis.2.label', 'Pending Orders')
+            ->where('kpis.3.label', 'Locations')
+            ->has('logistics_health')
         );
 });

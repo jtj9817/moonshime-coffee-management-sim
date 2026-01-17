@@ -150,9 +150,21 @@ class LogisticsService
             return null; // unreachable
         }
 
-        // Reconstruct path
+        return $this->reconstructPath($previous, $routeUsed, $target->id);
+    }
+
+    /**
+     * Reconstruct path
+     *
+     * @param array $previous
+     * @param array $routeUsed
+     * @param string $targetId
+     * @return Collection
+     */
+    protected function reconstructPath(array $previous, array $routeUsed, string $targetId): Collection
+    {
         $path = new Collection();
-        $currId = $target->id;
+        $currId = $targetId;
 
         while (isset($previous[$currId])) {
             $route = $routeUsed[$currId];
@@ -161,5 +173,38 @@ class LogisticsService
         }
 
         return $path;
+    }
+
+    /**
+     * Determine if a route is considered "premium" (e.g., an expensive alternative).
+     *
+     * @param \App\Models\Route $route
+     * @return bool
+     */
+    public function isPremiumRoute(\App\Models\Route $route): bool
+    {
+        $premiumModes = ['air', 'courier', 'express'];
+        if (in_array(strtolower($route->transport_mode), $premiumModes)) {
+            return true;
+        }
+
+        // Compare against other active routes between the same locations
+        $cheapestBaseRoute = \App\Models\Route::where('source_id', $route->source_id)
+            ->where('target_id', $route->target_id)
+            ->where('is_active', true)
+            ->get()
+            ->sortBy(fn($r) => $r->weights['cost'] ?? 0)
+            ->first();
+
+        if ($cheapestBaseRoute && $cheapestBaseRoute->id !== $route->id) {
+            $currentBaseCost = $route->weights['cost'] ?? 0;
+            $minBaseCost = $cheapestBaseRoute->weights['cost'] ?? 0;
+
+            if ($currentBaseCost > $minBaseCost) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

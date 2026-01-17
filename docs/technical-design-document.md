@@ -124,6 +124,14 @@ The `advanceTime()` method orchestrates the interaction:
 ### 6.3 Type Safety
 *   **DTOs -> TS:** PHP DTOs and Resources are automatically transformed into TypeScript interfaces in `resources/js/types` using `spatie/laravel-typescript-transformer`.
 
+### 6.4 UX Standards: Informational Blocking
+We employ the **Informational Blocking** pattern for all interactive forms (e.g., Restocking, Transfers).
+*   **Concept:** Instead of hiding unavailable options (e.g., a blocked route or an unaffordable item), we keep the element visible but "blocked" with a clear explanation.
+*   **Implementation:**
+    *   **Status Indicators:** Display a high-visibility status message (e.g., "Route Blocked by Spike") near the interaction point.
+    *   **Authorization Flow:** For high-impact or alternative choices (e.g., switching to a premium route), require explicit user "Authorization" (e.g., a dedicated button toggle) before enabling the primary submission.
+    *   **Feedback:** Use consistent iconography (`AlertTriangle` for blocks, `Info` for warnings) to communicate simulation constraints.
+
 ---
 
 ## 7. Implementation Roadmap

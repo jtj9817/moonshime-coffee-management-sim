@@ -1,17 +1,17 @@
 # Implementation Plan - Logistics Stabilization & Cleanup
 
 ## Phase 1: Architectural Cleanup & Standardisation
-- [ ] Task: Refactor `GameController::calculateKPIs`
-    - [ ] Identify and remove redundant "Logistics Health" from the generic KPI array.
-    - [ ] Update frontend `dashboard.tsx` to use the dedicated top-level `logistics_health` prop and remove manual filtering logic.
-- [ ] Task: Update pathfinding API with `is_premium` flag
-    - [ ] Update `LogisticsService` to algorithmically set `is_premium = true` when an alternative route is suggested.
-    - [ ] Update the `GET /api/logistics/path` endpoint and response DTO.
-- [ ] Task: Standardise Restock Form UX
-    - [ ] Update `RestockForm.tsx` (or equivalent) to implement "Informational Blocking".
-    - [ ] Ensure blocked options remain visible with status messages but prevent submission.
-    - [ ] Update any relevant technical docs to reflect this standard.
-- [ ] Task: Conductor - User Manual Verification 'Architectural Cleanup & Standardisation' (Protocol in workflow.md)
+- [x] Task: Refactor `GameController::calculateKPIs`
+    - [x] Identify and remove redundant "Logistics Health" from the generic KPI array.
+    - [x] Update frontend `dashboard.tsx` to use the dedicated top-level `logistics_health` prop and remove manual filtering logic.
+- [x] Task: Update pathfinding API with `is_premium` flag
+    - [x] Update `LogisticsService` to algorithmically set `is_premium = true` when an alternative route is suggested.
+    - [x] Update the `GET /api/logistics/path` endpoint and response DTO.
+- [x] Task: Standardise Restock Form UX
+    - [x] Update `resources/js/pages/game/transfers.tsx` to implement "Informational Blocking".
+    - [x] Ensure blocked options remain visible with status messages but prevent submission.
+    - [x] Update `docs/technical-design-document.md` to reflect this standard.
+- [~] Task: Conductor - User Manual Verification 'Architectural Cleanup & Standardisation' (Protocol in workflow.md)
 
 ## Phase 2: Data Integrity & Persistence
 - [ ] Task: Audit and Update Route Migrations

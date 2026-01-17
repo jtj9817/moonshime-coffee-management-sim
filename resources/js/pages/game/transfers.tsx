@@ -70,7 +70,14 @@ export default function Transfers({ transfers, suggestions }: TransfersProps) {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [routeInfo, setRouteInfo] = useState<{
         reachable: boolean;
-        path?: any[];
+        path?: Array<{
+            id: number;
+            source: string;
+            target: string;
+            transport_mode: string;
+            cost: number;
+            is_premium: boolean;
+        }>;
         total_cost?: number;
         message?: string;
     } | null>(null);
@@ -82,6 +89,9 @@ export default function Transfers({ transfers, suggestions }: TransfersProps) {
         target_location_id: '',
         items: [{ product_id: '', quantity: 1 }],
     });
+
+    // Determine if the current path contains any premium routes
+    const hasPremiumRoute = routeInfo?.path?.some(step => step.is_premium);
 
     useEffect(() => {
         if (data.source_location_id && data.target_location_id && data.source_location_id !== data.target_location_id) {
@@ -98,6 +108,8 @@ export default function Transfers({ transfers, suggestions }: TransfersProps) {
             const response = await fetch(`/game/logistics/path?source_id=${data.source_location_id}&target_id=${data.target_location_id}`);
             const result = await response.json();
             setRouteInfo(result);
+            // Reset alternative view if a new route is fetched
+            setShowAlternative(false);
         } catch (error) {
             console.error('Failed to fetch route', error);
         } finally {
@@ -200,17 +212,17 @@ export default function Transfers({ transfers, suggestions }: TransfersProps) {
                                                 )}
                                                 <div className="flex-1">
                                                     <p className={`text-sm font-bold ${routeInfo.reachable ? 'text-emerald-800 dark:text-emerald-400' : 'text-rose-800 dark:text-rose-400'}`}>
-                                                        {routeInfo.reachable ? (showAlternative ? 'Alternative Route Active' : 'Route Active') : 'Route Blocked'}
+                                                        {routeInfo.reachable ? (hasPremiumRoute && !showAlternative ? 'Direct Route Blocked' : 'Route Active') : 'All Routes Blocked'}
                                                     </p>
                                                     
                                                     {routeInfo.reachable && (
                                                         <div className="mt-1">
                                                             <div className="flex items-center justify-between">
                                                                 <p className="text-xs text-stone-600 dark:text-stone-400">
-                                                                    Estimated cost: <span className="font-bold text-stone-900 dark:text-white">{routeInfo.total_cost} units</span>
+                                                                    Estimated cost: <span className="font-bold text-stone-900 dark:text-white">${routeInfo.total_cost?.toLocaleString()}</span>
                                                                 </p>
-                                                                {routeInfo.path && routeInfo.path.length > 1 && !showAlternative && (
-                                                                    <Badge variant="outline" className="text-[10px] border-amber-500 text-amber-600">Premium Route</Badge>
+                                                                {hasPremiumRoute && (
+                                                                    <Badge variant="outline" className="text-[10px] bg-amber-100 border-amber-500 text-amber-700 dark:bg-amber-900/30">Premium Alternative</Badge>
                                                                 )}
                                                             </div>
                                                             
@@ -218,9 +230,11 @@ export default function Transfers({ transfers, suggestions }: TransfersProps) {
                                                                 <div className="mt-2 flex flex-wrap items-center gap-1">
                                                                     {routeInfo.path.map((step, i) => (
                                                                         <span key={i} className="flex items-center gap-1 text-[10px] font-medium text-stone-500">
-                                                                            {step.source}
+                                                                            <span className={step.is_premium ? 'text-amber-600 font-bold' : ''}>{step.source}</span>
                                                                             <ArrowRight size={10} />
-                                                                            {i === routeInfo.path!.length - 1 && step.target}
+                                                                            {i === routeInfo.path!.length - 1 && (
+                                                                                <span className={step.is_premium ? 'text-amber-600 font-bold' : ''}>{step.target}</span>
+                                                                            )}
                                                                         </span>
                                                                     ))}
                                                                 </div>
@@ -230,28 +244,28 @@ export default function Transfers({ transfers, suggestions }: TransfersProps) {
 
                                                     {!routeInfo.reachable && (
                                                         <p className="text-xs text-stone-600 dark:text-stone-400">
-                                                            {routeInfo.message || 'No available routes due to severe weather or distance.'}
+                                                            {routeInfo.message || 'No available routes due to severe disruptions or distance.'}
                                                         </p>
                                                     )}
                                                 </div>
                                             </div>
 
-                                            {/* Alternative Button */}
-                                            {routeInfo.reachable && routeInfo.path && routeInfo.path.length > 1 && !showAlternative && (
+                                            {/* Informational Blocking for Premium Routes */}
+                                            {routeInfo.reachable && hasPremiumRoute && !showAlternative && (
                                                 <div className="mt-2 rounded border border-amber-200 bg-amber-50 p-2 dark:border-amber-900 dark:bg-amber-950/30">
                                                     <div className="flex items-center justify-between gap-4">
                                                         <div className="flex items-center gap-2 text-xs text-amber-800 dark:text-amber-400">
-                                                            <Info size={14} />
-                                                            Direct route blocked. Use multi-hub alternative?
+                                                            <Info size={14} className="shrink-0" />
+                                                            Primary path is currently unavailable. An expensive alternative route is required.
                                                         </div>
                                                         <Button 
                                                             type="button"
                                                             size="sm"
                                                             variant="outline"
-                                                            className="h-7 border-amber-500 text-[10px] font-bold text-amber-600 hover:bg-amber-100"
+                                                            className="h-7 border-amber-500 bg-white text-[10px] font-bold text-amber-600 hover:bg-amber-100 dark:bg-stone-900"
                                                             onClick={() => setShowAlternative(true)}
                                                         >
-                                                            Switch to Alternative
+                                                            Authorize Premium
                                                         </Button>
                                                     </div>
                                                 </div>
@@ -300,13 +314,13 @@ export default function Transfers({ transfers, suggestions }: TransfersProps) {
                                         disabled={
                                             processing || 
                                             !routeInfo?.reachable || 
-                                            (routeInfo.path && routeInfo.path.length > 1 && !showAlternative)
+                                            (hasPremiumRoute && !showAlternative)
                                         }
                                         className="bg-amber-600 hover:bg-amber-700"
                                     >
                                         {processing 
                                             ? 'Creating...' 
-                                            : (showAlternative ? 'Confirm Alternative' : 'Confirm Transfer')
+                                            : (hasPremiumRoute && !showAlternative ? 'Authorization Required' : 'Confirm Transfer')
                                         }
                                     </Button>
                                 </DialogFooter>

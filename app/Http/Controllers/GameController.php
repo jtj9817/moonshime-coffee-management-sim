@@ -262,9 +262,6 @@ class GameController extends Controller
      */
     protected function calculateKPIs(): array
     {
-        $logisticsService = app(\App\Services\LogisticsService::class);
-        $logisticsHealth = $logisticsService->getLogisticsHealth();
-
         $totalInventoryValue = Inventory::with('product')
             ->get()
             ->sum(fn ($inv) => $inv->quantity * ($inv->product->storage_cost ?? 0));
@@ -277,7 +274,6 @@ class GameController extends Controller
             ['label' => 'Low Stock Items', 'value' => $lowStockCount, 'trend' => $lowStockCount > 5 ? 'down' : 'up'],
             ['label' => 'Pending Orders', 'value' => $pendingOrders],
             ['label' => 'Locations', 'value' => Location::count()],
-            ['label' => 'Logistics Health', 'value' => round($logisticsHealth).'%', 'trend' => $logisticsHealth < 90 ? 'down' : 'up'],
         ];
     }
 
