@@ -4,6 +4,13 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
+# Active Tracks
+
+- [ ] **Track: Logistics Stabilization & Cleanup**
+*Link: [./tracks/stabilization_cleanup_20260117/](./tracks/stabilization_cleanup_20260117/)*
+
+---
+
 # Archived Tracks
 
 - [x] **Track: Implement 'hybrid-event-topology' plan: Physical Graph (Logistics) and Causal Graph (DAG).**
