@@ -34,10 +34,10 @@
 - [x] Task: Conductor - User Manual Verification 'Causal Graph & Event Propagation' (Protocol in workflow.md)
 
 ## Phase 3: Advanced Algorithms (BFS & Dijkstra)
-- [~] Task: Implement BFS Reachability in `LogisticsService`
-    - [ ] Implement `checkReachability(Location $target)` using Reverse-BFS.
-    - [ ] Return boolean indicating if *any* supply source is accessible.
-- [ ] Task: Implement Dijkstra Pathfinding in `LogisticsService`
+- [x] Task: Implement BFS Reachability in `LogisticsService`
+    - [x] Implement `checkReachability(Location $target)` using Reverse-BFS.
+    - [x] Return boolean indicating if *any* supply source is accessible.
+- [~] Task: Implement Dijkstra Pathfinding in `LogisticsService`
     - [ ] Implement `findBestRoute(Location $source, Location $target)` minimizing dynamic cost.
     - [ ] Incorporate time/urgency multipliers into the weight calculation.
 - [ ] Task: TDD - Verify Graph Algorithms

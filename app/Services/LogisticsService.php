@@ -68,4 +68,70 @@ class LogisticsService
 
         return false;
     }
+
+    /**
+     * Find the best route (cheapest path) between two locations using Dijkstra's algorithm.
+     *
+     * @param Location $source
+     * @param Location $target
+     * @return Collection|null Collection of Route objects or null if no path
+     */
+    public function findBestRoute(Location $source, Location $target): ?Collection
+    {
+        $distances = [];
+        $previous = [];
+        $routeUsed = []; // To store the specific Route object used to reach a node
+        $queue = new \SplPriorityQueue();
+
+        // Init
+        // We use string IDs, so we need a map.
+        // Since we don't know all nodes upfront easily without scanning DB,
+        // we'll initialize on demand or just use array map.
+        
+        $distances[$source->id] = 0;
+        $queue->insert($source, 0);
+
+        while (!$queue->isEmpty()) {
+            $current = $queue->extract();
+
+            if ($current->id === $target->id) {
+                break; // Found target
+            }
+
+            // Get outgoing routes
+            // Eager load target to ensure we have the node object for the queue
+            $outgoing = $current->outgoingRoutes()->where('is_active', true)->with('target')->get();
+
+            foreach ($outgoing as $route) {
+                $neighbor = $route->target;
+                if (!$neighbor) continue;
+
+                $alt = $distances[$current->id] + $this->calculateCost($route);
+
+                if (!isset($distances[$neighbor->id]) || $alt < $distances[$neighbor->id]) {
+                    $distances[$neighbor->id] = $alt;
+                    $previous[$neighbor->id] = $current;
+                    $routeUsed[$neighbor->id] = $route;
+                    // Priority Queue is Max-Heap, so use negative priority for Min-Heap behavior
+                    $queue->insert($neighbor, -$alt);
+                }
+            }
+        }
+
+        if (!isset($distances[$target->id])) {
+            return null; // unreachable
+        }
+
+        // Reconstruct path
+        $path = new Collection();
+        $currId = $target->id;
+
+        while (isset($previous[$currId])) {
+            $route = $routeUsed[$currId];
+            $path->prepend($route);
+            $currId = $previous[$currId]->id;
+        }
+
+        return $path;
+    }
 }
