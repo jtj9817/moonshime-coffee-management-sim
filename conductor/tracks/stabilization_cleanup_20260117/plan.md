@@ -14,13 +14,14 @@
 - [x] Task: Conductor - User Manual Verification 'Architectural Cleanup & Standardisation' (Protocol in workflow.md)
 
 ## Phase 2: Data Integrity & Persistence
-- [ ] Task: Audit and Update Route Migrations
-    - [ ] Update `routes` table migration to add strict foreign key constraints for `source_id` and `target_id`.
-    - [ ] Run migration and verify database-level enforcement.
-- [ ] Task: Verify SpikeEvent DAG Persistence
-    - [ ] Audit `SpikeEvent` model and database for `parent_id` and `type` fields.
-    - [ ] Write a unit test ensuring causal chains (Root -> Symptom) persist correctly.
-- [ ] Task: Conductor - User Manual Verification 'Data Integrity & Persistence' (Protocol in workflow.md)
+- [x] Task: Audit and Update Route Migrations
+    - [x] Update `routes` table migration to add strict foreign key constraints for `source_id` and `target_id`.
+    - [x] Refactor `weights` JSON to explicit `cost`, `transit_days`, and `capacity` columns.
+    - [x] Run migration and verify database-level enforcement.
+- [x] Task: Verify SpikeEvent DAG Persistence
+    - [x] Audit `SpikeEvent` model and database for `parent_id` and `type` fields.
+    - [x] Write a unit test ensuring causal chains (Root -> Symptom) persist correctly.
+- [~] Task: Conductor - User Manual Verification 'Data Integrity & Persistence' (Protocol in workflow.md)
 
 ## Phase 3: Archive Synchronization & Documentation
 - [ ] Task: Audit Archived Plans

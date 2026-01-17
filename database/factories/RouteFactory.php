@@ -23,10 +23,9 @@ class RouteFactory extends Factory
             'source_id' => Location::factory(),
             'target_id' => Location::factory(),
             'transport_mode' => $mode,
-            'weights' => [
-                'cost' => $this->faker->numberBetween(10, 100),
-                'time' => $this->faker->numberBetween(1, 10),
-            ],
+            'cost' => $this->faker->numberBetween(10, 100),
+            'transit_days' => $this->faker->numberBetween(1, 10),
+            'capacity' => 1000,
             'is_active' => true,
             'weather_vulnerability' => in_array($mode, ['Truck', 'Air']),
         ];

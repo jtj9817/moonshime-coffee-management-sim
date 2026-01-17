@@ -16,12 +16,12 @@ test('findBestRoute returns cheapest path', function () {
     $d = Location::factory()->create(['name' => 'D']);
 
     // Path 1
-    $r1 = Route::factory()->create(['source_id' => $a->id, 'target_id' => $b->id, 'weights' => ['cost' => 10], 'is_active' => true]);
-    $r2 = Route::factory()->create(['source_id' => $b->id, 'target_id' => $c->id, 'weights' => ['cost' => 10], 'is_active' => true]);
+    $r1 = Route::factory()->create(['source_id' => $a->id, 'target_id' => $b->id, 'cost' => 10, 'is_active' => true]);
+    $r2 = Route::factory()->create(['source_id' => $b->id, 'target_id' => $c->id, 'cost' => 10, 'is_active' => true]);
 
     // Path 2
-    $r3 = Route::factory()->create(['source_id' => $a->id, 'target_id' => $d->id, 'weights' => ['cost' => 50], 'is_active' => true]);
-    $r4 = Route::factory()->create(['source_id' => $d->id, 'target_id' => $c->id, 'weights' => ['cost' => 5], 'is_active' => true]);
+    $r3 = Route::factory()->create(['source_id' => $a->id, 'target_id' => $d->id, 'cost' => 50, 'is_active' => true]);
+    $r4 = Route::factory()->create(['source_id' => $d->id, 'target_id' => $c->id, 'cost' => 5, 'is_active' => true]);
 
     $service = new LogisticsService();
     $path = $service->findBestRoute($a, $c);
@@ -41,12 +41,12 @@ test('findBestRoute avoids inactive routes', function () {
     $d = Location::factory()->create(['name' => 'D']);
 
     // Path 1 (Blocked)
-    Route::factory()->create(['source_id' => $a->id, 'target_id' => $b->id, 'weights' => ['cost' => 10], 'is_active' => true]);
-    Route::factory()->create(['source_id' => $b->id, 'target_id' => $c->id, 'weights' => ['cost' => 10], 'is_active' => false]);
+    Route::factory()->create(['source_id' => $a->id, 'target_id' => $b->id, 'cost' => 10, 'is_active' => true]);
+    Route::factory()->create(['source_id' => $b->id, 'target_id' => $c->id, 'cost' => 10, 'is_active' => false]);
 
     // Path 2 (Expensive but active)
-    $r3 = Route::factory()->create(['source_id' => $a->id, 'target_id' => $d->id, 'weights' => ['cost' => 50], 'is_active' => true]);
-    $r4 = Route::factory()->create(['source_id' => $d->id, 'target_id' => $c->id, 'weights' => ['cost' => 50], 'is_active' => true]);
+    $r3 = Route::factory()->create(['source_id' => $a->id, 'target_id' => $d->id, 'cost' => 50, 'is_active' => true]);
+    $r4 = Route::factory()->create(['source_id' => $d->id, 'target_id' => $c->id, 'cost' => 50, 'is_active' => true]);
 
     $service = new LogisticsService();
     $path = $service->findBestRoute($a, $c);

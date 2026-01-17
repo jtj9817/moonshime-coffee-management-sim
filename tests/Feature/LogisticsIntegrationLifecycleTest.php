@@ -19,21 +19,21 @@ test('full disruption lifecycle integration', function () {
     $directRoute = Route::factory()->create([
         'source_id' => $locA->id,
         'target_id' => $locC->id,
-        'weights' => ['cost' => 100],
+        'cost' => 100,
         'is_active' => true
     ]);
 
     Route::factory()->create([
         'source_id' => $locA->id,
         'target_id' => $locB->id,
-        'weights' => ['cost' => 50],
+        'cost' => 50,
         'is_active' => true
     ]);
 
     Route::factory()->create([
         'source_id' => $locB->id,
         'target_id' => $locC->id,
-        'weights' => ['cost' => 50],
+        'cost' => 50,
         'is_active' => true
     ]);
 

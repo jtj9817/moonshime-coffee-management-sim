@@ -9,14 +9,19 @@ uses(RefreshDatabase::class);
 test('route model has expected attributes', function () {
     $route = Route::factory()->create([
         'transport_mode' => 'Truck',
+        'cost' => 100,
+        'transit_days' => 2,
+        'capacity' => 1000,
         'is_active' => true,
-        'weights' => ['cost' => 10, 'time' => 5],
+        'weather_vulnerability' => true
     ]);
 
-    expect($route)->toBeInstanceOf(Route::class);
     expect($route->transport_mode)->toBe('Truck');
+    expect($route->cost)->toBe(100);
+    expect($route->transit_days)->toBe(2);
+    expect($route->capacity)->toBe(1000);
     expect($route->is_active)->toBeTrue();
-    expect($route->weights)->toBeArray();
+    expect($route->weather_vulnerability)->toBeTrue();
 });
 
 test('route belongs to source and target locations', function () {

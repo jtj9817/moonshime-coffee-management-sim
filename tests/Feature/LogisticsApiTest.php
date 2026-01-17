@@ -17,7 +17,7 @@ test('getPath returns optimal path and cost', function () {
         'source_id' => $locA->id,
         'target_id' => $locB->id,
         'transport_mode' => 'truck',
-        'weights' => ['cost' => 100],
+        'cost' => 100,
         'is_active' => true
     ]);
 
@@ -66,7 +66,7 @@ test('getPath reflects cost increases from active spikes', function () {
         'source_id' => $locA->id,
         'target_id' => $locB->id,
         'transport_mode' => 'truck',
-        'weights' => ['cost' => 100],
+        'cost' => 100,
         'is_active' => true
     ]);
 

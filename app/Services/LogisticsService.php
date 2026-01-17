@@ -47,7 +47,7 @@ class LogisticsService
      */
     public function calculateCost(\App\Models\Route $route): int
     {
-        $baseCost = $route->weights['cost'] ?? 0;
+        $baseCost = $route->cost;
 
         // Check for active spikes affecting this specific route
         $spikeMultiplier = \App\Models\SpikeEvent::where('affected_route_id', $route->id)
@@ -192,13 +192,12 @@ class LogisticsService
         $cheapestBaseRoute = \App\Models\Route::where('source_id', $route->source_id)
             ->where('target_id', $route->target_id)
             ->where('is_active', true)
-            ->get()
-            ->sortBy(fn($r) => $r->weights['cost'] ?? 0)
+            ->orderBy('cost', 'asc')
             ->first();
 
         if ($cheapestBaseRoute && $cheapestBaseRoute->id !== $route->id) {
-            $currentBaseCost = $route->weights['cost'] ?? 0;
-            $minBaseCost = $cheapestBaseRoute->weights['cost'] ?? 0;
+            $currentBaseCost = $route->cost;
+            $minBaseCost = $cheapestBaseRoute->cost;
 
             if ($currentBaseCost > $minBaseCost) {
                 return true;

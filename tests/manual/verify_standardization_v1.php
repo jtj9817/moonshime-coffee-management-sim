@@ -78,7 +78,7 @@ try {
         'source_id' => $locA->id,
         'target_id' => $locB->id,
         'transport_mode' => 'Truck',
-        'weights' => ['cost' => 100],
+        'cost' => 100,
         'is_active' => true
     ]);
     
@@ -87,7 +87,7 @@ try {
         'source_id' => $locA->id,
         'target_id' => $locB->id,
         'transport_mode' => 'Air',
-        'weights' => ['cost' => 500],
+        'cost' => 500,
         'is_active' => true
     ]);
     

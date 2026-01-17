@@ -26,7 +26,8 @@ class GraphSeeder extends Seeder
                     'source_id' => $vendor->id,
                     'target_id' => $warehouse->id,
                     'transport_mode' => 'Truck',
-                    'weights' => ['cost' => 50, 'time' => 2],
+                    'cost' => 50,
+                    'transit_days' => 2,
                     'is_active' => true,
                 ]);
             }
@@ -39,7 +40,8 @@ class GraphSeeder extends Seeder
                     'source_id' => $warehouse->id,
                     'target_id' => $store->id,
                     'transport_mode' => 'Truck',
-                    'weights' => ['cost' => 100, 'time' => 1], // Shorter time, higher cost per mile maybe?
+                    'cost' => 100,
+                    'transit_days' => 1,
                     'is_active' => true,
                 ]);
             }
@@ -52,7 +54,8 @@ class GraphSeeder extends Seeder
                 'source_id' => $stores[$i]->id,
                 'target_id' => $stores[$i+1]->id,
                 'transport_mode' => 'Truck',
-                'weights' => ['cost' => 150, 'time' => 3], // Lateral is slower/costlier
+                'cost' => 150,
+                'transit_days' => 3,
                 'is_active' => true,
             ]);
         }
@@ -63,7 +66,8 @@ class GraphSeeder extends Seeder
                 'source_id' => $vendor->id,
                 'target_id' => $hub->id,
                 'transport_mode' => 'Air',
-                'weights' => ['cost' => 500, 'time' => 0.5],
+                'cost' => 500,
+                'transit_days' => 1,
                 'is_active' => true,
             ]);
         }
@@ -74,7 +78,8 @@ class GraphSeeder extends Seeder
                 'source_id' => $hub->id,
                 'target_id' => $store->id,
                 'transport_mode' => 'Air',
-                'weights' => ['cost' => 500, 'time' => 0.5],
+                'cost' => 500,
+                'transit_days' => 1,
                 'is_active' => true,
             ]);
         }

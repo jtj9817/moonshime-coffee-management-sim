@@ -15,13 +15,15 @@ test('getValidRoutes returns only active routes between source and target', func
     $activeRoute = Route::factory()->create([
         'source_id' => $source->id,
         'target_id' => $target->id,
+        'transport_mode' => 'Truck',
         'is_active' => true,
     ]);
 
-    // Create inactive route
+    // Create inactive route (using different transport mode to avoid unique constraint)
     Route::factory()->create([
         'source_id' => $source->id,
         'target_id' => $target->id,
+        'transport_mode' => 'Air',
         'is_active' => false,
     ]);
 
@@ -39,9 +41,9 @@ test('getValidRoutes returns only active routes between source and target', func
     expect($routes->first()->id)->toBe($activeRoute->id);
 });
 
-test('calculateCost returns correct cost from route weights', function () {
+test('calculateCost returns correct cost from route base cost', function () {
     $route = Route::factory()->create([
-        'weights' => ['cost' => 150, 'time' => 5],
+        'cost' => 150,
     ]);
 
     $service = new LogisticsService();

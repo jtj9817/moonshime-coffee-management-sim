@@ -14,13 +14,17 @@ class Route extends Model
         'source_id',
         'target_id',
         'transport_mode',
-        'weights',
+        'cost',
+        'transit_days',
+        'capacity',
         'is_active',
         'weather_vulnerability',
     ];
 
     protected $casts = [
-        'weights' => 'array',
+        'cost' => 'integer',
+        'transit_days' => 'integer',
+        'capacity' => 'integer',
         'is_active' => 'boolean',
         'weather_vulnerability' => 'boolean',
     ];
