@@ -9,14 +9,14 @@
     - [ ] Create `GraphSeeder` to generate a Hub-and-Spoke topology.
     - [ ] Ensure `Stores` connect to `Warehouses`, and `Warehouses` to `Vendors`.
     - [ ] Add lateral connections (Store-to-Store) and "Air Routes" for redundancy.
-- [~] Task: Implement `LogisticsService` (Basic)
+- [x] Task: Implement `LogisticsService` (Basic)
     - [ ] Create `LogisticsService` class.
     - [ ] Implement `getValidRoutes($source, $target)` to return active edges.
     - [ ] Implement basic cost calculation methods.
-- [ ] Task: TDD - Verify Physical Graph Construction
+- [x] Task: TDD - Verify Physical Graph Construction
     - [ ] Write tests to verify graph connectivity and `Route` attribute persistence.
     - [ ] Verify `LogisticsService` correctly filters inactive routes.
-- [ ] Task: Conductor - User Manual Verification 'Physical Graph Foundation' (Protocol in workflow.md)
+- [~] Task: Conductor - User Manual Verification 'Physical Graph Foundation' (Protocol in workflow.md)
 
 ## Phase 2: Causal Graph & Event Propagation
 - [ ] Task: Update `SpikeEvent` Model
