@@ -23,7 +23,7 @@
     - [x] Write a unit test ensuring causal chains (Root -> Symptom) persist correctly.
 - [x] Task: Conductor - User Manual Verification 'Data Integrity & Persistence' (Protocol in workflow.md)
 
-## Phase 3: Archive Synchronization & Documentation
+## Phase 3: Archive Synchronization & Documentation [checkpoint: 757a7ad]
 - [x] Task: Audit Archived Plans
     - [x] Sync `hybrid_event_topology_20260116/plan.md` by marking completed tasks as `[x]`.
     - [x] Ensure all archived task descriptions accurately reflect the current code state.
