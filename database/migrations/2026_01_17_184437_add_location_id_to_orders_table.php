@@ -26,6 +26,15 @@ return new class extends Migration
             $table->dropUnique(['location_id', 'product_id']);
             $table->unique(['user_id', 'location_id', 'product_id']);
         });
+
+        Schema::table('spike_events', function (Blueprint $table) {
+            $table->foreignId('user_id')->nullable()->constrained('users')->cascadeOnDelete();
+        });
+
+        Schema::table('alerts', function (Blueprint $table) {
+            $table->foreignId('user_id')->nullable()->constrained('users')->cascadeOnDelete();
+            $table->boolean('is_resolved')->default(false)->after('is_read');
+        });
     }
 
     /**
@@ -33,6 +42,16 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('alerts', function (Blueprint $table) {
+            $table->dropForeign(['user_id']);
+            $table->dropColumn(['user_id', 'is_resolved']);
+        });
+
+        Schema::table('spike_events', function (Blueprint $table) {
+            $table->dropForeign(['user_id']);
+            $table->dropColumn('user_id');
+        });
+
         Schema::table('inventories', function (Blueprint $table) {
             $table->dropUnique(['user_id', 'location_id', 'product_id']);
             $table->unique(['location_id', 'product_id']);

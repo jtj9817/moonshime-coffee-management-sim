@@ -19,6 +19,7 @@ class InventoryFactory extends Factory
     public function definition(): array
     {
         return [
+            'user_id' => \App\Models\User::factory(),
             'location_id' => Location::factory(),
             'product_id' => Product::factory(),
             'quantity' => $this->faker->numberBetween(0, 100),

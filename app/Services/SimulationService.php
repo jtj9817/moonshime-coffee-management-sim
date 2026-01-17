@@ -93,7 +93,7 @@ class SimulationService
      */
     protected function processAnalysisTick(int $day): void
     {
-        app(GenerateIsolationAlerts::class)->handle();
+        app(GenerateIsolationAlerts::class)->handle($this->gameState->user_id);
     }
 
     /**

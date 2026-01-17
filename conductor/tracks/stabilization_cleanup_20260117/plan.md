@@ -47,17 +47,17 @@
         - [x] Route Capacity and Throughput Limits (Capacity exhaustion, max daily shipments)
 - [x] Task: Conductor - User Manual Verification 'Gameplay Loop Verification' (Protocol in workflow.md)
 
-## Phase 5: Advanced Stress Testing
+## Phase 5: Advanced Stress Testing [checkpoint: 9009fef]
 - [x] Task: Implement "The Cascade" Stress Test (Scenario A)
     - [x] Trigger a Root Spike and verify 10+ Symptom Alerts are generated across the graph.
     - [x] Verify automatic system recovery (Route restoration and Alert resolution) upon spike expiration.
 - [x] Task: Implement "The Decision Stressor" Stress Test (Scenario B)
     - [x] Simulate concurrent Price + Demand + Breakdown spikes forcing pathfinding recalculations.
     - [x] Verify server-side persistence of "premium" route selection and cost impact.
-- [~] Task: Implement "The Recursive Resolution" Stress Test (Scenario C)
-    - [ ] Trigger Root -> Symptom -> Task chain.
-    - [ ] Verify Root resolution clears the chain, while Task resolution does not prematurely end the Spike.
-- [ ] Task: Conductor - User Manual Verification 'Advanced Stress Testing' (Protocol in workflow.md)
+- [x] Task: Implement "The Recursive Resolution" Stress Test (Scenario C)
+    - [x] Trigger Root -> Symptom -> Task chain.
+    - [x] Verify Root resolution clears the chain, while Task resolution does not prematurely end the Spike.
+- [x] Task: Conductor - User Manual Verification 'Advanced Stress Testing' (Protocol in workflow.md)
 
 ## Phase 6: Final Performance & Stability Audit
 - [ ] Task: Benchmarking Dijkstra Performance

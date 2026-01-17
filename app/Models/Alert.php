@@ -13,6 +13,7 @@ class Alert extends Model
     use HasFactory, HasUuids;
 
     protected $fillable = [
+        'user_id',
         'type',
         'severity',
         'location_id',
@@ -28,7 +29,13 @@ class Alert extends Model
         'data' => 'array',
         'is_read' => 'boolean',
         'is_resolved' => 'boolean',
+        'user_id' => 'integer',
     ];
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function location(): BelongsTo
     {
