@@ -29,6 +29,14 @@ test('spike event model can be created', function () {
 test('spike event factory generates events', function () {
     Location::factory()->count(3)->create();
     Product::factory()->count(3)->create();
+    
+    // Create at least one vulnerable route for blizzard spikes
+    $locations = Location::all();
+    \App\Models\Route::factory()->create([
+        'source_id' => $locations[0]->id,
+        'target_id' => $locations[1]->id,
+        'weather_vulnerability' => true,
+    ]);
 
     $factory = new \App\Services\SpikeEventFactory();
     $spike = $factory->generate(1);

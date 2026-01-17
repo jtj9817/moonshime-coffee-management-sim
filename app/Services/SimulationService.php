@@ -4,6 +4,13 @@ namespace App\Services;
 
 use App\Models\GameState;
 use App\Events\TimeAdvanced;
+use App\Models\SpikeEvent;
+use App\Models\Transfer;
+use App\States\Transfer\InTransit;
+use App\States\Transfer\Completed;
+use App\Actions\GenerateIsolationAlerts;
+use App\Events\SpikeOccurred;
+use App\Events\SpikeEnded;
 
 class SimulationService
 {
@@ -18,9 +25,70 @@ class SimulationService
     {
         \Illuminate\Support\Facades\DB::transaction(function () {
             $this->gameState->increment('day');
+            $day = $this->gameState->day;
+
+            $this->processEventTick($day);
+            $this->processPhysicsTick($day);
+            $this->processAnalysisTick($day);
             
-            event(new TimeAdvanced($this->gameState->day));
+            event(new TimeAdvanced($day));
         });
+    }
+
+    /**
+     * Event Tick: Update Spike lifecycle (Activate/Deactivate) and generate new spikes.
+     */
+    protected function processEventTick(int $day): void
+    {
+        // 1. End spikes that reach their ends_at_day
+        SpikeEvent::where('is_active', true)
+            ->where('ends_at_day', '<=', $day)
+            ->get()
+            ->each(function (SpikeEvent $spike) {
+                $spike->update(['is_active' => false]);
+                event(new SpikeEnded($spike));
+            });
+
+        // 2. Start spikes that reach their starts_at_day
+        SpikeEvent::where('is_active', false)
+            ->where('starts_at_day', '<=', $day)
+            ->where('ends_at_day', '>', $day)
+            ->get()
+            ->each(function (SpikeEvent $spike) {
+                $spike->update(['is_active' => true]);
+                event(new SpikeOccurred($spike));
+            });
+
+        // 3. Generate a new spike for the future (Optional/Random)
+        // We use the factory via DI if possible, but SimulationService currently only has GameState.
+        // I should inject the SpikeEventFactory.
+        app(\App\Services\SpikeEventFactory::class)->generate($day);
+    }
+
+    /**
+     * Physics Tick: Move active transfers (Process Deliveries).
+     */
+    protected function processPhysicsTick(int $day): void
+    {
+        Transfer::whereState('status', InTransit::class)
+            ->where('delivery_day', '<=', $day)
+            ->get()
+            ->each(fn ($transfer) => $transfer->status->transitionTo(Completed::class));
+
+        // Note: Orders are also processed in the original ProcessDeliveries.
+        // I should probably move them here too if I'm replacing it.
+        \App\Models\Order::whereState('status', \App\States\Order\Shipped::class)
+            ->where('delivery_day', '<=', $day)
+            ->get()
+            ->each(fn ($order) => $order->status->transitionTo(\App\States\Order\Delivered::class));
+    }
+
+    /**
+     * Analysis Tick: Run BFS and Generate Isolation Alerts.
+     */
+    protected function processAnalysisTick(int $day): void
+    {
+        app(GenerateIsolationAlerts::class)->handle();
     }
 
     /**

@@ -12,7 +12,10 @@ use App\States\Order\Shipped;
 use App\States\Order\Delivered;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery\MockInterface;
+
+uses(RefreshDatabase::class);
 
 beforeEach(function () {
     $user = User::factory()->create();
@@ -58,20 +61,25 @@ test('it processes deliveries on time advancement', function () {
     expect($order->fresh()->status)->toBeInstanceOf(Delivered::class);
 });
 
-test('it triggers spike generation on time advancement', function () {
-    $mockFactory = $this->mock(SpikeEventFactory::class, function (MockInterface $mock) {
-        $mock->shouldReceive('generate')
-            ->once()
-            ->with(2)
-            ->andReturn(SpikeEvent::factory()->make(['starts_at_day' => 3]));
-        
-        $mock->shouldReceive('apply')->once();
-    });
+test('it triggers spike activation and future generation on time advancement', function () {
+    // 1. Setup a spike that should start on Day 2
+    $pendingSpike = SpikeEvent::factory()->create([
+        'starts_at_day' => 2,
+        'ends_at_day' => 4,
+        'is_active' => false,
+    ]);
 
-    // We need to ensure the listener uses the mocked factory.
-    // Laravel's $this->mock() handles this if the factory is resolved from the container.
+    // 2. Mock SpikeEventFactory to verify future generation is called
+    // Note: We don't mock 'apply' here because it's called via event listener which we want to run
     
-    $this->service->advanceTime(); // Day 2
+    $this->service->advanceTime(); // Advance to Day 2
+
+    // 3. Assert pending spike is now active
+    expect($pendingSpike->fresh()->is_active)->toBeTrue();
+    
+    // 4. Assert a new spike was generated (it will have starts_at_day = 3)
+    // We check if any spike exists starting on Day 3
+    expect(SpikeEvent::where('starts_at_day', 3)->exists())->toBeTrue();
 });
 
 test('it is atomic and rolls back on failure', function () {

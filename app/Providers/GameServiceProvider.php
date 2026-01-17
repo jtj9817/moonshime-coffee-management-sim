@@ -95,8 +95,6 @@ class GameServiceProvider extends ServiceProvider
     {
         // Simulation Chain
         Event::listen(TimeAdvanced::class, [DecayPerishables::class, 'onTimeAdvanced']);
-        Event::listen(TimeAdvanced::class, [ProcessDeliveries::class, 'onTimeAdvanced']);
-        Event::listen(TimeAdvanced::class, [GenerateSpike::class, 'onTimeAdvanced']);
 
         // DAG Chain for OrderPlaced
         Event::listen(OrderPlaced::class, DeductCash::class);

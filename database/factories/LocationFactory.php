@@ -20,6 +20,7 @@ class LocationFactory extends Factory
             'name' => 'Test Coffee',
             'address' => '123 Test St',
             'max_storage' => $this->faker->numberBetween(100, 1000),
+            'type' => 'store',
         ];
     }
 }

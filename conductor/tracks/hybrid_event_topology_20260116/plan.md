@@ -46,7 +46,7 @@
 - [x] Task: Conductor - User Manual Verification 'Advanced Algorithms' (Protocol in workflow.md)
 
 ## Phase 4: Simulation Loop Integration
-- [ ] Task: Implement Alert Generation Logic
+- [~] Task: Implement Alert Generation Logic
     - [ ] Create `GenerateIsolationAlert` listener or service method.
     - [ ] Logic: If `Reachability == false` and `Stock < Low`, create `Alert` linked to the active `SpikeEvent`.
 - [ ] Task: Update `SimulationService` Tick
