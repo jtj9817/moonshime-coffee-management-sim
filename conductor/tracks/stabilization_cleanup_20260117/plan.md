@@ -31,30 +31,30 @@
     - [x] Verify all manual verification scripts in `tests/manual/` are functional and documented.
 - [x] Task: Conductor - User Manual Verification 'Archive Synchronization & Documentation' (Protocol in workflow.md)
 
-## Phase 4: Gameplay Loop Verification [checkpoint: d5912b9]
-- [~] Task: Implement Comprehensive Gameplay Loop Feature Test
+## Phase 4: Gameplay Loop Verification [checkpoint: 2237276]
+- [x] Task: Implement Comprehensive Gameplay Loop Feature Test
     - [x] Write a test for the full sequence: Initial State (Day 1) -> Decision-making -> Stochastic States (Day 2+).
     - [x] Verify that Day 1 remains stable and deterministic with no random events.
     - [x] Verify full 5-day simulation cycle (Activation, Persistence, Expiration).
     - [x] Verify that user decisions (Policies/Orders) persist correctly across simulation ticks.
     - [x] Simulate player agency (placing alternative orders during disruptions) and economic impact (cash deduction).
-    - [~] Integrate Advanced Inventory & Economic Layer Scenarios:
-        - [ ] Inventory Changes on Order Delivery (Multi-product, missing records, atomic updates)
-        - [ ] Emergency Order Delivery Timing (Route-based transit days, simultaneous deliveries)
-        - [ ] Daily Storage Cost Application (Scaling, zero-cost, negative cash handling)
-        - [ ] Multiple Product Handling (Complex order/storage cost scenarios)
-        - [ ] Order Cancellation and Inventory Rollback (Refunds, blocking delivered cancellations)
-        - [ ] Route Capacity and Throughput Limits (Capacity exhaustion, max daily shipments)
-- [ ] Task: Conductor - User Manual Verification 'Gameplay Loop Verification' (Protocol in workflow.md)
+    - [x] Integrate Advanced Inventory & Economic Layer Scenarios:
+        - [x] Inventory Changes on Order Delivery (Multi-product, missing records, atomic updates)
+        - [x] Emergency Order Delivery Timing (Route-based transit days, simultaneous deliveries)
+        - [x] Daily Storage Cost Application (Scaling, zero-cost, negative cash handling)
+        - [x] Multiple Product Handling (Complex order/storage cost scenarios)
+        - [x] Order Cancellation and Inventory Rollback (Refunds, blocking delivered cancellations)
+        - [x] Route Capacity and Throughput Limits (Capacity exhaustion, max daily shipments)
+- [x] Task: Conductor - User Manual Verification 'Gameplay Loop Verification' (Protocol in workflow.md)
 
 ## Phase 5: Advanced Stress Testing
-- [~] Task: Implement "The Cascade" Stress Test (Scenario A)
-    - [ ] Trigger a Root Spike and verify 10+ Symptom Alerts are generated across the graph.
-    - [ ] Verify automatic system recovery (Route restoration and Alert resolution) upon spike expiration.
-- [ ] Task: Implement "The Decision Stressor" Stress Test (Scenario B)
-    - [ ] Simulate concurrent Price + Demand + Breakdown spikes forcing pathfinding recalculations.
-    - [ ] Verify server-side persistence of "premium" route selection and cost impact.
-- [ ] Task: Implement "The Recursive Resolution" Stress Test (Scenario C)
+- [x] Task: Implement "The Cascade" Stress Test (Scenario A)
+    - [x] Trigger a Root Spike and verify 10+ Symptom Alerts are generated across the graph.
+    - [x] Verify automatic system recovery (Route restoration and Alert resolution) upon spike expiration.
+- [x] Task: Implement "The Decision Stressor" Stress Test (Scenario B)
+    - [x] Simulate concurrent Price + Demand + Breakdown spikes forcing pathfinding recalculations.
+    - [x] Verify server-side persistence of "premium" route selection and cost impact.
+- [~] Task: Implement "The Recursive Resolution" Stress Test (Scenario C)
     - [ ] Trigger Root -> Symptom -> Task chain.
     - [ ] Verify Root resolution clears the chain, while Task resolution does not prematurely end the Spike.
 - [ ] Task: Conductor - User Manual Verification 'Advanced Stress Testing' (Protocol in workflow.md)

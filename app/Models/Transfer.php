@@ -16,6 +16,7 @@ class Transfer extends Model
     use HasFactory, HasUuids, HasStates;
 
     protected $fillable = [
+        'user_id',
         'source_location_id',
         'target_location_id',
         'product_id',
@@ -28,7 +29,15 @@ class Transfer extends Model
     {
         return [
             'status' => TransferState::class,
+            'user_id' => 'integer',
+            'quantity' => 'integer',
+            'delivery_day' => 'integer',
         ];
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function sourceLocation(): BelongsTo

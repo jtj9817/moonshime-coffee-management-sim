@@ -25,13 +25,14 @@ class SimulationService
     {
         \Illuminate\Support\Facades\DB::transaction(function () {
             $this->gameState->increment('day');
+            $this->gameState->refresh();
             $day = $this->gameState->day;
 
             $this->processEventTick($day);
             $this->processPhysicsTick($day);
             $this->processAnalysisTick($day);
             
-            event(new TimeAdvanced($day));
+            event(new TimeAdvanced($day, $this->gameState));
         });
     }
 
@@ -40,8 +41,11 @@ class SimulationService
      */
     protected function processEventTick(int $day): void
     {
+        $userId = $this->gameState->user_id;
+
         // 1. End spikes that reach their ends_at_day
-        SpikeEvent::where('is_active', true)
+        SpikeEvent::where('user_id', $userId)
+            ->where('is_active', true)
             ->where('ends_at_day', '<=', $day)
             ->get()
             ->each(function (SpikeEvent $spike) {
@@ -50,7 +54,8 @@ class SimulationService
             });
 
         // 2. Start spikes that reach their starts_at_day
-        SpikeEvent::where('is_active', false)
+        SpikeEvent::where('user_id', $userId)
+            ->where('is_active', false)
             ->where('starts_at_day', '<=', $day)
             ->where('ends_at_day', '>', $day)
             ->get()
@@ -60,8 +65,6 @@ class SimulationService
             });
 
         // 3. Generate a new spike for the future (Optional/Random)
-        // We use the factory via DI if possible, but SimulationService currently only has GameState.
-        // I should inject the SpikeEventFactory.
         app(\App\Services\SpikeEventFactory::class)->generate($day);
     }
 
@@ -70,14 +73,16 @@ class SimulationService
      */
     protected function processPhysicsTick(int $day): void
     {
-        Transfer::whereState('status', InTransit::class)
+        $userId = $this->gameState->user_id;
+
+        Transfer::where('user_id', $userId)
+            ->whereState('status', InTransit::class)
             ->where('delivery_day', '<=', $day)
             ->get()
             ->each(fn ($transfer) => $transfer->status->transitionTo(Completed::class));
 
-        // Note: Orders are also processed in the original ProcessDeliveries.
-        // I should probably move them here too if I'm replacing it.
-        \App\Models\Order::whereState('status', \App\States\Order\Shipped::class)
+        \App\Models\Order::where('user_id', $userId)
+            ->whereState('status', \App\States\Order\Shipped::class)
             ->where('delivery_day', '<=', $day)
             ->get()
             ->each(fn ($order) => $order->status->transitionTo(\App\States\Order\Delivered::class));

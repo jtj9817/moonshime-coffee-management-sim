@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Events\OrderPlaced;
+use App\Events\OrderDelivered;
+use App\Events\OrderCancelled;
 use App\Events\SpikeOccurred;
 use App\Events\TimeAdvanced;
 use App\Events\TransferCompleted;
@@ -30,6 +32,8 @@ use App\Models\User;
 use App\Events\SpikeEnded;
 use App\Listeners\ApplySpikeEffect;
 use App\Listeners\RollbackSpikeEffect;
+
+use App\Listeners\ApplyStorageCosts;
 
 class GameServiceProvider extends ServiceProvider
 {
@@ -95,11 +99,19 @@ class GameServiceProvider extends ServiceProvider
     {
         // Simulation Chain
         Event::listen(TimeAdvanced::class, [DecayPerishables::class, 'onTimeAdvanced']);
+        Event::listen(TimeAdvanced::class, ApplyStorageCosts::class);
 
         // DAG Chain for OrderPlaced
         Event::listen(OrderPlaced::class, DeductCash::class);
         Event::listen(OrderPlaced::class, GenerateAlert::class);
         Event::listen(OrderPlaced::class, UpdateMetrics::class);
+
+        // DAG Chain for OrderDelivered
+        Event::listen(OrderDelivered::class, UpdateInventory::class);
+        Event::listen(OrderDelivered::class, UpdateMetrics::class);
+
+        // DAG Chain for OrderCancelled
+        Event::listen(OrderCancelled::class, DeductCash::class);
 
         // DAG Chain for TransferCompleted
         Event::listen(TransferCompleted::class, GenerateAlert::class);

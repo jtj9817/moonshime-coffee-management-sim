@@ -19,6 +19,10 @@ class Location extends Model
         'type',
     ];
 
+    protected $casts = [
+        'max_storage' => 'integer',
+    ];
+
     public function inventories(): HasMany
     {
         return $this->hasMany(Inventory::class);

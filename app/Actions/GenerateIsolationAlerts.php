@@ -22,6 +22,7 @@ class GenerateIsolationAlerts
             $isReachable = $this->logistics->checkReachability($store);
 
             if (!$isReachable) {
+                // ... (existing logic for creating alerts)
                 // Check if stock is low for at least one product
                 $hasLowStock = $store->inventories()->where('quantity', '<', 10)->exists();
 
@@ -32,7 +33,7 @@ class GenerateIsolationAlerts
                 // Check if we already have an active isolation alert for this store
                 $existingAlert = Alert::where('location_id', $store->id)
                     ->where('type', 'isolation')
-                    ->where('is_read', false)
+                    ->where('is_resolved', false)
                     ->exists();
 
                 if ($existingAlert) {
@@ -55,6 +56,12 @@ class GenerateIsolationAlerts
                         'reason' => $cause ? "Likely due to {$cause->type}" : "Unknown network failure"
                     ]
                 ]);
+            } else {
+                // Store is reachable - RESOLVE existing isolation alerts
+                Alert::where('location_id', $store->id)
+                    ->where('type', 'isolation')
+                    ->where('is_resolved', false)
+                    ->update(['is_resolved' => true]);
             }
         }
     }

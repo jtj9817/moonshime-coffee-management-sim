@@ -18,7 +18,10 @@ class Order extends Model
     use HasFactory, HasUuids, HasStates;
 
     protected $fillable = [
+        'user_id',
         'vendor_id',
+        'location_id',
+        'route_id',
         'status',
         'total_cost',
         'delivery_date',
@@ -31,12 +34,30 @@ class Order extends Model
             'delivery_date' => 'datetime',
             'total_cost' => 'integer',
             'status' => OrderState::class,
+            'delivery_day' => 'integer',
+            'route_id' => 'integer',
+            'user_id' => 'integer',
         ];
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function vendor(): BelongsTo
     {
         return $this->belongsTo(Vendor::class);
+    }
+
+    public function location(): BelongsTo
+    {
+        return $this->belongsTo(Location::class);
+    }
+
+    public function route(): BelongsTo
+    {
+        return $this->belongsTo(Route::class);
     }
 
     public function items(): HasMany

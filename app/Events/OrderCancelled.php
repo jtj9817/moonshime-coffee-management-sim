@@ -2,15 +2,15 @@
 
 namespace App\Events;
 
+use App\Models\Order;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class TimeAdvanced
+class OrderCancelled
 {
     use Dispatchable, SerializesModels;
 
     public function __construct(
-        public int $day,
-        public \App\Models\GameState $gameState
+        public Order $order
     ) {}
 }

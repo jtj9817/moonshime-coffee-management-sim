@@ -12,7 +12,8 @@ class DecayPerishables
      */
     public function onTimeAdvanced(TimeAdvanced $event): void
     {
-        Inventory::whereHas('product', function ($query) {
+        Inventory::where('user_id', $event->gameState->user_id)
+            ->whereHas('product', function ($query) {
             $query->where('is_perishable', true);
         })
         ->where('quantity', '>', 0)

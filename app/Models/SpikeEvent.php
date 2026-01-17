@@ -14,6 +14,7 @@ class SpikeEvent extends Model
     use HasFactory, HasUuids;
 
     protected $fillable = [
+        'user_id',
         'type',
         'magnitude',
         'duration',
@@ -34,7 +35,13 @@ class SpikeEvent extends Model
         'ends_at_day' => 'integer',
         'is_active' => 'boolean',
         'meta' => 'array',
+        'user_id' => 'integer',
     ];
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function location(): BelongsTo
     {

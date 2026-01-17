@@ -13,17 +13,22 @@ class Inventory extends Model
     use HasFactory, HasUuids;
 
     protected $fillable = [
+        'user_id',
         'location_id',
         'product_id',
         'quantity',
         'last_restocked_at',
     ];
 
-    protected function casts(): array
+    protected $casts = [
+        'quantity' => 'integer',
+        'last_restocked_at' => 'datetime',
+        'user_id' => 'integer',
+    ];
+
+    public function user(): BelongsTo
     {
-        return [
-            'last_restocked_at' => 'datetime',
-        ];
+        return $this->belongsTo(User::class);
     }
 
     public function location(): BelongsTo

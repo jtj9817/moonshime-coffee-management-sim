@@ -21,11 +21,13 @@ class Alert extends Model
         'message',
         'data',
         'is_read',
+        'is_resolved',
     ];
 
     protected $casts = [
         'data' => 'array',
         'is_read' => 'boolean',
+        'is_resolved' => 'boolean',
     ];
 
     public function location(): BelongsTo
