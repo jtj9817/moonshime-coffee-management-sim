@@ -27,6 +27,10 @@ use App\Services\SimulationService;
 use App\Models\GameState;
 use App\Models\User;
 
+use App\Events\SpikeEnded;
+use App\Listeners\ApplySpikeEffect;
+use App\Listeners\RollbackSpikeEffect;
+
 class GameServiceProvider extends ServiceProvider
 {
     /**
@@ -106,5 +110,9 @@ class GameServiceProvider extends ServiceProvider
 
         // DAG Chain for SpikeOccurred
         Event::listen(SpikeOccurred::class, GenerateAlert::class);
+        Event::listen(SpikeOccurred::class, ApplySpikeEffect::class);
+
+        // DAG Chain for SpikeEnded
+        Event::listen(SpikeEnded::class, RollbackSpikeEffect::class);
     }
 }

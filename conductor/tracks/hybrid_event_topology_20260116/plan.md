@@ -22,10 +22,10 @@
 - [x] Task: Update `SpikeEvent` Model
     - [ ] Add `affected_route_id` (nullable) or polymorphic relation to `SpikeEvent`.
     - [ ] Add recursive relationship fields (`parent_id`, `type`) for DAG structure (Root/Symptom/Task).
-- [~] Task: Implement `SpikeEventFactory` Updates
+- [x] Task: Implement `SpikeEventFactory` Updates
     - [ ] Update factory to generate "Graph-Targeting" events (e.g., Blizzard targeting Road routes).
     - [ ] Implement logic to select target `Routes` based on `weather_vulnerability`.
-- [ ] Task: Implement Event Listeners for Route State
+- [~] Task: Implement Event Listeners for Route State
     - [ ] Create `SpikeStarted` listener: Sets `Route->is_active = false` or increases weight.
     - [ ] Create `SpikeEnded` listener: Restores `Route->is_active = true` and weights.
 - [ ] Task: TDD - Verify Event Propagation
