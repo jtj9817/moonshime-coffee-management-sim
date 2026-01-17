@@ -1,5 +1,6 @@
-import { Head } from '@inertiajs/react';
-import { ArrowRight, ArrowRightLeft, MapPin, Plus, Truck } from 'lucide-react';
+import { Head, useForm } from '@inertiajs/react';
+import { ArrowRight, ArrowRightLeft, MapPin, Plus, Truck, AlertTriangle, Info } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,6 +13,25 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { useGame } from '@/contexts/game-context';
 import GameLayout from '@/layouts/game-layout';
 import { TransferModel, type BreadcrumbItem } from '@/types';
 
@@ -25,27 +45,56 @@ interface TransfersProps {
     }>;
 }
 
-const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Mission Control', href: '/game/dashboard' },
-    { title: 'Logistics', href: '/game/transfers' },
-];
-
-function getStatusBadge(status: string) {
-    switch (status) {
-        case 'draft':
-            return <Badge variant="outline">Draft</Badge>;
-        case 'in_transit':
-            return <Badge className="bg-blue-500">In Transit</Badge>;
-        case 'completed':
-            return <Badge className="bg-emerald-500">Completed</Badge>;
-        case 'cancelled':
-            return <Badge variant="destructive">Cancelled</Badge>;
-        default:
-            return <Badge variant="outline">{status}</Badge>;
-    }
-}
+// ... existing getStatusBadge function ...
 
 export default function Transfers({ transfers, suggestions }: TransfersProps) {
+    const { locations, products } = useGame();
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [routeInfo, setRouteInfo] = useState<{
+        reachable: boolean;
+        path?: any[];
+        total_cost?: number;
+        message?: string;
+    } | null>(null);
+    const [loadingRoute, setLoadingRoute] = useState(false);
+
+    const { data, setData, post, processing, errors, reset } = useForm({
+        source_location_id: '',
+        target_location_id: '',
+        items: [{ product_id: '', quantity: 1 }],
+    });
+
+    useEffect(() => {
+        if (data.source_location_id && data.target_location_id && data.source_location_id !== data.target_location_id) {
+            fetchRoute();
+        } else {
+            setRouteInfo(null);
+        }
+    }, [data.source_location_id, data.target_location_id]);
+
+    const fetchRoute = async () => {
+        setLoadingRoute(true);
+        try {
+            const response = await fetch(`/game/logistics/path?source_id=${data.source_location_id}&target_id=${data.target_location_id}`);
+            const result = await response.json();
+            setRouteInfo(result);
+        } catch (error) {
+            console.error('Failed to fetch route', error);
+        } finally {
+            setLoadingRoute(false);
+        }
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        post(route('game.transfers.store'), {
+            onSuccess: () => {
+                setIsDialogOpen(false);
+                reset();
+            },
+        });
+    };
+
     return (
         <GameLayout breadcrumbs={breadcrumbs}>
             <Head title="Logistics" />
@@ -61,10 +110,146 @@ export default function Transfers({ transfers, suggestions }: TransfersProps) {
                             Manage inter-location transfers
                         </p>
                     </div>
-                    <Button className="gap-2 bg-amber-600 hover:bg-amber-700">
-                        <Plus className="h-4 w-4" />
-                        New Transfer
-                    </Button>
+                    
+                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                        <DialogTrigger asChild>
+                            <Button className="gap-2 bg-amber-600 hover:bg-amber-700">
+                                <Plus className="h-4 w-4" />
+                                New Transfer
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[500px]">
+                            <form onSubmit={handleSubmit}>
+                                <DialogHeader>
+                                    <DialogTitle>Create Inter-Location Transfer</DialogTitle>
+                                    <DialogDescription>
+                                        Move inventory between locations. Routes are affected by active weather events.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div className="grid gap-4 py-4">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="source">Source</Label>
+                                            <Select 
+                                                value={data.source_location_id} 
+                                                onValueChange={(val) => setData('source_location_id', val)}
+                                            >
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select source" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {locations.map(loc => (
+                                                        <SelectItem key={loc.id} value={loc.id}>{loc.name}</SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="target">Destination</Label>
+                                            <Select 
+                                                value={data.target_location_id} 
+                                                onValueChange={(val) => setData('target_location_id', val)}
+                                            >
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select target" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {locations.map(loc => (
+                                                        <SelectItem key={loc.id} value={loc.id}>{loc.name}</SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </div>
+
+                                    {/* Route Awareness UI */}
+                                    {loadingRoute && (
+                                        <div className="flex items-center gap-2 py-2 text-sm text-stone-500">
+                                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-stone-300 border-t-amber-600" />
+                                            Calculating optimal route...
+                                        </div>
+                                    )}
+
+                                    {routeInfo && !loadingRoute && (
+                                        <div className={`rounded-lg border p-3 ${routeInfo.reachable ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-900 dark:bg-emerald-950/30' : 'border-rose-200 bg-rose-50 dark:border-rose-900 dark:bg-rose-950/30'}`}>
+                                            <div className="flex items-start gap-2">
+                                                {routeInfo.reachable ? (
+                                                    <Truck className="mt-0.5 h-4 w-4 text-emerald-600" />
+                                                ) : (
+                                                    <AlertTriangle className="mt-0.5 h-4 w-4 text-rose-600" />
+                                                )}
+                                                <div className="flex-1">
+                                                    <p className={`text-sm font-bold ${routeInfo.reachable ? 'text-emerald-800 dark:text-emerald-400' : 'text-rose-800 dark:text-rose-400'}`}>
+                                                        {routeInfo.reachable ? 'Route Active' : 'Route Blocked'}
+                                                    </p>
+                                                    <p className="text-xs text-stone-600 dark:text-stone-400">
+                                                        {routeInfo.reachable 
+                                                            ? `Optimal path found. Estimated cost: ${routeInfo.total_cost} units.` 
+                                                            : routeInfo.message || 'No available routes due to severe weather or distance.'}
+                                                    </p>
+                                                    {routeInfo.reachable && routeInfo.path && (
+                                                        <div className="mt-2 flex flex-wrap items-center gap-1">
+                                                            {routeInfo.path.map((step, i) => (
+                                                                <span key={i} className="flex items-center gap-1 text-[10px] font-medium text-stone-500">
+                                                                    {step.source}
+                                                                    <ArrowRight size={10} />
+                                                                    {i === routeInfo.path!.length - 1 && step.target}
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div className="space-y-2">
+                                        <Label>Items</Label>
+                                        {data.items.map((item, index) => (
+                                            <div key={index} className="flex gap-2">
+                                                <Select 
+                                                    value={item.product_id} 
+                                                    onValueChange={(val) => {
+                                                        const newItems = [...data.items];
+                                                        newItems[index].product_id = val;
+                                                        setData('items', newItems);
+                                                    }}
+                                                >
+                                                    <SelectTrigger className="flex-1">
+                                                        <SelectValue placeholder="Select product" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {products.map(p => (
+                                                            <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                <Input 
+                                                    type="number" 
+                                                    className="w-20" 
+                                                    value={item.quantity}
+                                                    onChange={(e) => {
+                                                        const newItems = [...data.items];
+                                                        newItems[index].quantity = parseInt(e.target.value);
+                                                        setData('items', newItems);
+                                                    }}
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                                <DialogFooter>
+                                    <Button 
+                                        type="submit" 
+                                        disabled={processing || !routeInfo?.reachable}
+                                        className="bg-amber-600 hover:bg-amber-700"
+                                    >
+                                        {processing ? 'Creating...' : 'Confirm Transfer'}
+                                    </Button>
+                                </DialogFooter>
+                            </form>
+                        </DialogContent>
+                    </Dialog>
                 </div>
 
                 {/* Stats */}

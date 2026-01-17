@@ -187,7 +187,7 @@ export default function Dashboard({ alerts, kpis, quests }: DashboardProps) {
                 )}
 
                 {/* KPIs */}
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
                     {kpis.map((kpi, index) => (
                         <Card key={index}>
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

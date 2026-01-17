@@ -8,6 +8,23 @@ use Illuminate\Database\Eloquent\Collection;
 class LogisticsService
 {
     /**
+     * Get the overall logistics health (percentage of active routes).
+     *
+     * @return float
+     */
+    public function getLogisticsHealth(): float
+    {
+        $totalRoutes = \App\Models\Route::count();
+        if ($totalRoutes === 0) {
+            return 100.0;
+        }
+
+        $activeRoutes = \App\Models\Route::where('is_active', true)->count();
+
+        return ($activeRoutes / $totalRoutes) * 100;
+    }
+
+    /**
      * Get all active routes between two locations.
      *
      * @param Location $source

@@ -58,12 +58,12 @@
 - [x] Task: Conductor - User Manual Verification 'Simulation Loop Integration' (Protocol in workflow.md)
 
 ## Phase 5: UI Integration ("The No-Map Dashboard")
-- [ ] Task: Update Dashboard Logic
-    - [ ] Expose "Logistics Health" metric (percentage of active routes vs total) via Inertia props.
-    - [ ] Update `StatWidget` or create `LogisticsStatusWidget` to display this metric.
-- [ ] Task: Enhance Transfer Form Logic
-    - [ ] Update `Inventory/Restock.tsx` (or equivalent) to query `LogisticsService` via a new Controller endpoint (`/api/logistics/routes`).
-    - [ ] Display "Unable to Restock" error if no valid routes exist (Reachability == False).
-    - [ ] Implement "Alternative Route Suggestion":
-        - [ ] If primary route blocked, display valid alternatives (e.g., "Air Drop") with their high cost highlighted.
-- [ ] Task: Conductor - User Manual Verification 'UI Integration' (Protocol in workflow.md)
+- [x] Task: Update Dashboard Logic
+    - [x] Expose "Logistics Health" metric (percentage of active routes vs total) via Inertia props.
+    - [x] Update `StatWidget` or create `LogisticsStatusWidget` to display this metric.
+- [x] Task: Enhance Transfer Form Logic
+    - [x] Update `Inventory/Restock.tsx` (or equivalent) to query `LogisticsService` via a new Controller endpoint (`/api/logistics/routes`).
+    - [x] Display "Unable to Restock" error if no valid routes exist (Reachability == False).
+    - [x] Implement "Alternative Route Suggestion":
+        - [x] If primary route blocked, display valid alternatives (e.g., "Air Drop") with their high cost highlighted.
+- [x] Task: Conductor - User Manual Verification 'UI Integration' (Protocol in workflow.md)

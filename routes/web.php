@@ -29,6 +29,10 @@ Route::middleware(['auth', 'verified'])->prefix('game')->name('game.')->group(fu
     Route::post('/transfers', [GameController::class, 'createTransfer'])->name('transfers.store');
     Route::put('/policy', [GameController::class, 'updatePolicy'])->name('policy.update');
     Route::post('/alerts/{alert}/read', [GameController::class, 'markAlertRead'])->name('alerts.read');
+
+    // Logistics API
+    Route::get('/logistics/path', [\App\Http\Controllers\LogisticsController::class, 'getPath'])->name('logistics.path');
+    Route::get('/logistics/health', [\App\Http\Controllers\LogisticsController::class, 'health'])->name('logistics.health');
 });
 
 // Legacy dashboard redirect

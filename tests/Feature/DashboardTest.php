@@ -15,3 +15,17 @@ test('authenticated users can visit the dashboard', function () {
         ->get(route('game.dashboard'))
         ->assertOk();
 });
+
+test('dashboard includes logistics health KPI', function () {
+    $this->actingAs($user = User::factory()->create())
+        ->withoutMiddleware(\Illuminate\Cookie\Middleware\EncryptCookies::class)
+        ->withCookie('game_acknowledged', 'true')
+        ->get(route('game.dashboard'))
+        ->assertInertia(fn ($page) => $page
+            ->has('kpis', 5)
+            ->has('kpis.4', fn ($kpi) => $kpi
+                ->where('label', 'Logistics Health')
+                ->etc()
+            )
+        );
+});
