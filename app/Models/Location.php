@@ -23,4 +23,14 @@ class Location extends Model
     {
         return $this->hasMany(Inventory::class);
     }
+
+    public function outgoingRoutes(): HasMany
+    {
+        return $this->hasMany(Route::class, 'source_id');
+    }
+
+    public function incomingRoutes(): HasMany
+    {
+        return $this->hasMany(Route::class, 'target_id');
+    }
 }

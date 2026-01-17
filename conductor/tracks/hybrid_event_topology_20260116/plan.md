@@ -5,11 +5,11 @@
     - [ ] Create migration for `routes` table (source_id, target_id, transport_mode, weights, is_active).
     - [ ] Create `Route` Eloquent model with relationships to `Location`.
     - [ ] Create Factory for `Route` to support testing.
-- [~] Task: Implement `GraphSeeder`
+- [x] Task: Implement `GraphSeeder`
     - [ ] Create `GraphSeeder` to generate a Hub-and-Spoke topology.
     - [ ] Ensure `Stores` connect to `Warehouses`, and `Warehouses` to `Vendors`.
     - [ ] Add lateral connections (Store-to-Store) and "Air Routes" for redundancy.
-- [ ] Task: Implement `LogisticsService` (Basic)
+- [~] Task: Implement `LogisticsService` (Basic)
     - [ ] Create `LogisticsService` class.
     - [ ] Implement `getValidRoutes($source, $target)` to return active edges.
     - [ ] Implement basic cost calculation methods.
