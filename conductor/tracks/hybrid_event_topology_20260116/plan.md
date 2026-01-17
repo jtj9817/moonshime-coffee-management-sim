@@ -45,17 +45,17 @@
     - [x] Test Dijkstra finds the cheapest valid path, avoiding blocked routes.
 - [x] Task: Conductor - User Manual Verification 'Advanced Algorithms' (Protocol in workflow.md)
 
-## Phase 4: Simulation Loop Integration
-- [~] Task: Implement Alert Generation Logic
-    - [ ] Create `GenerateIsolationAlert` listener or service method.
-    - [ ] Logic: If `Reachability == false` and `Stock < Low`, create `Alert` linked to the active `SpikeEvent`.
-- [ ] Task: Update `SimulationService` Tick
-    - [ ] Integrate "Event Tick" (Update Spikes).
-    - [ ] Integrate "Physics Tick" (Move Transfers).
-    - [ ] Integrate "Analysis Tick" (Run BFS and Generate Alerts).
-- [ ] Task: TDD - Verify Simulation Loop
-    - [ ] Simulate a tick where a Blizzard blocks supply, and verify an Alert is spawned for a low-stock store.
-- [ ] Task: Conductor - User Manual Verification 'Simulation Loop Integration' (Protocol in workflow.md)
+## Phase 4: Simulation Loop Integration [checkpoint: b184d77]
+- [x] Task: Implement Alert Generation Logic
+    - [x] Create `GenerateIsolationAlert` listener or service method.
+    - [x] Logic: If `Reachability == false` and `Stock < Low`, create `Alert` linked to the active `SpikeEvent`.
+- [x] Task: Update `SimulationService` Tick
+    - [x] Integrate "Event Tick" (Update Spikes).
+    - [x] Integrate "Physics Tick" (Move Transfers).
+    - [x] Integrate "Analysis Tick" (Run BFS and Generate Alerts).
+- [x] Task: TDD - Verify Simulation Loop
+    - [x] Simulate a tick where a Blizzard blocks supply, and verify an Alert is spawned for a low-stock store.
+- [x] Task: Conductor - User Manual Verification 'Simulation Loop Integration' (Protocol in workflow.md)
 
 ## Phase 5: UI Integration ("The No-Map Dashboard")
 - [ ] Task: Update Dashboard Logic
