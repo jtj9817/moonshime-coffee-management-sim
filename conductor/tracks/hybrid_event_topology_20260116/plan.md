@@ -25,10 +25,10 @@
 - [x] Task: Implement `SpikeEventFactory` Updates
     - [ ] Update factory to generate "Graph-Targeting" events (e.g., Blizzard targeting Road routes).
     - [ ] Implement logic to select target `Routes` based on `weather_vulnerability`.
-- [~] Task: Implement Event Listeners for Route State
+- [x] Task: Implement Event Listeners for Route State
     - [ ] Create `SpikeStarted` listener: Sets `Route->is_active = false` or increases weight.
     - [ ] Create `SpikeEnded` listener: Restores `Route->is_active = true` and weights.
-- [ ] Task: TDD - Verify Event Propagation
+- [~] Task: TDD - Verify Event Propagation
     - [ ] Write tests confirming a "Blizzard" event disables vulnerable routes.
     - [ ] Verify routes are restored when the event expires.
 - [ ] Task: Conductor - User Manual Verification 'Causal Graph & Event Propagation' (Protocol in workflow.md)
