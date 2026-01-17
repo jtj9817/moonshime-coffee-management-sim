@@ -18,7 +18,7 @@
     - [ ] Verify `LogisticsService` correctly filters inactive routes.
 - [x] Task: Conductor - User Manual Verification 'Physical Graph Foundation' (Protocol in workflow.md)
 
-## Phase 2: Causal Graph & Event Propagation
+## Phase 2: Causal Graph & Event Propagation [checkpoint: 2432a15]
 - [x] Task: Update `SpikeEvent` Model
     - [ ] Add `affected_route_id` (nullable) or polymorphic relation to `SpikeEvent`.
     - [ ] Add recursive relationship fields (`parent_id`, `type`) for DAG structure (Root/Symptom/Task).
@@ -29,9 +29,9 @@
     - [ ] Create `SpikeStarted` listener: Sets `Route->is_active = false` or increases weight.
     - [ ] Create `SpikeEnded` listener: Restores `Route->is_active = true` and weights.
 - [x] Task: TDD - Verify Event Propagation
-    - [x] Write tests confirming a "Blizzard" event disables vulnerable routes.
-    - [x] Verify routes are restored when the event expires.
-- [~] Task: Conductor - User Manual Verification 'Causal Graph & Event Propagation' (Protocol in workflow.md)
+    - [ ] Write tests confirming a "Blizzard" event disables vulnerable routes.
+    - [ ] Verify routes are restored when the event expires.
+- [x] Task: Conductor - User Manual Verification 'Causal Graph & Event Propagation' (Protocol in workflow.md)
 
 ## Phase 3: Advanced Algorithms (BFS & Dijkstra)
 - [ ] Task: Implement BFS Reachability in `LogisticsService`
