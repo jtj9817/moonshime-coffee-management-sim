@@ -20,15 +20,15 @@ This track focuses on resolving technical debt, architectural redundancies, and 
 
 ## 3. Technical Requirements
 
-### 3.1 Gameplay Loop Testing
-The system must be validated through a complete state-transition lifecycle to ensure the simulation engine behaves predictably:
-- **Sequence:** Initial State (Day 1) -> Decision-making State -> Stochastic States (Day 2+).
-- **Initial State (Day 1):** Verify that Day 1 is always a stable, deterministic initial state where no random events are active.
-- **Decision-Making State:** Verify that user actions (e.g., placing orders, defining policies) are correctly processed and persist into the next simulation tick.
-- **Stochastic States (Day 2+):** Using logic derived from `tests/Feature/ChaosEngineTest.php`, verify that the `SpikeEventFactory` activates at Day 2, introducing random disruptions that correctly modify the physical and causal graphs without corrupting the underlying state.
+### 3.1 Comprehensive Gameplay Loop Testing
+The system must be validated through a single, comprehensive state-transition lifecycle (Day 1 to Day 5) to ensure the simulation engine and gameplay mechanics behave predictably under player agency:
 
-### 3.2 Inventory Layer Gameplay Mechanics
-The simulation must accurately process the following gameplay mechanics across multi-day cycles:
+#### 3.1.1 Core Simulation Flow
+- **Initial State (Day 1):** Verify that Day 1 is always a stable, deterministic state with no random events.
+- **Decision-Making:** Verify that user actions (e.g., placing orders, defining policies) are correctly processed and persist into the next simulation tick.
+- **Disruption & Recovery:** Verify the activation of spikes at Day 2+, their persistence, and the automatic restoration of the system (e.g., unblocking routes) upon expiration.
+
+#### 3.1.2 Inventory & Economic Mechanics
 - **Inventory & Delivery:** 
     - Order delivery must increment inventory at target locations atomically.
     - Multi-product orders must update corresponding inventory entries.
@@ -39,15 +39,12 @@ The simulation must accurately process the following gameplay mechanics across m
 - **Economic Layer (Storage Costs):**
     - Daily storage costs (based on product-specific `storage_cost` and quantity) must be deducted from `GameState` cash during each simulation tick.
     - Costs must scale correctly across multiple products and locations.
-    - System must handle zero-cost products and prevent/handle negative cash balances according to design.
-- **Player Agency (Cancellations):**
-    - Orders in valid states (e.g., Pending/Shipped) can be cancelled, triggering cash refunds and preventing inventory updates.
+- **Player Agency & Constraints:**
+    - Orders in valid states (e.g., Pending/Shipped) can be cancelled, triggering cash refunds.
     - Delivered orders must block cancellation attempts.
-- **Logistics Constraints:**
-    - Route `capacity` must limit the total volume of simultaneous shipments.
-    - Route `max_daily_shipments` (throughput) must limit the number of successful shipments per day, queuing or rejecting overflows.
+    - Route `capacity` and `max_daily_shipments` must enforce physical throughput limits.
 
-### 3.3 Advanced Stress Testing
+### 3.2 Advanced Stress Testing
 - **Scenario A (The Cascade):** A single Root Spike (e.g., Blizzard) must trigger 10+ Symptom Alerts (Isolation) across the graph. Verify that system recovery (Route restoration and Alert resolution) occurs automatically upon spike expiration.
 - **Scenario B (The Decision Stressor):** Simulate a state where multiple concurrent spikes (Price + Demand + Route Breakdown) force complex pathfinding recalculations. Verify that "Decision-Making" state transitions accurately reflect on the server side.
 - **Scenario C (The Recursive Resolution):** Verify the integrity of multi-level causal chains (Root -> Symptom -> Task). Trigger a Root Event that spawns a Symptom Alert and a dependent Task. Verify that resolving the Root Event correctly propagates state changes down the entire chain, while individual Task resolution does not prematurely terminate the parent Spike.

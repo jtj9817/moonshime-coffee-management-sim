@@ -32,22 +32,19 @@
 - [x] Task: Conductor - User Manual Verification 'Archive Synchronization & Documentation' (Protocol in workflow.md)
 
 ## Phase 4: Gameplay Loop Verification [checkpoint: d5912b9]
-- [x] Task: Implement Gameplay Loop Feature Test
+- [~] Task: Implement Comprehensive Gameplay Loop Feature Test
     - [x] Write a test for the full sequence: Initial State (Day 1) -> Decision-making -> Stochastic States (Day 2+).
     - [x] Verify that Day 1 remains stable and deterministic with no random events.
-    - [x] Verify full 5-day simulation cycle:
-        - [x] Day 2: Spike activation and initial stochastic changes.
-        - [x] Day 3-4: Decision persistence and state progression.
-        - [x] Day 5: Spike expiration and state restoration/cleanup.
+    - [x] Verify full 5-day simulation cycle (Activation, Persistence, Expiration).
     - [x] Verify that user decisions (Policies/Orders) persist correctly across simulation ticks.
     - [x] Simulate player agency (placing alternative orders during disruptions) and economic impact (cash deduction).
-- [~] Task: Implement Inventory & Economic Layer Gameplay Tests
-    - [ ] Task: Inventory Changes on Order Delivery (Multi-product, missing records, atomic updates)
-    - [ ] Task: Emergency Order Delivery Timing (Route-based transit days, simultaneous deliveries)
-    - [ ] Task: Daily Storage Cost Application (Scaling, zero-cost, negative cash handling)
-    - [ ] Task: Multiple Product Handling (Complex order/storage cost scenarios)
-    - [ ] Task: Order Cancellation and Inventory Rollback (Refunds, blocking delivered cancellations)
-    - [ ] Task: Route Capacity and Throughput Limits (Capacity exhaustion, max daily shipments)
+    - [~] Integrate Advanced Inventory & Economic Layer Scenarios:
+        - [ ] Inventory Changes on Order Delivery (Multi-product, missing records, atomic updates)
+        - [ ] Emergency Order Delivery Timing (Route-based transit days, simultaneous deliveries)
+        - [ ] Daily Storage Cost Application (Scaling, zero-cost, negative cash handling)
+        - [ ] Multiple Product Handling (Complex order/storage cost scenarios)
+        - [ ] Order Cancellation and Inventory Rollback (Refunds, blocking delivered cancellations)
+        - [ ] Route Capacity and Throughput Limits (Capacity exhaustion, max daily shipments)
 - [ ] Task: Conductor - User Manual Verification 'Gameplay Loop Verification' (Protocol in workflow.md)
 
 ## Phase 5: Advanced Stress Testing
