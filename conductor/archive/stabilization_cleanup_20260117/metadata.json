@@ -1,0 +1,8 @@
+{
+  "track_id": "stabilization_cleanup_20260117",
+  "type": "chore",
+  "status": "new",
+  "created_at": "2026-01-17T12:55:00Z",
+  "updated_at": "2026-01-17T12:55:00Z",
+  "description": "Logistics Stabilization & Cleanup based on the precursor plan in docs/logistics-integration-post-completion-cleanup.md"
+}

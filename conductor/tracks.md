@@ -6,12 +6,13 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 # Active Tracks
 
-- [x] **Track: Logistics Stabilization & Cleanup**
-*Link: [./tracks/stabilization_cleanup_20260117/](./tracks/stabilization_cleanup_20260117/)*
-
 ---
 
 # Archived Tracks
+
+- [x] **Track: Logistics Stabilization & Cleanup**
+    - **ID:** `stabilization_cleanup_20260117`
+    - **Link:** [./archive/stabilization_cleanup_20260117/](./archive/stabilization_cleanup_20260117/)
 
 - [x] **Track: Implement 'hybrid-event-topology' plan: Physical Graph (Logistics) and Causal Graph (DAG).**
     - **ID:** `hybrid_event_topology_20260116`
