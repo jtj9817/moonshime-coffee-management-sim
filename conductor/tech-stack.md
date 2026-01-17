@@ -18,6 +18,7 @@
 ## Styling & UI
 - **CSS Framework:** Tailwind CSS 4.0
 - **Build Tool:** Vite
+- **Icons:** Lucide React
 
 ## Additional Libraries (Inferred)
 - **Real-time:** Laravel Reverb (planned)
