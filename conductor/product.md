@@ -16,6 +16,7 @@ A high-stakes, professional tycoon-style game where players build a coffee empir
 
 ## Core Features
 - **Interactive Command Center:** A comprehensive real-time dashboard for monitoring financial health, inventory trends, and active simulation events.
+- **Hybrid Event-Topology System:** A graph-based logistics engine that simulates physical routes and causal event chains, requiring players to navigate complex supply disruptions.
 - **Chaos Engine (Spike Events):** A dynamic event system that introduces random disruptions—such as heatwaves or delivery strikes—requiring rapid tactical adaptation.
 - **Mission & Progression System:** Structured challenges and contracts that unlock new locations, advanced upgrades, and higher-tier logistics capabilities.
 
