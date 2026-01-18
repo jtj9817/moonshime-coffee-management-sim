@@ -1,11 +1,7 @@
-import { useForm } from '@inertiajs/react';
 import {
     AlertTriangle,
     Bell,
-    Calendar,
-    DollarSign,
     MapPin,
-    Play,
     Star,
     TrendingUp,
     Zap,
@@ -26,6 +22,9 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { useGame } from '@/contexts/game-context';
+import { AdvanceDayButton } from './advance-day-button';
+import { CashDisplay } from './cash-display';
+import { DayCounter } from './day-counter';
 
 export function GameHeader() {
     const {
@@ -37,36 +36,15 @@ export function GameHeader() {
         setCurrentLocationId,
     } = useGame();
 
-    const { post, processing } = useForm({});
-
-    const handleAdvanceDay = () => {
-        post('/game/advance-day', {
-            preserveState: true,
-            preserveScroll: true,
-        });
-    };
-
     const currentLocation =
         currentLocationId === 'all'
             ? null
             : locations.find((l) => l.id === currentLocationId);
 
-    const getCashColor = (cash: number) => {
-        if (cash > 500000) return 'text-emerald-600 dark:text-emerald-400';
-        if (cash > 100000) return 'text-amber-600 dark:text-amber-400';
-        return 'text-rose-600 dark:text-rose-400';
-    };
-
     const getReputationColor = (reputation: number) => {
         if (reputation >= 80) return 'bg-emerald-500';
         if (reputation >= 50) return 'bg-amber-500';
         return 'bg-rose-500';
-    };
-
-    const formatCash = (cash: number) => {
-        if (cash >= 1000000) return `$${(cash / 1000000).toFixed(2)}M`;
-        if (cash >= 1000) return `$${(cash / 1000).toFixed(1)}K`;
-        return `$${cash.toFixed(2)}`;
     };
 
     return (
@@ -109,22 +87,7 @@ export function GameHeader() {
                 {/* Center: Game Stats */}
                 <div className="flex items-center gap-6">
                     {/* Cash */}
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <div className="flex items-center gap-2">
-                                <DollarSign className="h-4 w-4 text-stone-400" />
-                                <span className={`font-mono font-bold ${getCashColor(gameState.cash)}`}>
-                                    {formatCash(gameState.cash)}
-                                </span>
-                            </div>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            <p>Available Cash</p>
-                            <p className="text-xs text-stone-400">
-                                ${gameState.cash.toLocaleString()}
-                            </p>
-                        </TooltipContent>
-                    </Tooltip>
+                    <CashDisplay cash={gameState.cash} />
 
                     {/* XP & Level */}
                     <Tooltip>
@@ -225,23 +188,10 @@ export function GameHeader() {
                     </Tooltip>
 
                     {/* Day Counter */}
-                    <div className="flex items-center gap-2 rounded-lg border border-stone-200 bg-white px-3 py-1.5 dark:border-stone-700 dark:bg-stone-800">
-                        <Calendar className="h-4 w-4 text-stone-400" />
-                        <span className="font-mono font-bold text-stone-900 dark:text-white">
-                            Day {gameState.day}
-                        </span>
-                    </div>
+                    <DayCounter day={gameState.day} />
 
                     {/* Advance Day Button */}
-                    <Button
-                        onClick={handleAdvanceDay}
-                        disabled={processing}
-                        size="sm"
-                        className="gap-2 bg-amber-600 text-white hover:bg-amber-700"
-                    >
-                        <Play className="h-4 w-4" />
-                        {processing ? 'Processing...' : 'Next Day'}
-                    </Button>
+                    <AdvanceDayButton />
                 </div>
             </div>
         </TooltipProvider>

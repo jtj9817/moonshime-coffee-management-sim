@@ -1,13 +1,13 @@
 # Implementation Plan: Dashboard UX & Test Validation Gaps
 
 ## Phase 1: Global State & Layout Foundations
-- [ ] Task: Add Day Counter and Cash Display to GameLayout
-    - [ ] Create `DayCounter` component
-    - [ ] Create `CashDisplay` component with animation support
-    - [ ] Integrate components into `resources/js/layouts/game-layout.tsx`
-- [ ] Task: Implement Advance Day UI trigger
-    - [ ] Add `AdvanceDayButton` to header or dashboard
-    - [ ] Connect button to `advanceDay()` in `GameContext`
+- [x] Task: Add Day Counter and Cash Display to GameLayout
+    - [x] Create `DayCounter` component
+    - [x] Create `CashDisplay` component with animation support
+    - [x] Integrate components into `resources/js/layouts/game-layout.tsx`
+- [x] Task: Implement Advance Day UI trigger
+    - [x] Add `AdvanceDayButton` to header or dashboard
+    - [x] Connect button to `advanceDay()` in `GameContext`
 - [ ] Task: Conductor - User Manual Verification 'Global State & Layout Foundations' (Protocol in workflow.md)
 
 ## Phase 2: Backend API Enhancements
