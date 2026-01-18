@@ -18,6 +18,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LogisticsStatusWidget } from '@/components/game/LogisticsStatusWidget';
+import { WelcomeBanner } from '@/components/game/welcome-banner';
 import { useGame } from '@/contexts/game-context';
 import GameLayout from '@/layouts/game-layout';
 import { AlertModel, DashboardKPI, QuestModel, type BreadcrumbItem } from '@/types/index';
@@ -147,6 +148,16 @@ function LocationCard({ location, alerts }: { location: { id: string; name: stri
                         <CheckCircle2 size={12} /> Systems Normal
                     </div>
                 )}
+                
+                {/* Empty State Call to Action */}
+                {critical > 0 && locationAlerts.some(a => a.message.toLowerCase().includes('stock')) && (
+                    <div className="mt-2 text-center">
+                        <span className="text-[10px] font-bold text-rose-600 dark:text-rose-400 animate-pulse">
+                            CRITICAL SHORTAGE - ORDER NOW
+                        </span>
+                    </div>
+                )}
+
                 {locationAlerts.length > 2 && (
                     <div className="text-center text-[10px] font-bold text-stone-400">
                         +{locationAlerts.length - 2} more issues
@@ -165,6 +176,11 @@ export default function Dashboard({ alerts, kpis, quests, logistics_health, acti
             <Head title="Mission Control" />
 
             <div className="flex flex-col gap-6 p-6">
+                {/* Day 1 Welcome Banner */}
+                {gameState.day === 1 && (
+                    <WelcomeBanner />
+                )}
+
                 {/* Active Spike Alert */}
                 {currentSpike && (
                     <div className="flex items-center justify-between rounded-xl border-2 border-rose-500 bg-rose-50 p-4 dark:border-rose-600 dark:bg-rose-950">

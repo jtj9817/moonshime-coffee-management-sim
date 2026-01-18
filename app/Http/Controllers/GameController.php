@@ -8,14 +8,20 @@ use App\Models\Location;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\SpikeEvent;
+use App\Models\OrderItem;
+use App\Models\Route;
 use App\States\Order\Cancelled;
 use App\States\Order\Delivered;
+use App\States\Order\Draft;
+use App\States\Order\Pending;
 use App\States\Order\Shipped;
 use App\Models\Transfer;
 use App\Models\Vendor;
+use App\Events\OrderPlaced;
 use App\Services\SimulationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -203,16 +209,43 @@ class GameController extends Controller
     {
         $validated = $request->validate([
             'vendor_id' => 'required|exists:vendors,id',
+            'location_id' => 'required|exists:locations,id',
+            'route_id' => 'required|exists:routes,id',
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.unit_price' => 'required|numeric|min:0',
         ]);
 
-        // Create order logic would go here
-        // For now, we'll just return back
+        return DB::transaction(function () use ($validated) {
+            $totalCost = collect($validated['items'])->sum(fn($item) => $item['quantity'] * $item['unit_price']);
+            
+            $route = Route::findOrFail($validated['route_id']);
+            $totalCost += $route->cost;
 
-        return back()->with('success', 'Order placed successfully');
+            $order = Order::create([
+                'user_id' => auth()->id(),
+                'vendor_id' => $validated['vendor_id'],
+                'location_id' => $validated['location_id'],
+                'route_id' => $validated['route_id'],
+                'total_cost' => $totalCost,
+                'status' => Draft::class,
+            ]);
+
+            foreach ($validated['items'] as $item) {
+                $order->items()->create([
+                    'product_id' => $item['product_id'],
+                    'quantity' => $item['quantity'],
+                    'cost_per_unit' => $item['unit_price'],
+                ]);
+            }
+
+            $order->status->transitionTo(Pending::class);
+            
+            event(new OrderPlaced($order));
+
+            return back()->with('success', 'Order placed successfully');
+        });
     }
 
     /**

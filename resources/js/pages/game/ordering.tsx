@@ -1,5 +1,6 @@
 import { Head } from '@inertiajs/react';
-import { Clock, Package, Plus, ShoppingCart, Truck } from 'lucide-react';
+import { Clock, Package, Plus, ShoppingCart, Truck, XCircle } from 'lucide-react';
+import { useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,6 +13,8 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { NewOrderDialog } from '@/components/game/new-order-dialog';
+import { CancelOrderDialog } from '@/components/game/cancel-order-dialog';
 import GameLayout from '@/layouts/game-layout';
 import { OrderModel, type BreadcrumbItem } from '@/types';
 
@@ -29,15 +32,15 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 function getStatusBadge(status: string) {
-    switch (status) {
+    switch (status.toLowerCase()) {
         case 'draft':
             return <Badge variant="outline">Draft</Badge>;
         case 'pending':
             return <Badge variant="secondary">Pending</Badge>;
         case 'shipped':
-            return <Badge className="bg-blue-500">Shipped</Badge>;
+            return <Badge className="bg-blue-500 text-white">Shipped</Badge>;
         case 'delivered':
-            return <Badge className="bg-emerald-500">Delivered</Badge>;
+            return <Badge className="bg-emerald-500 text-white">Delivered</Badge>;
         case 'cancelled':
             return <Badge variant="destructive">Cancelled</Badge>;
         default:
@@ -46,6 +49,13 @@ function getStatusBadge(status: string) {
 }
 
 export default function Ordering({ orders, vendorProducts }: OrderingProps) {
+    const [isNewOrderDialogOpen, setIsNewOrderDialogOpen] = useState(false);
+    const [selectedOrderToCancel, setSelectedOrderToCancel] = useState<OrderModel | null>(null);
+
+    const handleCancelOrder = (order: OrderModel) => {
+        setSelectedOrderToCancel(order);
+    };
+
     return (
         <GameLayout breadcrumbs={breadcrumbs}>
             <Head title="Procurement" />
@@ -61,7 +71,10 @@ export default function Ordering({ orders, vendorProducts }: OrderingProps) {
                             Manage supplier orders and deliveries
                         </p>
                     </div>
-                    <Button className="gap-2 bg-amber-600 hover:bg-amber-700">
+                    <Button 
+                        onClick={() => setIsNewOrderDialogOpen(true)}
+                        className="gap-2 bg-amber-600 hover:bg-amber-700"
+                    >
                         <Plus className="h-4 w-4" />
                         New Order
                     </Button>
@@ -78,7 +91,7 @@ export default function Ordering({ orders, vendorProducts }: OrderingProps) {
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">
-                                {orders.filter((o) => o.status === 'pending').length}
+                                {orders.filter((o) => o.status.toLowerCase().includes('pending')).length}
                             </div>
                         </CardContent>
                     </Card>
@@ -91,7 +104,7 @@ export default function Ordering({ orders, vendorProducts }: OrderingProps) {
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">
-                                {orders.filter((o) => o.status === 'shipped').length}
+                                {orders.filter((o) => o.status.toLowerCase().includes('shipped')).length}
                             </div>
                         </CardContent>
                     </Card>
@@ -109,7 +122,7 @@ export default function Ordering({ orders, vendorProducts }: OrderingProps) {
                 </div>
 
                 {/* Orders Table */}
-                <div className="rounded-xl border border-stone-200 bg-white dark:border-stone-700 dark:bg-stone-800">
+                <div className="rounded-xl border border-stone-200 bg-white dark:border-stone-700 dark:bg-stone-800 overflow-hidden">
                     <div className="border-b border-stone-200 p-4 dark:border-stone-700">
                         <h2 className="font-semibold text-stone-900 dark:text-white">
                             Recent Orders
@@ -124,36 +137,55 @@ export default function Ordering({ orders, vendorProducts }: OrderingProps) {
                                 <TableHead className="text-right">Total</TableHead>
                                 <TableHead>Status</TableHead>
                                 <TableHead>Delivery</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {orders.map((order) => (
-                                <TableRow key={order.id}>
-                                    <TableCell className="font-mono text-sm">
-                                        {order.id.substring(0, 8)}
-                                    </TableCell>
-                                    <TableCell>{order.vendor?.name ?? 'Unknown'}</TableCell>
-                                    <TableCell>
-                                        <div className="flex items-center gap-1">
-                                            <Package className="h-4 w-4 text-stone-400" />
-                                            {order.items?.length ?? 0} items
-                                        </div>
-                                    </TableCell>
-                                    <TableCell className="text-right font-mono">
-                                        ${order.total_cost.toLocaleString()}
-                                    </TableCell>
-                                    <TableCell>{getStatusBadge(order.status)}</TableCell>
-                                    <TableCell>
-                                        {order.delivery_day
-                                            ? `Day ${order.delivery_day}`
-                                            : 'Pending'}
-                                    </TableCell>
-                                </TableRow>
-                            ))}
+                            {orders.map((order) => {
+                                const status = order.status.toLowerCase();
+                                const isCancellable = status.includes('shipped') || status.includes('pending') || status.includes('draft');
+                                
+                                return (
+                                    <TableRow key={order.id}>
+                                        <TableCell className="font-mono text-sm">
+                                            {order.id.substring(0, 8)}
+                                        </TableCell>
+                                        <TableCell>{order.vendor?.name ?? 'Unknown'}</TableCell>
+                                        <TableCell>
+                                            <div className="flex items-center gap-1">
+                                                <Package className="h-4 w-4 text-stone-400" />
+                                                {order.items?.length ?? 0} items
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="text-right font-mono">
+                                            ${order.total_cost.toLocaleString()}
+                                        </TableCell>
+                                        <TableCell>{getStatusBadge(order.status)}</TableCell>
+                                        <TableCell>
+                                            {order.delivery_day
+                                                ? `Day ${order.delivery_day}`
+                                                : 'Pending'}
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            {isCancellable && (
+                                                <Button 
+                                                    variant="ghost" 
+                                                    size="sm"
+                                                    onClick={() => handleCancelOrder(order)}
+                                                    className="h-8 gap-1 text-rose-600 hover:bg-rose-50 hover:text-rose-700 dark:text-rose-400 dark:hover:bg-rose-900/20"
+                                                >
+                                                    <XCircle className="h-3.5 w-3.5" />
+                                                    Cancel
+                                                </Button>
+                                            )}
+                                        </TableCell>
+                                    </TableRow>
+                                );
+                            })}
                             {orders.length === 0 && (
                                 <TableRow>
                                     <TableCell
-                                        colSpan={6}
+                                        colSpan={7}
                                         className="py-12 text-center text-stone-500"
                                     >
                                         No orders yet
@@ -164,6 +196,18 @@ export default function Ordering({ orders, vendorProducts }: OrderingProps) {
                     </Table>
                 </div>
             </div>
+
+            <NewOrderDialog 
+                open={isNewOrderDialogOpen}
+                onOpenChange={setIsNewOrderDialogOpen}
+                vendorProducts={vendorProducts}
+            />
+
+            <CancelOrderDialog 
+                order={selectedOrderToCancel}
+                open={!!selectedOrderToCancel}
+                onOpenChange={(open) => !open && setSelectedOrderToCancel(null)}
+            />
         </GameLayout>
     );
 }

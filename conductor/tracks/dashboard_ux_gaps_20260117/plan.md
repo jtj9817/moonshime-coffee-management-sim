@@ -23,30 +23,30 @@
 - [x] Task: Conductor - User Manual Verification 'Backend API Enhancements' (Protocol in workflow.md)
 
 ## Phase 3: Route Selection & Capacity UI
-- [ ] Task: Create RoutePicker Component
-    - [ ] Design `RoutePicker` with transport mode, cost, and transit info
-    - [ ] Implement visual indicators for Premium and Blocked routes
-    - [ ] Integrate into `resources/js/pages/game/ordering.tsx`
-- [ ] Task: Implement Real-time Capacity Validation
-    - [ ] Create `RouteCapacityMeter` component (Green/Amber/Red)
-    - [ ] Add real-time calculation in `ordering.tsx`
-    - [ ] Disable submit button and show specific error on excess
+- [x] Task: Create RoutePicker Component
+    - [x] Design `RoutePicker` with transport mode, cost, and transit info
+    - [x] Implement visual indicators for Premium and Blocked routes
+    - [x] Integrate into `resources/js/pages/game/ordering.tsx`
+- [x] Task: Implement Real-time Capacity Validation
+    - [x] Create `RouteCapacityMeter` component (Green/Amber/Red)
+    - [x] Add real-time calculation in `ordering.tsx`
+    - [x] Disable submit button and show specific error on excess
 - [ ] Task: Conductor - User Manual Verification 'Route Selection & Capacity UI' (Protocol in workflow.md)
 
 ## Phase 4: Order Cancellation UI
-- [ ] Task: Add Cancellation controls to Ordering Page
-    - [ ] Add "Cancel & Refund" button to orders table
-    - [ ] Implement state check (visible only for Shipped orders)
-- [ ] Task: Implement Cancellation Confirmation Dialog
-    - [ ] Create dialog showing refund amount and warnings
-    - [ ] Hook up to `cancelOrder` API call
+- [x] Task: Add Cancellation controls to Ordering Page
+    - [x] Add "Cancel & Refund" button to orders table
+    - [x] Implement state check (visible only for Shipped orders)
+- [x] Task: Implement Cancellation Confirmation Dialog
+    - [x] Create dialog showing refund amount and warnings
+    - [x] Hook up to `cancelOrder` API call
 - [ ] Task: Conductor - User Manual Verification 'Order Cancellation UI' (Protocol in workflow.md)
 
 ## Phase 5: Day One Onboarding & Polish
-- [ ] Task: Implement Day 1 Welcome Banner
-    - [ ] Create `WelcomeBanner` component
-    - [ ] Add conditional rendering in `dashboard.tsx` for `day === 1`
-- [ ] Task: Improve Empty State Messaging
-    - [ ] Update `LocationCard` to show critical warnings when inventory is 0
-    - [ ] Add "Place First Order" call-to-action
-- [ ] Task: Conductor - User Manual Verification 'Day One Onboarding & Polish' (Protocol in workflow.md)
+- [x] Task: Implement Day 1 Welcome Banner
+    - [x] Create `WelcomeBanner` component
+    - [x] Add conditional rendering in `dashboard.tsx` for `day === 1`
+- [x] Task: Improve Empty State Messaging
+    - [x] Update `LocationCard` to show critical warnings when inventory is 0
+    - [x] Add "Place First Order" call-to-action
+- [x] Task: Conductor - User Manual Verification 'Day One Onboarding & Polish' (Protocol in workflow.md)

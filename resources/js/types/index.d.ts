@@ -88,6 +88,20 @@ export interface SpikeEventModel {
     created_at: string;
 }
 
+export interface RouteModel {
+    id: number;
+    source_id: string;
+    target_id: string;
+    transport_mode: string;
+    cost: number;
+    transit_days: number;
+    capacity: number;
+    is_active: boolean;
+    weather_vulnerability: boolean;
+    source?: LocationModel;
+    target?: LocationModel;
+}
+
 export interface GameShared {
     state: GameStateShared;
     locations: LocationModel[];
