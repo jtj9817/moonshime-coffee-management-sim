@@ -1,4 +1,4 @@
-# Implementation Plan: Dashboard UX & Test Validation Gaps
+# Implementation Plan: Dashboard UX & Test Validation Gaps [checkpoint: 35585f0]
 
 ## Phase 1: Global State & Layout Foundations [checkpoint: 147a777]
 - [x] Task: Add Day Counter and Cash Display to GameLayout
