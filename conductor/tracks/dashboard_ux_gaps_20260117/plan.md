@@ -11,16 +11,16 @@
 - [ ] Task: Conductor - User Manual Verification 'Global State & Layout Foundations' (Protocol in workflow.md)
 
 ## Phase 2: Backend API Enhancements
-- [ ] Task: Implement Route Retrieval API
-    - [ ] Write tests for `GET /game/logistics/routes`
-    - [ ] Implement endpoint in `app/Http/Controllers/GameController.php` (or dedicated Logistics controller)
-    - [ ] Ensure support for `source_id`/`target_id` filtering
-- [ ] Task: Implement Order Cancellation API
-    - [ ] Write tests for `POST /game/orders/{id}/cancel`
-    - [ ] Implement cancellation logic in `OrderController`
-    - [ ] Add state machine validation (Shipped only, not Delivered)
-    - [ ] Add atomic cash refund logic
-- [ ] Task: Conductor - User Manual Verification 'Backend API Enhancements' (Protocol in workflow.md)
+- [x] Task: Implement Route Retrieval API
+    - [x] Write tests for `GET /game/logistics/routes`
+    - [x] Implement endpoint in `app/Http/Controllers/GameController.php` (or dedicated Logistics controller)
+    - [x] Ensure support for `source_id`/`target_id` filtering
+- [x] Task: Implement Order Cancellation API
+    - [x] Write tests for `POST /game/orders/{id}/cancel`
+    - [x] Implement cancellation logic in `OrderController`
+    - [x] Add state machine validation (Shipped only, not Delivered)
+    - [x] Add atomic cash refund logic
+- [x] Task: Conductor - User Manual Verification 'Backend API Enhancements' (Protocol in workflow.md)
 
 ## Phase 3: Route Selection & Capacity UI
 - [ ] Task: Create RoutePicker Component

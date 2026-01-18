@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Location;
+use App\Models\Route;
 use App\Services\LogisticsService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -14,6 +15,36 @@ class LogisticsController extends Controller
     public function __construct(LogisticsService $logistics)
     {
         $this->logistics = $logistics;
+    }
+
+    /**
+     * Get all routes, optionally filtered by source or target.
+     */
+    public function getRoutes(Request $request): JsonResponse
+    {
+        $query = Route::with(['source', 'target']);
+
+        if ($request->has('source_id')) {
+            $query->where('source_id', $request->source_id);
+        }
+
+        if ($request->has('target_id')) {
+            $query->where('target_id', $request->target_id);
+        }
+
+        $routes = $query->get()->map(fn(Route $route) => [
+            'id' => $route->id,
+            'source_id' => $route->source_id,
+            'target_id' => $route->target_id,
+            'source' => $route->source,
+            'target' => $route->target,
+            'transport_mode' => $route->transport_mode,
+            'cost' => $route->cost,
+            'transit_days' => $route->transit_days,
+            'is_active' => $route->is_active,
+        ]);
+
+        return response()->json(['data' => $routes]);
     }
 
     /**

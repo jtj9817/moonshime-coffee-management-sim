@@ -8,9 +8,13 @@ use App\Models\Location;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\SpikeEvent;
+use App\States\Order\Cancelled;
+use App\States\Order\Delivered;
+use App\States\Order\Shipped;
 use App\Models\Transfer;
 use App\Models\Vendor;
 use App\Services\SimulationService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -243,6 +247,31 @@ class GameController extends Controller
         // For now, we'll just return back
 
         return back()->with('success', 'Policy updated successfully');
+    }
+
+    /**
+     * Cancel an existing order.
+     */
+    public function cancelOrder(Order $order): JsonResponse
+    {
+        if ($order->user_id !== auth()->id()) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        if ($order->status instanceof Delivered) {
+            return response()->json(['success' => false, 'message' => 'Cannot cancel delivered orders.'], 422);
+        }
+
+        if (!$order->status->canTransitionTo(Cancelled::class)) {
+            return response()->json(['success' => false, 'message' => 'Order cannot be cancelled in its current state.'], 422);
+        }
+
+        try {
+            $order->status->transitionTo(Cancelled::class);
+            return response()->json(['success' => true, 'message' => 'Order cancelled successfully.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to cancel order: ' . $e->getMessage()], 500);
+        }
     }
 
     /**

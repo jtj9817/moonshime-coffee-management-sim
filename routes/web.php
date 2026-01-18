@@ -26,11 +26,13 @@ Route::middleware(['auth', 'verified'])->prefix('game')->name('game.')->group(fu
     // Actions
     Route::post('/advance-day', [GameController::class, 'advanceDay'])->name('advance-day');
     Route::post('/orders', [GameController::class, 'placeOrder'])->name('orders.store');
+    Route::post('/orders/{order}/cancel', [GameController::class, 'cancelOrder'])->name('orders.cancel');
     Route::post('/transfers', [GameController::class, 'createTransfer'])->name('transfers.store');
     Route::put('/policy', [GameController::class, 'updatePolicy'])->name('policy.update');
     Route::post('/alerts/{alert}/read', [GameController::class, 'markAlertRead'])->name('alerts.read');
 
     // Logistics API
+    Route::get('/logistics/routes', [\App\Http\Controllers\LogisticsController::class, 'getRoutes'])->name('logistics.routes');
     Route::get('/logistics/path', [\App\Http\Controllers\LogisticsController::class, 'getPath'])->name('logistics.path');
     Route::get('/logistics/health', [\App\Http\Controllers\LogisticsController::class, 'health'])->name('logistics.health');
 });
