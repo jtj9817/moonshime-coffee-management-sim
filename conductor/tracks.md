@@ -8,12 +8,15 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Dashboard UX & Test Validation Gaps**
-*Link: [./tracks/dashboard_ux_gaps_20260117/](./tracks/dashboard_ux_gaps_20260117/)*
+*(No active tracks)*
 
 ---
 
 # Archived Tracks
+
+- [x] **Track: Dashboard UX & Test Validation Gaps**
+    - **ID:** `dashboard_ux_gaps_20260117`
+    - **Link:** [./archive/dashboard_ux_gaps_20260117/](./archive/dashboard_ux_gaps_20260117/)
 
 - [x] **Track: Logistics Stabilization & Cleanup**
     - **ID:** `stabilization_cleanup_20260117`
