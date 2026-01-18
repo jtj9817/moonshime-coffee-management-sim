@@ -16,6 +16,9 @@ uses(RefreshDatabase::class);
 
 test('simulation loop integrates event, physics and analysis ticks', function () {
     // 1. Setup Environment
+    $gameState = GameState::factory()->create(['day' => 1]);
+    $user = $gameState->user; // Get the user created by factory
+
     $warehouse = Location::factory()->create(['type' => 'warehouse']);
     $store = Location::factory()->create(['type' => 'store']);
     $product = Product::factory()->create();
@@ -28,7 +31,6 @@ test('simulation loop integrates event, physics and analysis ticks', function ()
         'is_active' => true,
     ]);
 
-    $gameState = GameState::factory()->create(['day' => 1]);
     $service = new SimulationService($gameState);
 
     // 2. Setup "Event Tick" data:
@@ -39,6 +41,7 @@ test('simulation loop integrates event, physics and analysis ticks', function ()
         'starts_at_day' => 2,
         'ends_at_day' => 4,
         'is_active' => false,
+        'user_id' => $user->id,
     ]);
 
     // 3. Setup "Physics Tick" data:
@@ -47,6 +50,7 @@ test('simulation loop integrates event, physics and analysis ticks', function ()
         'source_location_id' => $warehouse->id,
         'target_location_id' => $store->id,
         'delivery_day' => 2,
+        'user_id' => $user->id,
     ]);
     $transfer->status->transitionTo(InTransit::class);
 
@@ -56,6 +60,7 @@ test('simulation loop integrates event, physics and analysis ticks', function ()
         'location_id' => $store->id,
         'product_id' => $product->id,
         'quantity' => 5, // Low stock
+        'user_id' => $user->id,
     ]);
 
     // --- ACT: Advance to Day 2 ---

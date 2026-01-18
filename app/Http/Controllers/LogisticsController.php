@@ -52,6 +52,8 @@ class LogisticsController extends Controller
      */
     public function getPath(Request $request): JsonResponse
     {
+        $this->logistics->clearCache();
+
         $validated = $request->validate([
             'source_id' => 'required|exists:locations,id',
             'target_id' => 'required|exists:locations,id',

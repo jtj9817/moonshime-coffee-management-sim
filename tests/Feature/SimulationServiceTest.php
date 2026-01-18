@@ -54,6 +54,7 @@ test('it processes deliveries on time advancement', function () {
         'vendor_id' => $vendor->id,
         'status' => Shipped::class,
         'delivery_day' => 2,
+        'user_id' => $this->gameState->user_id,
     ]);
 
     $this->service->advanceTime(); // Day becomes 2
@@ -67,6 +68,7 @@ test('it triggers spike activation and future generation on time advancement', f
         'starts_at_day' => 2,
         'ends_at_day' => 4,
         'is_active' => false,
+        'user_id' => $this->gameState->user_id,
     ]);
 
     // 2. Mock SpikeEventFactory to verify future generation is called

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Order;
+use App\Models\Route;
 use App\Models\Transfer;
 use App\States\OrderState;
 use App\States\TransferState;
@@ -68,7 +69,12 @@ class StateMachinesTest extends TestCase
         $this->actingAs($user);
         \App\Models\GameState::factory()->create(['user_id' => $user->id, 'cash' => 10000]);
 
-        $order = Order::factory()->create(['total_cost' => 1000]);
+        $route = Route::factory()->create();
+        $order = Order::factory()->create([
+            'total_cost' => 1000,
+            'route_id' => $route->id,
+            'user_id' => $user->id
+        ]);
 
         $order->status->transitionTo(\App\States\Order\Pending::class);
         $this->assertInstanceOf(\App\States\Order\Pending::class, $order->status);

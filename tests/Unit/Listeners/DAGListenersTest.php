@@ -47,12 +47,14 @@ class DAGListenersTest extends TestCase
 
     public function test_update_inventory_listener_updates_stock_on_transfer()
     {
+        $user = User::factory()->create();
         $product = Product::factory()->create();
         $source = Location::factory()->create();
         $target = Location::factory()->create();
 
         // Source inventory
         Inventory::factory()->create([
+            'user_id' => $user->id,
             'location_id' => $source->id,
             'product_id' => $product->id,
             'quantity' => 100,
@@ -60,12 +62,14 @@ class DAGListenersTest extends TestCase
 
         // Target inventory
         $targetInventory = Inventory::factory()->create([
+            'user_id' => $user->id,
             'location_id' => $target->id,
             'product_id' => $product->id,
             'quantity' => 10,
         ]);
 
         $transfer = Transfer::factory()->create([
+            'user_id' => $user->id,
             'source_location_id' => $source->id,
             'target_location_id' => $target->id,
             'product_id' => $product->id,
@@ -108,6 +112,7 @@ class DAGListenersTest extends TestCase
         ]);
 
         $order = Order::factory()->create([
+            'user_id' => $user->id,
             'total_cost' => 2000,
         ]);
 
@@ -130,6 +135,7 @@ class DAGListenersTest extends TestCase
         ]);
 
         $order = Order::factory()->create([
+            'user_id' => $user->id,
             'total_cost' => 2000,
         ]);
 
