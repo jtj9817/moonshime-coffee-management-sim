@@ -6,6 +6,7 @@ use App\Events\OrderPlaced;
 use App\Events\SpikeOccurred;
 use App\Events\TimeAdvanced;
 use App\Events\TransferCompleted;
+use App\Models\GameState;
 use App\Models\Order;
 use App\Models\Transfer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -42,8 +43,10 @@ class EventClassesTest extends TestCase
 
     public function test_time_advanced_event_holds_day()
     {
-        $event = new TimeAdvanced(5);
+        $gameState = GameState::factory()->create(['day' => 5]);
+        $event = new TimeAdvanced(5, $gameState);
 
         $this->assertEquals(5, $event->day);
+        $this->assertSame($gameState, $event->gameState);
     }
 }

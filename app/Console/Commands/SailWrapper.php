@@ -30,7 +30,9 @@ class SailWrapper extends Command
         $this->info('Running sail command: sail ' . implode(' ', $args));
 
         $process = new Process(['bash', $sailPath, ...$args], base_path());
-        $process->setTty(true);
+        if (Process::isTtySupported()) {
+            $process->setTty(true);
+        }
         $process->setTimeout(null);
 
         $process->run(function ($type, $output) {

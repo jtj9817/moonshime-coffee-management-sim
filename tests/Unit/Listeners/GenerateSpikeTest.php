@@ -5,6 +5,7 @@ use App\Events\TimeAdvanced;
 use App\Events\SpikeOccurred;
 use App\Services\SpikeEventFactory;
 use App\Models\SpikeEvent;
+use App\Models\GameState;
 use Illuminate\Support\Facades\Event;
 use Mockery\MockInterface;
 
@@ -18,7 +19,7 @@ test('it generates a spike when time advances', function () {
     });
 
     $listener = new GenerateSpike($factory);
-    $listener->onTimeAdvanced(new TimeAdvanced(2));
+    $listener->onTimeAdvanced(new TimeAdvanced(2, GameState::factory()->make()));
 
     Event::assertDispatched(SpikeOccurred::class, function ($event) use ($spike) {
         return $event->spike === $spike;
@@ -33,7 +34,7 @@ test('it does not fire SpikeOccurred if no spike generated', function () {
     });
 
     $listener = new GenerateSpike($factory);
-    $listener->onTimeAdvanced(new TimeAdvanced(2));
+    $listener->onTimeAdvanced(new TimeAdvanced(2, GameState::factory()->make()));
 
     Event::assertNotDispatched(SpikeOccurred::class);
 });

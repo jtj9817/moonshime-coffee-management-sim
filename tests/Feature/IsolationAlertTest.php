@@ -9,10 +9,13 @@ use App\Models\Route;
 use App\Models\SpikeEvent;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
+use App\Models\User;
+
 uses(RefreshDatabase::class);
 
 test('it generates isolation alert only when unreachable and stock is low', function () {
     // 1. Setup
+    $user = User::factory()->create();
     $warehouse = Location::factory()->create(['type' => 'warehouse']);
     $store = Location::factory()->create(['type' => 'store']);
     $product = Product::factory()->create();
@@ -28,6 +31,7 @@ test('it generates isolation alert only when unreachable and stock is low', func
     $spike = SpikeEvent::factory()->create([
         'type' => 'blizzard',
         'is_active' => true,
+        'user_id' => $user->id,
     ]);
 
     // Scenario A: Reachability false, but stock is NOT low
@@ -35,17 +39,18 @@ test('it generates isolation alert only when unreachable and stock is low', func
         'location_id' => $store->id,
         'product_id' => $product->id,
         'quantity' => 100, // Not low (threshold is 10)
+        'user_id' => $user->id,
     ]);
 
     $action = app(GenerateIsolationAlerts::class);
-    $action->handle();
+    $action->handle($user->id);
 
     expect(Alert::where('type', 'isolation')->count())->toBe(0);
 
     // Scenario B: Reachability false, AND stock is low
     Inventory::where('location_id', $store->id)->update(['quantity' => 5]);
 
-    $action->handle();
+    $action->handle($user->id);
 
     expect(Alert::where('type', 'isolation')->count())->toBe(1);
     
@@ -56,6 +61,7 @@ test('it generates isolation alert only when unreachable and stock is low', func
 });
 
 test('it does not generate alert if reachable even if stock is low', function () {
+    $user = User::factory()->create();
     $warehouse = Location::factory()->create(['type' => 'warehouse']);
     $store = Location::factory()->create(['type' => 'store']);
     $product = Product::factory()->create();
@@ -71,10 +77,11 @@ test('it does not generate alert if reachable even if stock is low', function ()
         'location_id' => $store->id,
         'product_id' => $product->id,
         'quantity' => 5, // Low stock
+        'user_id' => $user->id,
     ]);
 
     $action = app(GenerateIsolationAlerts::class);
-    $action->handle();
+    $action->handle($user->id);
 
     expect(Alert::where('type', 'isolation')->count())->toBe(0);
 });
