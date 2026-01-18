@@ -10,7 +10,7 @@
     - [x] Connect button to `advanceDay()` in `GameContext`
 - [ ] Task: Conductor - User Manual Verification 'Global State & Layout Foundations' (Protocol in workflow.md)
 
-## Phase 2: Backend API Enhancements
+## Phase 2: Backend API Enhancements [checkpoint: 672bd7c]
 - [x] Task: Implement Route Retrieval API
     - [x] Write tests for `GET /game/logistics/routes`
     - [x] Implement endpoint in `app/Http/Controllers/GameController.php` (or dedicated Logistics controller)
