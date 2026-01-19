@@ -1,7 +1,8 @@
 # Guaranteed Spike Generation Plan
 
 **Created**: 2026-01-19
-**Status**: Draft
+**Completed**: 2026-01-19
+**Status**: ✅ Completed
 **Purpose**: Ensure at least one spike event triggers per day and pre-seed initial spikes for new games
 
 ---
@@ -70,11 +71,11 @@ This results in players potentially experiencing multiple uneventful days at gam
 
 ## Implementation Tasks
 
-### Phase 1: Database Schema Updates
+### Phase 1: Database Schema Updates ✅
 
-#### Task 1.1: Add spike tracking columns to `spike_events` table
+#### Task 1.1: Add spike tracking columns to `spike_events` table ✅
 
-**File**: `database/migrations/YYYY_MM_DD_add_spike_generation_tracking.php`
+**File**: `database/migrations/2026_01_19_185700_add_spike_generation_tracking.php`
 
 ```php
 Schema::table('spike_events', function (Blueprint $table) {
@@ -83,9 +84,9 @@ Schema::table('spike_events', function (Blueprint $table) {
 });
 ```
 
-#### Task 1.2: Add spike configuration to `game_states` table
+#### Task 1.2: Add spike configuration to `game_states` table ✅
 
-**File**: `database/migrations/YYYY_MM_DD_add_spike_config_to_game_states.php`
+**File**: `database/migrations/2026_01_19_185701_add_spike_config_to_game_states.php`
 
 ```php
 Schema::table('game_states', function (Blueprint $table) {
@@ -94,7 +95,7 @@ Schema::table('game_states', function (Blueprint $table) {
 });
 ```
 
-#### Task 1.3: Update model casts/fillables for new columns
+#### Task 1.3: Update model casts/fillables for new columns ✅
 
 **Files**:
 - `app/Models/SpikeEvent.php` - add `is_guaranteed` to `$fillable` and `$casts`
@@ -102,9 +103,9 @@ Schema::table('game_states', function (Blueprint $table) {
 
 ---
 
-### Phase 2: Core Services
+### Phase 2: Core Services ✅
 
-#### Task 2.1: Create `SpikeConstraintChecker` service
+#### Task 2.1: Create `SpikeConstraintChecker` service ✅
 
 **File**: `app/Services/SpikeConstraintChecker.php`
 
@@ -126,7 +127,7 @@ class SpikeConstraintChecker
 }
 ```
 
-#### Task 2.2: Create `GuaranteedSpikeGenerator` service
+#### Task 2.2: Create `GuaranteedSpikeGenerator` service ✅
 
 **File**: `app/Services/GuaranteedSpikeGenerator.php`
 
@@ -190,7 +191,7 @@ public function generate(GameState $gameState, int $currentDay): ?SpikeEvent
 }
 ```
 
-#### Task 2.3: Update `SpikeEventFactory`
+#### Task 2.3: Update `SpikeEventFactory` ✅
 
 **File**: `app/Services/SpikeEventFactory.php`
 
@@ -215,9 +216,9 @@ public function generateWithConstraints(
 
 ---
 
-### Phase 3: Initial Spike Seeding
+### Phase 3: Initial Spike Seeding ✅
 
-#### Task 3.1: Create `SpikeSeeder` seeder
+#### Task 3.1: Create `SpikeSeeder` seeder ✅
 
 **File**: `database/seeders/SpikeSeeder.php`
 
@@ -282,7 +283,7 @@ class SpikeSeeder extends Seeder
 }
 ```
 
-#### Task 3.2: Update `DatabaseSeeder`
+#### Task 3.2: Update `DatabaseSeeder` ✅
 
 **File**: `database/seeders/DatabaseSeeder.php`
 
@@ -302,7 +303,7 @@ public function run(): void
 }
 ```
 
-#### Task 3.3: Create action for new user initialization
+#### Task 3.3: Create action for new user initialization ✅
 
 **File**: `app/Actions/InitializeNewGame.php`
 
@@ -325,9 +326,9 @@ class InitializeNewGame
 
 ---
 
-### Phase 4: Integration with Simulation Loop
+### Phase 4: Integration with Simulation Loop ✅
 
-#### Task 4.1: Update `SimulationService::processEventTick()`
+#### Task 4.1: Update `SimulationService::processEventTick()` ✅
 
 **File**: `app/Services/SimulationService.php`
 
@@ -387,9 +388,9 @@ protected function ensureGuaranteedSpike(int $day): void
 
 ---
 
-### Phase 5: Testing
+### Phase 5: Testing ✅
 
-#### Task 5.1: Unit tests for `SpikeConstraintChecker`
+#### Task 5.1: Unit tests for `SpikeConstraintChecker` ✅
 
 **File**: `tests/Unit/Services/SpikeConstraintCheckerTest.php`
 
@@ -402,7 +403,7 @@ test('getAllowedTypes returns all types when no cooldown', function () { ... });
 test('recordSpikeStarted updates cooldown tracking', function () { ... });
 ```
 
-#### Task 5.2: Unit tests for `GuaranteedSpikeGenerator`
+#### Task 5.2: Unit tests for `GuaranteedSpikeGenerator` ✅
 
 **File**: `tests/Unit/Services/GuaranteedSpikeGeneratorTest.php`
 
@@ -413,7 +414,7 @@ test('respects type cooldown constraints', function () { ... });
 test('falls back to available type when preferred unavailable', function () { ... });
 ```
 
-#### Task 5.3: Feature test for initial seeding
+#### Task 5.3: Feature test for initial seeding ✅
 
 **File**: `tests/Feature/InitialSpikeSeederTest.php`
 
@@ -423,7 +424,7 @@ test('seeded spikes respect 2-day type cooldown', function () { ... });
 test('seeded spikes are marked as guaranteed', function () { ... });
 ```
 
-#### Task 5.4: Feature test for guaranteed generation
+#### Task 5.4: Feature test for guaranteed generation ✅
 
 **File**: `tests/Feature/GuaranteedSpikeGenerationTest.php`
 
@@ -438,46 +439,46 @@ test('respects 2-day type cooldown', function () { ... });
 
 ## File Summary
 
-| File | Action | Description |
-|------|--------|-------------|
-| `database/migrations/*_add_spike_generation_tracking.php` | Create | Add `is_guaranteed` column |
-| `database/migrations/*_add_spike_config_to_game_states.php` | Create | Add `spike_cooldowns` JSON column |
-| `app/Models/SpikeEvent.php` | Modify | Allow/cast `is_guaranteed` |
-| `app/Models/GameState.php` | Modify | Allow/cast `spike_cooldowns` |
-| `app/Services/SpikeConstraintChecker.php` | Create | Constraint validation service |
-| `app/Services/GuaranteedSpikeGenerator.php` | Create | Guaranteed spike generation logic |
-| `app/Services/SpikeEventFactory.php` | Modify | Add `generateWithConstraints()` method |
-| `app/Services/SimulationService.php` | Modify | Add `ensureGuaranteedSpike()` call |
-| `database/seeders/SpikeSeeder.php` | Create | Initial spike seeding |
-| `database/seeders/DatabaseSeeder.php` | Modify | Call SpikeSeeder |
-| `app/Actions/InitializeNewGame.php` | Create | Reusable game initialization |
-| `tests/Unit/Services/SpikeConstraintCheckerTest.php` | Create | Unit tests |
-| `tests/Unit/Services/GuaranteedSpikeGeneratorTest.php` | Create | Unit tests |
-| `tests/Feature/InitialSpikeSeederTest.php` | Create | Feature tests |
-| `tests/Feature/GuaranteedSpikeGenerationTest.php` | Create | Feature tests |
+| File | Action | Status |
+|------|--------|--------|
+| `database/migrations/2026_01_19_185700_add_spike_generation_tracking.php` | Create | ✅ |
+| `database/migrations/2026_01_19_185701_add_spike_config_to_game_states.php` | Create | ✅ |
+| `app/Models/SpikeEvent.php` | Modify | ✅ |
+| `app/Models/GameState.php` | Modify | ✅ |
+| `app/Services/SpikeConstraintChecker.php` | Create | ✅ |
+| `app/Services/GuaranteedSpikeGenerator.php` | Create | ✅ |
+| `app/Services/SpikeEventFactory.php` | Modify | ✅ |
+| `app/Services/SimulationService.php` | Modify | ✅ |
+| `database/seeders/SpikeSeeder.php` | Create | ✅ |
+| `database/seeders/DatabaseSeeder.php` | Modify | ✅ |
+| `app/Actions/InitializeNewGame.php` | Create | ✅ |
+| `tests/Unit/Services/SpikeConstraintCheckerTest.php` | Create | ✅ |
+| `tests/Unit/Services/GuaranteedSpikeGeneratorTest.php` | Create | ✅ |
+| `tests/Feature/InitialSpikeSeederTest.php` | Create | ✅ |
+| `tests/Feature/GuaranteedSpikeGenerationTest.php` | Create | ✅ |
 
 ---
 
 ## Execution Order
 
-1. **Migrations** - Run schema updates first
-2. **Model updates** - Add casts/fillables for new columns
-3. **SpikeConstraintChecker** - Core constraint logic (no dependencies)
-4. **SpikeEventFactory update** - Add new method
-5. **GuaranteedSpikeGenerator** - Depends on above two
-6. **SpikeSeeder** - Depends on factory
-7. **SimulationService update** - Integration point
-8. **Tests** - Verify all components
-9. **DatabaseSeeder update** - Final integration
+1. **Migrations** - Run schema updates first ✅
+2. **Model updates** - Add casts/fillables for new columns ✅
+3. **SpikeConstraintChecker** - Core constraint logic (no dependencies) ✅
+4. **SpikeEventFactory update** - Add new method ✅
+5. **GuaranteedSpikeGenerator** - Depends on above two ✅
+6. **SpikeSeeder** - Depends on factory ✅
+7. **SimulationService update** - Integration point ✅
+8. **Tests** - Verify all components ✅
+9. **DatabaseSeeder update** - Final integration ✅
 
 ---
 
 ## Edge Cases to Handle
 
-1. **All types on cooldown**: If all 5 spike types are on cooldown for a target day, relax cooldown (guarantee > cooldown) by picking a fallback type
-2. **No valid resources**: If blizzard is only allowed type but no vulnerable routes exist, fall back to other types
-3. **Game day 1**: Don't generate guaranteed spikes on Day 1 (allow tutorial grace period)
-4. **Mid-game start**: If player somehow starts at Day > 1, seed appropriate spikes
+1. **All types on cooldown**: If all 5 spike types are on cooldown for a target day, relax cooldown (guarantee > cooldown) by picking a fallback type ✅
+2. **No valid resources**: If blizzard is only allowed type but no vulnerable routes exist, fall back to other types ✅
+3. **Game day 1**: Don't generate guaranteed spikes on Day 1 (allow tutorial grace period) ✅
+4. **Mid-game start**: If player somehow starts at Day > 1, seed appropriate spikes ✅
 
 ---
 
@@ -492,9 +493,53 @@ If issues arise:
 
 ## Success Criteria
 
-- [ ] New games have 3-5 spikes scheduled for Days 2-7
-- [ ] Every day progression has at least one active spike (after Day 1)
-- [ ] Never more than 2 spikes active simultaneously
-- [ ] Same spike type doesn't repeat within 2 days
-- [ ] All existing tests continue to pass
-- [ ] New tests cover constraint logic
+- [x] New games have 3-5 spikes scheduled for Days 2-7
+- [x] Every day progression has at least one active spike (after Day 1)
+- [x] Never more than 2 spikes active simultaneously
+- [x] Same spike type doesn't repeat within 2 days
+- [x] All existing tests continue to pass
+- [x] New tests cover constraint logic
+
+---
+
+## Implementation Walkthrough
+
+**Completed**: 2026-01-19
+
+### Test Results
+
+All 34 spike-related tests pass with 101 assertions in 2.19s:
+
+| Test Suite | Tests |
+|------------|-------|
+| `SpikeConstraintCheckerTest` | 7 tests |
+| `GuaranteedSpikeGeneratorTest` | 5 tests |
+| `InitialSpikeSeederTest` | 4 tests |
+| `GuaranteedSpikeGenerationTest` | 5 tests |
+| Other spike-related tests | 13 tests |
+
+### New Files Created
+
+| File | Purpose |
+|------|---------|
+| `database/migrations/2026_01_19_185700_add_spike_generation_tracking.php` | Adds `is_guaranteed` column |
+| `database/migrations/2026_01_19_185701_add_spike_config_to_game_states.php` | Adds `spike_cooldowns` JSON column |
+| `app/Services/SpikeConstraintChecker.php` | Enforces cap/cooldown constraints |
+| `app/Services/GuaranteedSpikeGenerator.php` | Generates guaranteed spikes |
+| `database/seeders/SpikeSeeder.php` | Seeds initial 3-5 spikes |
+| `app/Actions/InitializeNewGame.php` | Reusable game initialization |
+| `tests/Unit/Services/SpikeConstraintCheckerTest.php` | Unit tests |
+| `tests/Unit/Services/GuaranteedSpikeGeneratorTest.php` | Unit tests |
+| `tests/Feature/InitialSpikeSeederTest.php` | Feature tests |
+| `tests/Feature/GuaranteedSpikeGenerationTest.php` | Feature tests |
+
+### Modified Files
+
+| File | Changes |
+|------|---------|
+| `app/Models/SpikeEvent.php` | Added `is_guaranteed` to fillable/casts |
+| `app/Models/GameState.php` | Added `spike_cooldowns` to fillable/casts |
+| `app/Services/SpikeEventFactory.php` | Added `generateWithConstraints()` method |
+| `app/Services/SimulationService.php` | Added `ensureGuaranteedSpike()`, cooldown recording |
+| `database/seeders/DatabaseSeeder.php` | Calls SpikeSeeder |
+
