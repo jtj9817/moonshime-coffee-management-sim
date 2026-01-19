@@ -25,19 +25,24 @@ export function CancelOrderDialog({
     onOpenChange,
 }: CancelOrderDialogProps) {
     const [processing, setProcessing] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     if (!order) return null;
 
     const handleConfirm = () => {
         setProcessing(true);
+        setError(null);
         router.post(`/game/orders/${order.id}/cancel`, {}, {
             preserveScroll: true,
             onSuccess: () => {
                 onOpenChange(false);
                 setProcessing(false);
             },
-            onError: () => {
+            onError: (errors) => {
                 setProcessing(false);
+                // Extract first error message
+                const msg = Object.values(errors)[0] || 'Failed to cancel order.';
+                setError(msg);
             }
         });
     };
@@ -80,7 +85,7 @@ export function CancelOrderDialog({
                     <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={processing}>
                         Keep Order
                     </Button>
-                    <Button 
+                    <Button
                         onClick={handleConfirm}
                         disabled={processing}
                         className="bg-rose-600 hover:bg-rose-700 text-white gap-2"

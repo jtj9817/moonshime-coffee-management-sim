@@ -71,7 +71,7 @@ export default function Ordering({ orders, vendorProducts }: OrderingProps) {
                             Manage supplier orders and deliveries
                         </p>
                     </div>
-                    <Button 
+                    <Button
                         onClick={() => setIsNewOrderDialogOpen(true)}
                         className="gap-2 bg-amber-600 hover:bg-amber-700"
                     >
@@ -143,8 +143,8 @@ export default function Ordering({ orders, vendorProducts }: OrderingProps) {
                         <TableBody>
                             {orders.map((order) => {
                                 const status = order.status.toLowerCase();
-                                const isCancellable = status.includes('shipped') || status.includes('pending') || status.includes('draft');
-                                
+                                const isCancellable = status === 'shipped';
+
                                 return (
                                     <TableRow key={order.id}>
                                         <TableCell className="font-mono text-sm">
@@ -168,8 +168,8 @@ export default function Ordering({ orders, vendorProducts }: OrderingProps) {
                                         </TableCell>
                                         <TableCell className="text-right">
                                             {isCancellable && (
-                                                <Button 
-                                                    variant="ghost" 
+                                                <Button
+                                                    variant="ghost"
                                                     size="sm"
                                                     onClick={() => handleCancelOrder(order)}
                                                     className="h-8 gap-1 text-rose-600 hover:bg-rose-50 hover:text-rose-700 dark:text-rose-400 dark:hover:bg-rose-900/20"
@@ -186,9 +186,28 @@ export default function Ordering({ orders, vendorProducts }: OrderingProps) {
                                 <TableRow>
                                     <TableCell
                                         colSpan={7}
-                                        className="py-12 text-center text-stone-500"
+                                        className="h-64 text-center"
                                     >
-                                        No orders yet
+                                        <div className="flex flex-col items-center justify-center gap-4">
+                                            <div className="rounded-full bg-stone-100 p-4 dark:bg-stone-900">
+                                                <Package className="h-8 w-8 text-stone-400" />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <h3 className="font-semibold text-stone-900 dark:text-white">
+                                                    No active orders
+                                                </h3>
+                                                <p className="text-sm text-stone-500 max-w-xs mx-auto">
+                                                    Your supply chain is quiet. Start by placing a purchase order from one of our vendors.
+                                                </p>
+                                            </div>
+                                            <Button
+                                                onClick={() => setIsNewOrderDialogOpen(true)}
+                                                className="mt-2 bg-amber-600 hover:bg-amber-700 text-white gap-2"
+                                            >
+                                                <Plus className="h-4 w-4" />
+                                                Place First Order
+                                            </Button>
+                                        </div>
                                     </TableCell>
                                 </TableRow>
                             )}
@@ -197,13 +216,13 @@ export default function Ordering({ orders, vendorProducts }: OrderingProps) {
                 </div>
             </div>
 
-            <NewOrderDialog 
+            <NewOrderDialog
                 open={isNewOrderDialogOpen}
                 onOpenChange={setIsNewOrderDialogOpen}
                 vendorProducts={vendorProducts}
             />
 
-            <CancelOrderDialog 
+            <CancelOrderDialog
                 order={selectedOrderToCancel}
                 open={!!selectedOrderToCancel}
                 onOpenChange={(open) => !open && setSelectedOrderToCancel(null)}

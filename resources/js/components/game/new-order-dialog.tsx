@@ -46,15 +46,15 @@ export function NewOrderDialog({
     vendorProducts,
 }: NewOrderDialogProps) {
     const { locations } = useGame();
-    
+
     const [selectedSourceId, setSelectedSourceId] = useState<string>('');
     const [selectedRoute, setSelectedRoute] = useState<RouteModel | null>(null);
-    
+
     // For adding a new item
     const [currentProductId, setCurrentProductId] = useState<string>('');
     const [currentQuantity, setCurrentQuantity] = useState<number>(100);
 
-    const { data, setData, post, processing, reset } = useForm({
+    const { data, setData, post, processing, reset, errors } = useForm({
         vendor_id: '',
         location_id: '',
         route_id: 0,
@@ -63,7 +63,7 @@ export function NewOrderDialog({
 
     const vendorOptions = vendorProducts.map((vp) => vp.vendor);
     const selectedVendorData = vendorProducts.find((vp) => vp.vendor.id === data.vendor_id);
-    
+
     const vendorLocations = useMemo(() => {
         return locations.filter(l => l.type === 'vendor' || l.type === 'warehouse');
     }, [locations]);
@@ -74,7 +74,7 @@ export function NewOrderDialog({
 
     const handleAddItem = () => {
         if (!currentProductId) return;
-        
+
         const product = selectedVendorData?.products.find(p => p.id === currentProductId);
         if (!product) return;
 
@@ -83,7 +83,7 @@ export function NewOrderDialog({
             quantity: currentQuantity,
             unit_price: 2.5, // Placeholder price
         }];
-        
+
         setData('items', newItems);
         setCurrentProductId('');
         setCurrentQuantity(100);
@@ -96,9 +96,15 @@ export function NewOrderDialog({
     const totalQuantity = data.items.reduce((sum, item) => sum + item.quantity, 0);
     const isOverCapacity = selectedRoute ? totalQuantity > selectedRoute.capacity : false;
 
+    // Derived values for summary
+    const itemsSubtotal = data.items.reduce((sum, i) => sum + i.quantity * i.unit_price, 0);
+    const shippingCost = selectedRoute?.cost ?? 0;
+    const totalCost = itemsSubtotal + shippingCost;
+    const excess = selectedRoute ? Math.max(0, totalQuantity - selectedRoute.capacity) : 0;
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         if (!data.vendor_id || !data.location_id || !selectedRoute || data.items.length === 0 || isOverCapacity) {
             return;
         }
@@ -186,8 +192,8 @@ export function NewOrderDialog({
                         <div className="flex items-end gap-3">
                             <div className="flex-1 space-y-2">
                                 <Label className="text-xs">Product</Label>
-                                <Select 
-                                    value={currentProductId} 
+                                <Select
+                                    value={currentProductId}
                                     onValueChange={setCurrentProductId}
                                     disabled={!data.vendor_id}
                                 >
@@ -205,16 +211,16 @@ export function NewOrderDialog({
                             </div>
                             <div className="w-32 space-y-2">
                                 <Label className="text-xs">Quantity</Label>
-                                <Input 
-                                    type="number" 
-                                    value={currentQuantity} 
+                                <Input
+                                    type="number"
+                                    value={currentQuantity}
                                     onChange={(e) => setCurrentQuantity(parseInt(e.target.value))}
                                     min={1}
                                 />
                             </div>
-                            <Button 
-                                type="button" 
-                                size="icon" 
+                            <Button
+                                type="button"
+                                size="icon"
                                 variant="outline"
                                 onClick={handleAddItem}
                                 disabled={!currentProductId}
@@ -233,10 +239,10 @@ export function NewOrderDialog({
                                             <span className="font-medium">{product?.name}</span>
                                             <div className="flex items-center gap-4">
                                                 <span className="text-stone-500 font-mono">{item.quantity} units</span>
-                                                <Button 
-                                                    type="button" 
-                                                    variant="ghost" 
-                                                    size="icon" 
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="icon"
                                                     className="h-7 w-7 text-rose-500"
                                                     onClick={() => removeItem(index)}
                                                 >
@@ -251,7 +257,7 @@ export function NewOrderDialog({
                     </div>
 
                     {/* Route Selection */}
-                    <RoutePicker 
+                    <RoutePicker
                         sourceId={selectedSourceId}
                         targetId={data.location_id}
                         selectedRouteId={selectedRoute?.id}
@@ -261,12 +267,52 @@ export function NewOrderDialog({
                         }}
                     />
 
+                    {/* Validation Errors & Summary */}
+                    <div className="rounded-lg bg-stone-100 p-4 dark:bg-stone-800">
+                        <div className="flex flex-col gap-2 border-b border-stone-200 pb-2 mb-2 dark:border-stone-700">
+                            <div className="flex justify-between text-sm">
+                                <span className="text-stone-500">Items Subtotal</span>
+                                <span>${itemsSubtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                                <span className="text-stone-500">Shipping Mode</span>
+                                <span className="capitalize">{selectedRoute?.transport_mode ?? '—'}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                                <span className="text-stone-500">Shipping Cost</span>
+                                <span>${shippingCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                            </div>
+                        </div>
+
+                        <div className="flex justify-between font-bold text-lg">
+                            <span>Total Cost</span>
+                            <span>${totalCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                        </div>
+
+                        {/* Error Messages */}
+                        {(errors.total || errors.route_id || errors.vendor_id || errors.items) && (
+                            <div className="mt-3 rounded border border-rose-200 bg-rose-50 p-2 text-xs text-rose-600 dark:border-rose-900/30 dark:bg-rose-900/20">
+                                {errors.total && <div className="font-bold">{errors.total}</div>}
+                                {errors.route_id && <div>Route Error: {errors.route_id}</div>}
+                                {errors.vendor_id && <div>Vendor Error: {errors.vendor_id}</div>}
+                                {typeof errors.items === 'string' && <div>{errors.items}</div>}
+                            </div>
+                        )}
+                    </div>
+
                     {/* Capacity Validation */}
                     {selectedRoute && (
-                        <RouteCapacityMeter 
-                            currentQuantity={totalQuantity}
-                            capacity={selectedRoute.capacity}
-                        />
+                        <div className="space-y-1">
+                            <RouteCapacityMeter
+                                currentQuantity={totalQuantity}
+                                capacity={selectedRoute.capacity}
+                            />
+                            {excess > 0 && (
+                                <p className="text-xs text-rose-600 font-medium text-right">
+                                    Reduce order by {excess.toLocaleString()} units
+                                </p>
+                            )}
+                        </div>
                     )}
                 </form>
 
@@ -274,12 +320,13 @@ export function NewOrderDialog({
                     <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={processing}>
                         Cancel
                     </Button>
-                    <Button 
+                    <Button
                         onClick={handleSubmit}
-                        disabled={processing || data.items.length === 0 || !selectedRoute || isOverCapacity}
-                        className="bg-amber-600 hover:bg-amber-700"
+                        disabled={processing || data.items.length === 0 || !selectedRoute || totalQuantity > (selectedRoute?.capacity ?? Infinity)}
+                        className={`bg-amber-600 hover:bg-amber-700 w-full sm:w-auto ${processing ? 'opacity-80' : ''
+                            }`}
                     >
-                        {processing ? 'Placing Order...' : 'Confirm Order'}
+                        {processing ? 'Placing Order...' : `Confirm Order ($${totalCost.toLocaleString()})`}
                     </Button>
                 </DialogFooter>
             </DialogContent>

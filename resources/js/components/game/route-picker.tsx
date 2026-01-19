@@ -39,7 +39,7 @@ export function RoutePicker({
                 );
                 if (!response.ok) throw new Error('Failed to fetch routes');
                 const result = await response.json();
-                setRoutes(result.data);
+                setRoutes(result.routes);
             } catch (err) {
                 setError('Could not load shipping routes.');
                 console.error(err);
@@ -84,15 +84,15 @@ export function RoutePicker({
                 {routes.map((route) => {
                     const isSelected = selectedRouteId === route.id;
                     const isBlocked = !route.is_active;
+                    const blockedReason = route.blocked_reason || 'Route Temporarily Unavailable';
 
                     return (
                         <Card
                             key={route.id}
-                            className={`relative cursor-pointer overflow-hidden transition-all hover:border-amber-400 ${
-                                isSelected
+                            className={`relative cursor-pointer overflow-hidden transition-all hover:border-amber-400 ${isSelected
                                     ? 'ring-2 ring-amber-500 border-amber-500'
                                     : 'border-stone-200 dark:border-stone-700'
-                            } ${isBlocked ? 'opacity-50 grayscale pointer-events-none' : ''}`}
+                                } ${isBlocked ? 'opacity-60 grayscale pointer-events-none' : ''}`}
                             onClick={() => !isBlocked && onSelect(route)}
                         >
                             <CardContent className="p-3">
@@ -103,26 +103,35 @@ export function RoutePicker({
                                             {route.transport_mode}
                                         </span>
                                     </div>
-                                    {route.transport_mode === 'air' && (
-                                        <Badge variant="secondary" className="text-[10px] h-4">Premium</Badge>
-                                    )}
+                                    <div className="flex gap-1">
+                                        {route.is_premium && (
+                                            <Badge variant="secondary" className="text-[10px] h-4 bg-amber-100 text-amber-800 hover:bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400">Premium</Badge>
+                                        )}
+                                        {route.weather_vulnerability && (
+                                            <Badge variant="outline" className="text-[10px] h-4 border-blue-200 text-blue-600 dark:border-blue-900 dark:text-blue-400">Weather Risk</Badge>
+                                        )}
+                                    </div>
                                 </div>
 
-                                <div className="flex flex-col gap-1 text-xs text-stone-500">
+                                <div className="grid grid-cols-2 gap-y-1 gap-x-2 text-xs text-stone-500">
                                     <div className="flex items-center gap-1">
                                         <DollarSign className="h-3 w-3" />
-                                        <span>Cost: ${route.cost}</span>
+                                        <span>Cost: ${route.cost.toLocaleString()}</span>
                                     </div>
                                     <div className="flex items-center gap-1">
                                         <Clock className="h-3 w-3" />
                                         <span>Transit: {route.transit_days} {route.transit_days === 1 ? 'day' : 'days'}</span>
                                     </div>
+                                    <div className="flex items-center gap-1 col-span-2">
+                                        <span className="font-semibold">Capacity:</span> {route.capacity.toLocaleString()} units
+                                    </div>
                                 </div>
 
                                 {isBlocked && (
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/60 dark:bg-stone-900/60 backdrop-blur-[1px]">
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/70 dark:bg-stone-900/70 backdrop-blur-[1px] p-2 text-center">
                                         <AlertTriangle className="h-5 w-5 text-rose-500 mb-1" />
                                         <span className="text-[10px] font-bold text-rose-600 uppercase">Route Blocked</span>
+                                        <span className="text-[10px] text-rose-600 font-medium leading-tight mt-1">{blockedReason}</span>
                                     </div>
                                 )}
                             </CardContent>
