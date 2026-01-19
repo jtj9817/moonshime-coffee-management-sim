@@ -8,11 +8,12 @@
 
 ## Problem Statement
 
-The current spike generation system has two issues:
+The current spike generation system has four issues:
 
 1. **No initial spikes**: New games start with zero seeded spikes, meaning Day 1 → Day 2 transition likely has no active events
 2. **Future scheduling only**: `SpikeEventFactory::generate()` schedules spikes for `currentDay + 1`, creating a lag where early game days feel uneventful
 3. **No generation guarantee**: Spike generation can silently fail if required resources (routes, locations) don't exist
+4. **User scoping mismatch**: The simulation tick scopes spikes by `user_id`, but generated spikes must also persist `user_id` to be started/ended for the current player
 
 This results in players potentially experiencing multiple uneventful days at game start.
 
@@ -88,10 +89,16 @@ Schema::table('spike_events', function (Blueprint $table) {
 
 ```php
 Schema::table('game_states', function (Blueprint $table) {
-    // Track last generated spike type for cooldown logic
-    $table->json('spike_cooldowns')->nullable(); // {"demand": 5, "blizzard": 3} = day last used
+    // Track last-started day per spike type (cooldown is enforced relative to start days)
+    $table->json('spike_cooldowns')->nullable(); // {"demand": 5, "blizzard": 3} = last start day
 });
 ```
+
+#### Task 1.3: Update model casts/fillables for new columns
+
+**Files**:
+- `app/Models/SpikeEvent.php` - add `is_guaranteed` to `$fillable` and `$casts`
+- `app/Models/GameState.php` - add `spike_cooldowns` to `$fillable` and `$casts` (cast to `array`)
 
 ---
 
@@ -102,9 +109,9 @@ Schema::table('game_states', function (Blueprint $table) {
 **File**: `app/Services/SpikeConstraintChecker.php`
 
 **Responsibilities**:
-- Check if active spike count is below cap (2)
-- Check if spike type is on cooldown
-- Return list of allowed spike types for current day
+- Enforce max concurrent spikes (cap = 2) for a target day by counting spikes whose `[starts_at_day, ends_at_day)` covers that day (not just `is_active`)
+- Enforce 2-day type cooldown for a target start day (must consider already-scheduled spikes in the cooldown window, not only historical cooldown state)
+- Return list of allowed spike types for a target start day
 
 ```php
 class SpikeConstraintChecker
@@ -112,10 +119,10 @@ class SpikeConstraintChecker
     const MAX_ACTIVE_SPIKES = 2;
     const TYPE_COOLDOWN_DAYS = 2;
 
-    public function canGenerateSpike(int $userId): bool;
-    public function getActiveSpikesCount(int $userId): int;
-    public function getAllowedTypes(GameState $gameState): array;
-    public function recordSpikeGeneration(GameState $gameState, string $type): void;
+    public function canScheduleSpike(GameState $gameState, int $startDay, int $duration): bool;
+    public function getSpikeCountCoveringDay(int $userId, int $day): int;
+    public function getAllowedTypes(GameState $gameState, int $startDay): array;
+    public function recordSpikeStarted(GameState $gameState, string $type, int $startDay): void;
 }
 ```
 
@@ -148,29 +155,36 @@ class GuaranteedSpikeGenerator
 ```php
 public function generate(GameState $gameState, int $currentDay): ?SpikeEvent
 {
+    if ($currentDay <= 1) {
+        return null; // Tutorial grace period
+    }
+
     // 1. Check if we can generate (under cap)
-    if (!$this->constraintChecker->canGenerateSpike($gameState->user_id)) {
+    // NOTE: cap must be enforced against the spike's *full window* to avoid future overlap
+    $duration = rand(2, 5);
+    if (!$this->constraintChecker->canScheduleSpike($gameState, $currentDay, $duration)) {
         return null; // At capacity
     }
 
     // 2. Get allowed types (respecting cooldown)
-    $allowedTypes = $this->constraintChecker->getAllowedTypes($gameState);
+    $allowedTypes = $this->constraintChecker->getAllowedTypes($gameState, $currentDay);
 
     if (empty($allowedTypes)) {
-        return null; // All types on cooldown (rare edge case)
+        // Guarantee > cooldown: relax cooldown as a last resort
+        $allowedTypes = ['demand', 'delay', 'price', 'breakdown', 'blizzard'];
     }
 
     // 3. Generate spike with allowed type, starting TODAY
     $spike = $this->factory->generateWithConstraints(
-        currentDay: $currentDay,
+        userId: $gameState->user_id,
         allowedTypes: $allowedTypes,
-        startDay: $currentDay // Key difference: starts today, not tomorrow
+        startDay: $currentDay,
+        duration: $duration,
+        isGuaranteed: true
     );
 
-    // 4. Record for cooldown tracking
-    if ($spike) {
-        $this->constraintChecker->recordSpikeGeneration($gameState, $spike->type);
-    }
+    // Cooldowns should be recorded when the spike actually starts (SpikeOccurred / activation),
+    // not when merely scheduled, to avoid "future day" pollution.
 
     return $spike;
 }
@@ -183,15 +197,19 @@ public function generate(GameState $gameState, int $currentDay): ?SpikeEvent
 **Changes**:
 - Add new method `generateWithConstraints()` that accepts allowed types and start day
 - Refactor existing `generate()` to use new method internally
+- Ensure created spikes persist `user_id` and `is_guaranteed` (so the per-user simulation tick can manage lifecycle)
+- Retry/fallback within `allowedTypes` when a chosen type can't be instantiated due to missing resources (routes/locations)
 
 ```php
 /**
  * Generate spike with specific constraints.
  */
 public function generateWithConstraints(
-    int $currentDay,
+    int $userId,
     array $allowedTypes,
-    int $startDay
+    int $startDay,
+    int $duration,
+    bool $isGuaranteed = false
 ): ?SpikeEvent;
 ```
 
@@ -206,15 +224,18 @@ public function generateWithConstraints(
 **Responsibilities**:
 - Called when new game starts (after user creation)
 - Generate 3-5 spikes distributed across Days 2-7
-- Ensure variety (no consecutive same-type spikes)
+- Ensure variety (2-day type cooldown during seeding)
 
 ```php
 class SpikeSeeder extends Seeder
 {
     public function run(): void
     {
-        // Get the test user's game state
-        $gameState = GameState::first();
+        // Local/dev seeding only: if no GameState exists, skip.
+        $gameState = GameState::query()->first();
+        if (!$gameState) {
+            return;
+        }
 
         $this->seedInitialSpikes($gameState);
     }
@@ -228,22 +249,33 @@ class SpikeSeeder extends Seeder
             ->sort()
             ->values();
 
-        $lastType = null;
+        $lastUsedDayByType = []; // type => last start day
         $factory = app(SpikeEventFactory::class);
 
         foreach ($selectedDays as $day) {
-            // Exclude last type to ensure variety
-            $excludeTypes = $lastType ? [$lastType] : [];
+            $allowedTypes = collect(['demand', 'delay', 'price', 'breakdown', 'blizzard'])
+                ->reject(fn (string $type) => isset($lastUsedDayByType[$type])
+                    && ($day - $lastUsedDayByType[$type]) <= SpikeConstraintChecker::TYPE_COOLDOWN_DAYS
+                )
+                ->values()
+                ->all();
 
-            $spike = $factory->generateForDay(
+            // If everything is blocked, relax cooldown for seeding (still keep cap enforcement)
+            if (empty($allowedTypes)) {
+                $allowedTypes = ['demand', 'delay', 'price', 'breakdown', 'blizzard'];
+            }
+
+            $duration = rand(2, 5);
+            $spike = $factory->generateWithConstraints(
                 userId: $gameState->user_id,
-                targetDay: $day,
-                excludeTypes: $excludeTypes
+                allowedTypes: $allowedTypes,
+                startDay: $day,
+                duration: $duration,
+                isGuaranteed: true
             );
 
             if ($spike) {
-                $spike->update(['is_guaranteed' => true]);
-                $lastType = $spike->type;
+                $lastUsedDayByType[$spike->type] = $day;
             }
         }
     }
@@ -258,6 +290,13 @@ class SpikeSeeder extends Seeder
 public function run(): void
 {
     // ... existing seeders ...
+
+    // Ensure a GameState exists for the seeded user before seeding spikes
+    $user = User::first();
+    GameState::firstOrCreate(
+        ['user_id' => $user->id],
+        ['cash' => 1000000, 'xp' => 0, 'day' => 1]
+    );
 
     $this->call(SpikeSeeder::class); // Add after CoreGameStateSeeder
 }
@@ -274,7 +313,10 @@ class InitializeNewGame
 {
     public function handle(User $user): void
     {
-        $gameState = $user->gameState;
+        $gameState = GameState::firstOrCreate(
+            ['user_id' => $user->id],
+            ['cash' => 1000000, 'xp' => 0, 'day' => 1]
+        );
 
         app(SpikeSeeder::class)->seedInitialSpikes($gameState);
     }
@@ -309,29 +351,34 @@ protected function processEventTick(int $day): void
     // 1. End spikes that reach their ends_at_day
     // ... existing code ...
 
-    // 2. Start spikes that reach their starts_at_day
-    // ... existing code ...
-
-    // 3. GUARANTEED: Ensure at least one spike exists for today
+    // 2. GUARANTEED: Ensure at least one spike covers today (after Day 1)
     $this->ensureGuaranteedSpike($day);
 
-    // 4. OPTIONAL: Generate a future spike (existing behavior)
-    app(\App\Services\SpikeEventFactory::class)->generate($day);
+    // 3. Start spikes that reach their starts_at_day (includes guaranteed spikes created above)
+    // ... existing code ...
+    // NOTE: When a spike is activated, record cooldown state for that day:
+    // app(SpikeConstraintChecker::class)->recordSpikeStarted($this->gameState, $spike->type, $day);
+
+    // 4. OPTIONAL: Schedule a future spike (existing behavior), but it MUST respect cap/cooldown
+    // and persist user_id; otherwise it will violate Success Criteria.
+    // app(\App\Services\SpikeEventFactory::class)->generate($userId, $day);
 }
 
 protected function ensureGuaranteedSpike(int $day): void
 {
+    if ($day <= 1) {
+        return;
+    }
+
     $userId = $this->gameState->user_id;
 
-    // Check if any spike is already active or starting today
-    $hasActiveOrStarting = SpikeEvent::where('user_id', $userId)
-        ->where(function ($q) use ($day) {
-            $q->where('is_active', true)
-              ->orWhere('starts_at_day', $day);
-        })
+    // Check if any spike already covers today (active or scheduled-to-start today)
+    $hasSpikeCoveringToday = SpikeEvent::where('user_id', $userId)
+        ->where('starts_at_day', '<=', $day)
+        ->where('ends_at_day', '>', $day)
         ->exists();
 
-    if (!$hasActiveOrStarting) {
+    if (!$hasSpikeCoveringToday) {
         // Generate a guaranteed spike for today
         app(GuaranteedSpikeGenerator::class)->generate($this->gameState, $day);
     }
@@ -347,11 +394,12 @@ protected function ensureGuaranteedSpike(int $day): void
 **File**: `tests/Unit/Services/SpikeConstraintCheckerTest.php`
 
 ```php
-test('canGenerateSpike returns false when at cap', function () { ... });
-test('canGenerateSpike returns true when under cap', function () { ... });
-test('getAllowedTypes excludes types on cooldown', function () { ... });
+test('canScheduleSpike returns false when window would exceed cap', function () { ... });
+test('canScheduleSpike returns true when window fits cap', function () { ... });
+test('getSpikeCountCoveringDay counts scheduled + active spikes', function () { ... });
+test('getAllowedTypes excludes types in cooldown window', function () { ... });
 test('getAllowedTypes returns all types when no cooldown', function () { ... });
-test('recordSpikeGeneration updates cooldown tracking', function () { ... });
+test('recordSpikeStarted updates cooldown tracking', function () { ... });
 ```
 
 #### Task 5.2: Unit tests for `GuaranteedSpikeGenerator`
@@ -360,7 +408,7 @@ test('recordSpikeGeneration updates cooldown tracking', function () { ... });
 
 ```php
 test('generates spike starting on current day', function () { ... });
-test('returns null when at active spike cap', function () { ... });
+test('returns null when spike window would exceed cap', function () { ... });
 test('respects type cooldown constraints', function () { ... });
 test('falls back to available type when preferred unavailable', function () { ... });
 ```
@@ -371,7 +419,7 @@ test('falls back to available type when preferred unavailable', function () { ..
 
 ```php
 test('new game has 3-5 spikes seeded for days 2-7', function () { ... });
-test('seeded spikes have variety in types', function () { ... });
+test('seeded spikes respect 2-day type cooldown', function () { ... });
 test('seeded spikes are marked as guaranteed', function () { ... });
 ```
 
@@ -394,6 +442,8 @@ test('respects 2-day type cooldown', function () { ... });
 |------|--------|-------------|
 | `database/migrations/*_add_spike_generation_tracking.php` | Create | Add `is_guaranteed` column |
 | `database/migrations/*_add_spike_config_to_game_states.php` | Create | Add `spike_cooldowns` JSON column |
+| `app/Models/SpikeEvent.php` | Modify | Allow/cast `is_guaranteed` |
+| `app/Models/GameState.php` | Modify | Allow/cast `spike_cooldowns` |
 | `app/Services/SpikeConstraintChecker.php` | Create | Constraint validation service |
 | `app/Services/GuaranteedSpikeGenerator.php` | Create | Guaranteed spike generation logic |
 | `app/Services/SpikeEventFactory.php` | Modify | Add `generateWithConstraints()` method |
@@ -411,19 +461,20 @@ test('respects 2-day type cooldown', function () { ... });
 ## Execution Order
 
 1. **Migrations** - Run schema updates first
-2. **SpikeConstraintChecker** - Core constraint logic (no dependencies)
-3. **SpikeEventFactory update** - Add new method
-4. **GuaranteedSpikeGenerator** - Depends on above two
-5. **SpikeSeeder** - Depends on factory
-6. **SimulationService update** - Integration point
-7. **Tests** - Verify all components
-8. **DatabaseSeeder update** - Final integration
+2. **Model updates** - Add casts/fillables for new columns
+3. **SpikeConstraintChecker** - Core constraint logic (no dependencies)
+4. **SpikeEventFactory update** - Add new method
+5. **GuaranteedSpikeGenerator** - Depends on above two
+6. **SpikeSeeder** - Depends on factory
+7. **SimulationService update** - Integration point
+8. **Tests** - Verify all components
+9. **DatabaseSeeder update** - Final integration
 
 ---
 
 ## Edge Cases to Handle
 
-1. **All types on cooldown**: If all 5 spike types are on 2-day cooldown (unlikely but possible), skip guaranteed generation for that day
+1. **All types on cooldown**: If all 5 spike types are on cooldown for a target day, relax cooldown (guarantee > cooldown) by picking a fallback type
 2. **No valid resources**: If blizzard is only allowed type but no vulnerable routes exist, fall back to other types
 3. **Game day 1**: Don't generate guaranteed spikes on Day 1 (allow tutorial grace period)
 4. **Mid-game start**: If player somehow starts at Day > 1, seed appropriate spikes
