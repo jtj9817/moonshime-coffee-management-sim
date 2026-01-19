@@ -45,6 +45,7 @@ class SimulationService
     protected function processEventTick(int $day): void
     {
         $userId = $this->gameState->user_id;
+        $constraintChecker = app(SpikeConstraintChecker::class);
 
         // 1. End spikes that reach their ends_at_day
         SpikeEvent::where('user_id', $userId)
@@ -56,19 +57,75 @@ class SimulationService
                 event(new SpikeEnded($spike));
             });
 
-        // 2. Start spikes that reach their starts_at_day
+        // 2. GUARANTEED: Ensure at least one spike covers today (after Day 1)
+        $this->ensureGuaranteedSpike($day);
+
+        // 3. Start spikes that reach their starts_at_day (includes guaranteed spikes created above)
         SpikeEvent::where('user_id', $userId)
             ->where('is_active', false)
             ->where('starts_at_day', '<=', $day)
             ->where('ends_at_day', '>', $day)
             ->get()
-            ->each(function (SpikeEvent $spike) {
+            ->each(function (SpikeEvent $spike) use ($constraintChecker, $day) {
                 $spike->update(['is_active' => true]);
                 event(new SpikeOccurred($spike));
+                
+                // Record cooldown when spike actually starts
+                $constraintChecker->recordSpikeStarted($this->gameState, $spike->type, $day);
             });
 
-        // 3. Generate a new spike for the future (Optional/Random)
-        app(\App\Services\SpikeEventFactory::class)->generate($day);
+        // 4. OPTIONAL: Schedule a future spike when constraints allow it
+        $this->scheduleOptionalSpike($day, $constraintChecker);
+    }
+
+    /**
+     * Ensure at least one spike covers today (guaranteed spike generation).
+     */
+    protected function ensureGuaranteedSpike(int $day): void
+    {
+        if ($day <= 1) {
+            return; // Tutorial grace period
+        }
+
+        $userId = $this->gameState->user_id;
+
+        // Check if any spike already covers today (active or scheduled-to-start today)
+        $hasSpikeCoveringToday = SpikeEvent::where('user_id', $userId)
+            ->where('starts_at_day', '<=', $day)
+            ->where('ends_at_day', '>', $day)
+            ->exists();
+
+        if (!$hasSpikeCoveringToday) {
+            // Generate a guaranteed spike for today
+            app(GuaranteedSpikeGenerator::class)->generate($this->gameState, $day);
+        }
+    }
+
+    /**
+     * Optionally schedule a future spike if cap/cooldown constraints allow it.
+     */
+    protected function scheduleOptionalSpike(int $day, SpikeConstraintChecker $constraintChecker): void
+    {
+        $startDay = $day + 1;
+        $duration = rand(2, 5);
+
+        if (!$constraintChecker->canScheduleSpike($this->gameState, $startDay, $duration)) {
+            return;
+        }
+
+        $allowedTypes = $constraintChecker->getAllowedTypes($this->gameState, $startDay);
+        if (empty($allowedTypes)) {
+            return;
+        }
+
+        app(\App\Services\SpikeEventFactory::class)->generateWithConstraints(
+            userId: $this->gameState->user_id,
+            allowedTypes: $allowedTypes,
+            startDay: $startDay,
+            duration: $duration,
+            isGuaranteed: false,
+            useWeights: true
+        );
     }
 
     /**
