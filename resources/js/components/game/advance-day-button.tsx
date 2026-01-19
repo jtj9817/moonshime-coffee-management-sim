@@ -25,8 +25,17 @@ export function AdvanceDayButton({ className = '', label = 'Next Day' }: Advance
             size="sm"
             className={`gap-2 bg-amber-600 text-white hover:bg-amber-700 ${className}`}
         >
-            <Play className="h-4 w-4" />
-            {processing ? 'Processing...' : label}
+            {processing ? (
+                <>
+                    <Play className="h-4 w-4 animate-spin" />
+                    <span>Advancing...</span>
+                </>
+            ) : (
+                <>
+                    <Play className="h-4 w-4" />
+                    <span>{label}</span>
+                </>
+            )}
         </Button>
     );
 }
