@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Order;
+use App\Models\User;
 use App\Models\Vendor;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -21,10 +22,22 @@ class OrderFactory extends Factory
     public function definition(): array
     {
         return [
+            'user_id' => User::factory(),
             'vendor_id' => Vendor::factory(),
             'status' => 'draft',
             'total_cost' => fake()->numberBetween(1000, 10000),
             'delivery_date' => now()->addDays(3),
         ];
+    }
+
+    /**
+     * Configure the order as shipped with a specific delivery day.
+     */
+    public function shipped(int $deliveryDay): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => 'shipped',
+            'delivery_day' => $deliveryDay,
+        ]);
     }
 }
