@@ -82,6 +82,33 @@ class GameController extends Controller
     }
 
     /**
+     * Check order capacity and validation.
+     */
+    public function capacityCheck(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'route_id' => 'required|exists:routes,id',
+            'items' => 'required|array',
+            'items.*.quantity' => 'required|integer|min:0',
+        ]);
+
+        $route = Route::find($validated['route_id']);
+        $totalQuantity = collect($validated['items'])->sum('quantity');
+        
+        // Logic: if total quantity <= capacity, it's valid.
+        // We also want to return the excess if any.
+        $excess = max(0, $totalQuantity - $route->capacity);
+        
+        return response()->json([
+            'within_capacity' => $totalQuantity <= $route->capacity,
+            'order_quantity' => $totalQuantity,
+            'route_capacity' => $route->capacity,
+            'excess' => $excess,
+            'suggestion' => $excess > 0 ? "Reduce order size by {$excess} units." : null,
+        ]);
+    }
+
+    /**
      * Display the ordering page.
      */
     public function ordering(): Response
@@ -205,23 +232,20 @@ class GameController extends Controller
     /**
      * Place a new order.
      */
-    public function placeOrder(Request $request): \Illuminate\Http\RedirectResponse
+    public function placeOrder(\App\Http\Requests\StoreOrderRequest $request): \Illuminate\Http\RedirectResponse
     {
-        $validated = $request->validate([
-            'vendor_id' => 'required|exists:vendors,id',
-            'location_id' => 'required|exists:locations,id',
-            'route_id' => 'required|exists:routes,id',
-            'items' => 'required|array|min:1',
-            'items.*.product_id' => 'required|exists:products,id',
-            'items.*.quantity' => 'required|integer|min:1',
-            'items.*.unit_price' => 'required|numeric|min:0',
-        ]);
+        $validated = $request->validated();
 
         return DB::transaction(function () use ($validated) {
             $totalCost = collect($validated['items'])->sum(fn($item) => $item['quantity'] * $item['unit_price']);
             
             $route = Route::findOrFail($validated['route_id']);
-            $totalCost += $route->cost;
+            // LogisticsService is now calculating cost correctly with spikes in the service, 
+            // but we might want to recalc here to be safe or trust the client passed cost? 
+            // The request validation calculated it safely.
+            // We should use the service to get the real cost to ensure consistency.
+            $shippingCost = app(\App\Services\LogisticsService::class)->calculateCost($route);
+            $totalCost += $shippingCost;
 
             $order = Order::create([
                 'user_id' => auth()->id(),

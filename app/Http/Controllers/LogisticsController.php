@@ -20,6 +20,9 @@ class LogisticsController extends Controller
     /**
      * Get all routes, optionally filtered by source or target.
      */
+    /**
+     * Get all routes, optionally filtered by source or target.
+     */
     public function getRoutes(Request $request): JsonResponse
     {
         $query = Route::with(['source', 'target']);
@@ -32,19 +35,33 @@ class LogisticsController extends Controller
             $query->where('target_id', $request->target_id);
         }
 
-        $routes = $query->get()->map(fn(Route $route) => [
+        $routes = $query->get();
+
+        // Eager load active spikes for these routes to derive blocked_reason
+        $activeSpikes = \App\Models\SpikeEvent::where('is_active', true)
+            ->whereIn('affected_route_id', $routes->pluck('id'))
+            ->get()
+            ->keyBy('affected_route_id');
+
+        $routesData = $routes->map(fn(Route $route) => [
             'id' => $route->id,
-            'source_id' => $route->source_id,
-            'target_id' => $route->target_id,
-            'source' => $route->source,
-            'target' => $route->target,
+            'name' => ucfirst($route->transport_mode) . " Route",
+            'source_location_id' => $route->source_id,
+            'target_location_id' => $route->target_id,
             'transport_mode' => $route->transport_mode,
-            'cost' => $route->cost,
+            'cost' => $this->logistics->calculateCost($route),
             'transit_days' => $route->transit_days,
+            'capacity' => $route->capacity,
+            'weather_vulnerability' => $route->weather_vulnerability,
             'is_active' => $route->is_active,
+            'is_premium' => $this->logistics->isPremiumRoute($route),
+            'blocked_reason' => $activeSpikes->has($route->id) ? $activeSpikes[$route->id]->type : null,
         ]);
 
-        return response()->json(['data' => $routes]);
+        return response()->json([
+            'success' => true,
+            'routes' => $routesData,
+        ]);
     }
 
     /**

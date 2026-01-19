@@ -26,6 +26,7 @@ Route::middleware(['auth', 'verified'])->prefix('game')->name('game.')->group(fu
     // Actions
     Route::post('/advance-day', [GameController::class, 'advanceDay'])->name('advance-day');
     Route::post('/orders', [GameController::class, 'placeOrder'])->name('orders.store');
+    Route::get('/orders/capacity-check', [GameController::class, 'capacityCheck'])->name('orders.capacity-check');
     Route::post('/orders/{order}/cancel', [GameController::class, 'cancelOrder'])->name('orders.cancel');
     Route::post('/transfers', [GameController::class, 'createTransfer'])->name('transfers.store');
     Route::put('/policy', [GameController::class, 'updatePolicy'])->name('policy.update');
