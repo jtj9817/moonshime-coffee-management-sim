@@ -27,7 +27,7 @@ class SpikeEventFactory
     /**
      * Generate a new random spike event.
      */
-    public function generate(int $currentDay): ?SpikeEvent
+    public function generate(int $currentDay, ?int $userId = null): ?SpikeEvent
     {
         $type = $this->getRandomType();
         
@@ -62,6 +62,7 @@ class SpikeEventFactory
         }
 
         return SpikeEvent::create([
+            'user_id' => $userId,
             'type' => $type,
             'magnitude' => $magnitude,
             'duration' => $duration,
@@ -71,7 +72,80 @@ class SpikeEventFactory
             'starts_at_day' => $currentDay + 1,
             'ends_at_day' => $currentDay + 1 + $duration,
             'is_active' => false,
+            'is_guaranteed' => false,
         ]);
+    }
+
+    /**
+     * Generate spike with specific constraints.
+     * Includes retry/fallback logic when a chosen type can't be instantiated.
+     */
+    public function generateWithConstraints(
+        int $userId,
+        array $allowedTypes,
+        int $startDay,
+        int $duration,
+        bool $isGuaranteed = false,
+        bool $useWeights = false
+    ): ?SpikeEvent {
+        // Shuffle allowed types for random selection with fallback
+        $typesToTry = collect($allowedTypes)->shuffle()->all();
+        if ($useWeights) {
+            $weightedType = $this->getRandomTypeFromAllowed($allowedTypes);
+            $typesToTry = array_values(array_unique(array_merge([$weightedType], $typesToTry)));
+        }
+
+        foreach ($typesToTry as $type) {
+            $magnitude = $this->generateMagnitude($type);
+            $locationId = null;
+            $affectedRouteId = null;
+            $productId = null;
+
+            if ($type === 'blizzard') {
+                // Target a vulnerable route
+                $route = Route::where('weather_vulnerability', true)
+                    ->inRandomOrder()
+                    ->first();
+
+                if (!$route) {
+                    continue; // Try next type
+                }
+                $affectedRouteId = $route->id;
+            } elseif ($type === 'breakdown') {
+                $locationId = Location::inRandomOrder()->first()?->id;
+
+                if (!$locationId) {
+                    continue; // Try next type
+                }
+            } else {
+                // For other types, optionally attach a location
+                if (rand(0, 100) > 50) {
+                    $locationId = Location::inRandomOrder()->first()?->id;
+                }
+            }
+
+            // Optionally attach a product for non-breakdown, non-blizzard
+            if ($type !== 'breakdown' && $type !== 'blizzard' && (rand(0, 100) > 50)) {
+                $productId = Product::inRandomOrder()->first()?->id;
+            }
+
+            return SpikeEvent::create([
+                'user_id' => $userId,
+                'type' => $type,
+                'magnitude' => $magnitude,
+                'duration' => $duration,
+                'location_id' => $locationId,
+                'product_id' => $productId,
+                'affected_route_id' => $affectedRouteId,
+                'starts_at_day' => $startDay,
+                'ends_at_day' => $startDay + $duration,
+                'is_active' => false,
+                'is_guaranteed' => $isGuaranteed,
+            ]);
+        }
+
+        // All types failed due to missing resources
+        return null;
     }
 
     /**
@@ -131,5 +205,22 @@ class SpikeEventFactory
             'blizzard' => 1.0, // Binary effect (active/inactive) mostly
             default => 1.0,
         };
+    }
+
+    protected function getRandomTypeFromAllowed(array $allowedTypes): string
+    {
+        $weights = array_intersect_key($this->weights, array_flip($allowedTypes));
+        $totalWeight = array_sum($weights);
+        $rand = rand(1, $totalWeight);
+
+        $currentWeight = 0;
+        foreach ($weights as $type => $weight) {
+            $currentWeight += $weight;
+            if ($rand <= $currentWeight) {
+                return $type;
+            }
+        }
+
+        return array_key_last($weights);
     }
 }
