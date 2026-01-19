@@ -19,7 +19,7 @@ abstract class TransferState extends State
                 Transfer\Cancelled::class,
             ])
             ->allowTransition(Transfer\Draft::class, Transfer\InTransit::class)
-            ->allowTransition(Transfer\InTransit::class, Transfer\Completed::class)
+            ->allowTransition(Transfer\InTransit::class, Transfer\Completed::class, Transfer\Transitions\ToCompleted::class)
             ->allowTransition([Transfer\Draft::class, Transfer\InTransit::class], Transfer\Cancelled::class);
     }
 }
