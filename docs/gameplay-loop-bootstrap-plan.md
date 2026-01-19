@@ -1,7 +1,8 @@
 # Gameplay Loop Bootstrap Plan
 
 **Created**: 2026-01-19  
-**Status**: Draft  
+**Status**: ✅ Complete  
+**Implemented**: 2026-01-19  
 **Purpose**: Make new games start with a realistic, engaging first 5-day loop by seeding inventory breadth, in-transit activity, and enforcing consistent user scoping across seeders/factories.
 
 **Related**:
@@ -40,7 +41,9 @@ User-scoped processing already exists in core loops/listeners:
 
 ### Known mismatch to account for
 
-Transfers currently transition to `completed` in `SimulationService`, but **no `TransferCompleted` event is dispatched**, so inventory/metrics/alerts won’t update from transfers unless the completion event is emitted via a transition class or explicit dispatch.
+~~Transfers currently transition to `completed` in `SimulationService`, but **no `TransferCompleted` event is dispatched**, so inventory/metrics/alerts won't update from transfers unless the completion event is emitted via a transition class or explicit dispatch.~~
+
+> ✅ **Resolved**: Added `ToCompleted` transition class that dispatches `TransferCompleted` event.
 
 ---
 
@@ -203,15 +206,18 @@ Add targeted feature tests that validate bootstrap, separate from “manual setu
 
 ---
 
-## File Summary (Planned)
+## File Summary
 
 | File | Action | Description |
 |------|--------|-------------|
-| `docs/gameplay-loop-bootstrap-plan.md` | Create | This document |
-| `app/Actions/InitializeNewGame.php` | Modify | Extend to inventory + pipeline + spikes bootstrap |
-| `database/seeders/*` | Modify/Create | Separate world vs per-user bootstrapping |
-| `database/factories/*` | Modify | Consistent `user_id` attachment patterns |
-| `tests/Feature/*` | Create | Bootstrap + 5-day loop tests |
+| `app/States/Transfer/Transitions/ToCompleted.php` | ✅ Created | Transition class dispatching `TransferCompleted` |
+| `app/States/TransferState.php` | ✅ Modified | Registered `ToCompleted` transition |
+| `app/Actions/InitializeNewGame.php` | ✅ Modified | Extended with inventory + pipeline seeding |
+| `database/seeders/CoreGameStateSeeder.php` | ✅ Modified | Removed user-scoped inventory |
+| `database/seeders/DatabaseSeeder.php` | ✅ Modified | Uses `InitializeNewGame` for per-user bootstrap |
+| `database/factories/OrderFactory.php` | ✅ Modified | Added `user_id` default + `shipped()` state |
+| `database/factories/TransferFactory.php` | ✅ Modified | Added `user_id` default + `inTransit()` state |
+| `tests/Feature/GameLoopBootstrapTest.php` | ✅ Created | 6 tests for bootstrap + 5-day loop |
 
 ---
 
@@ -227,9 +233,47 @@ Add targeted feature tests that validate bootstrap, separate from “manual setu
 
 ## Success Criteria
 
-- [ ] New games start with per-user inventory across multiple locations and core SKUs
-- [ ] New games start with at least one pipeline item (order/transfer) completing by Day 4
-- [ ] All per-user seeded rows include `user_id`
-- [ ] Works cleanly with `docs/guaranteed-spike-generation-plan.md` (spikes Days 2–7, daily guarantee after Day 1)
-- [ ] A Day 1 → Day 5 simulation produces visible state changes (deliveries + spikes) without requiring immediate player action
+- [x] New games start with per-user inventory across multiple locations and core SKUs
+- [x] New games start with at least one pipeline item (order/transfer) completing by Day 4
+- [x] All per-user seeded rows include `user_id`
+- [x] Works cleanly with `docs/guaranteed-spike-generation-plan.md` (spikes Days 2–7, daily guarantee after Day 1)
+- [x] A Day 1 → Day 5 simulation produces visible state changes (deliveries + spikes) without requiring immediate player action
 
+---
+
+## Implementation Walkthrough
+
+### Transfer State Transitions
+- **`app/States/Transfer/Transitions/ToCompleted.php`** - New transition class that dispatches `TransferCompleted` event
+- **`app/States/TransferState.php`** - Registered the transition for `InTransit` → `Completed`
+
+### Factory Improvements
+- **`database/factories/OrderFactory.php`** - Added `user_id` default and `shipped(int $deliveryDay)` state method
+- **`database/factories/TransferFactory.php`** - Added `user_id` default and `inTransit(int $deliveryDay)` state method
+
+### Bootstrap Action
+**`app/Actions/InitializeNewGame.php`** now seeds:
+- Initial inventory across store and warehouse locations (perishables: 30/20 units, non-perishables: 80/200 units)
+- Shipped orders arriving Day 3
+- In-transit transfers arriving Days 2 and 4
+- Initial spikes (existing from spike plan)
+
+### Seeders
+- **`database/seeders/CoreGameStateSeeder.php`** - Removed user-scoped inventory creation (now handled by `InitializeNewGame`)
+- **`database/seeders/DatabaseSeeder.php`** - Now uses `InitializeNewGame` action for per-user bootstrap
+
+### Tests
+**`tests/Feature/GameLoopBootstrapTest.php`** - 6 new tests:
+1. Inventory across multiple locations
+2. Pipeline activity (transfers arriving Days 2-4)
+3. Initial spikes seeded
+4. 5-day loop with inventory changes
+5. User isolation (no data leakage)
+6. Transfer completion events
+
+### Verification
+
+```
+Tests: 176 passed
+Duration: ~9s
+```
