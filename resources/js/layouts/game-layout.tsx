@@ -5,6 +5,8 @@ import { GameProvider } from '@/contexts/game-context';
 import AppSidebarLayout from '@/layouts/app/app-sidebar-layout';
 import { type BreadcrumbItem } from '@/types';
 
+import { FlashToast } from '@/components/ui/flash-toast';
+
 interface GameLayoutProps {
     children: ReactNode;
     breadcrumbs?: BreadcrumbItem[];
@@ -13,6 +15,7 @@ interface GameLayoutProps {
 export default function GameLayout({ children, breadcrumbs }: GameLayoutProps) {
     return (
         <GameProvider>
+            <FlashToast />
             <AppSidebarLayout breadcrumbs={breadcrumbs}>
                 <GameHeader />
                 <div className="flex-1 overflow-auto">{children}</div>

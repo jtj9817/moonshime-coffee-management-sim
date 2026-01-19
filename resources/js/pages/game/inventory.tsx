@@ -131,11 +131,23 @@ export default function Inventory({ inventory, currentLocation }: InventoryProps
                             })}
                             {inventory.length === 0 && (
                                 <TableRow>
-                                    <TableCell
-                                        colSpan={6}
-                                        className="py-12 text-center text-stone-500"
-                                    >
-                                        No inventory items found
+                                    <TableCell colSpan={6} className="h-64 text-center">
+                                        <div className="flex flex-col items-center justify-center gap-4">
+                                            <div className="rounded-full bg-stone-100 p-4 dark:bg-stone-900">
+                                                <Package className="h-8 w-8 text-stone-300" />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <h3 className="font-semibold text-stone-900 dark:text-white">Pantry is empty</h3>
+                                                <p className="text-stone-500 dark:text-stone-400 text-sm max-w-xs mx-auto">
+                                                    You have no stock in this location. Visit Procurement to order supplies.
+                                                </p>
+                                            </div>
+                                            <Link href="/game/ordering">
+                                                <Button variant="outline" className="mt-2 text-amber-600 hover:text-amber-700 hover:bg-amber-50">
+                                                    Go to Procurement
+                                                </Button>
+                                            </Link>
+                                        </div>
                                     </TableCell>
                                 </TableRow>
                             )}
