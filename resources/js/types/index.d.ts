@@ -98,6 +98,8 @@ export interface RouteModel {
     capacity: number;
     is_active: boolean;
     weather_vulnerability: boolean;
+    is_premium?: boolean;
+    blocked_reason?: string | null;
     source?: LocationModel;
     target?: LocationModel;
 }
