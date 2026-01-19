@@ -21,5 +21,6 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call(CoreGameStateSeeder::class);
+        $this->call(GraphSeeder::class);
     }
 }
