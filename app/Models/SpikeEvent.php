@@ -25,6 +25,7 @@ class SpikeEvent extends Model
         'starts_at_day',
         'ends_at_day',
         'is_active',
+        'is_guaranteed',
         'meta',
     ];
 
@@ -34,6 +35,7 @@ class SpikeEvent extends Model
         'starts_at_day' => 'integer',
         'ends_at_day' => 'integer',
         'is_active' => 'boolean',
+        'is_guaranteed' => 'boolean',
         'meta' => 'array',
         'user_id' => 'integer',
     ];

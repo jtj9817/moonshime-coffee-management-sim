@@ -15,6 +15,11 @@ class GameState extends Model
         'cash',
         'xp',
         'day',
+        'spike_cooldowns',
+    ];
+
+    protected $casts = [
+        'spike_cooldowns' => 'array',
     ];
 
     public function user(): BelongsTo
