@@ -8,11 +8,11 @@
 
 This document provides a comprehensive analysis of the gameplay loop mechanics in Moonshine Coffee Management Sim. Key findings:
 
-- **Initial State:** Players start at Day 1 with $10,000 cash, 0 XP, and baseline inventory
-- **Loop Structure:** Player-initiated turn-based system with three-phase tick (events, physics, analysis)
+- **Initial State:** Players start at Day 1 with $10,000 cash, 0 XP, baseline inventory, and seeded pipeline activity
+- **Loop Structure:** Player-initiated turn-based system; day increments first, then event/physics/analysis ticks
 - **End Condition:** No hard day limit - designed for indefinite sandbox play
 - **Decision Tracking:** All player actions persisted via PostgreSQL with `user_id` foreign keys
-- **Reset Feasibility:** Low-medium effort (~2-3 hours, 7 files) with inventory table migration as main blocker
+- **Reset Feasibility:** Low effort (~1-2 hours, 6 files) with no schema blockers
 
 ---
 
@@ -20,18 +20,15 @@ This document provides a comprehensive analysis of the gameplay loop mechanics i
 
 ### 1.1 Game State Initialization
 
-**Location:** `app/Providers/GameServiceProvider.php` (lines 46-55)
+**Location:** `app/Http/Middleware/HandleInertiaRequests.php` (`getGameState`) and `app/Actions/InitializeNewGame.php`
 
-When a new player authenticates, the game creates their initial state:
+When an authenticated user loads the game, the state is created (if missing) and per-user seeding runs for a fresh game:
 
 ```php
-GameState::firstOrCreate([
-    'user_id' => auth()->id()
-], [
-    'cash' => 1_000_000,  // $10,000 stored in cents
-    'xp' => 0,
-    'day' => 1
-]);
+$gameState = GameState::firstOrCreate(
+    ['user_id' => $user->id],
+    ['cash' => 1000000, 'xp' => 0, 'day' => 1]
+);
 ```
 
 ### 1.2 Initial Values
@@ -49,13 +46,18 @@ GameState::firstOrCreate([
 
 **Seeded via:** `database/seeders/DatabaseSeeder.php`
 
-- **3 Locations:** Roastery HQ, Uptown Kiosk, Lakeside Cafe
-- **6 Products:** Coffee beans, milk, sugar, cups, lids, sleeves
-- **5 Vendors:** Suppliers with varying reliability scores
-- **7 Routes:** Logistics connections between locations
-- **0 Orders:** Empty order history
-- **0 Transfers:** No pending transfers
-- **0 Alerts:** No active alerts
+**Global world data:**
+- **Locations:** Vendor/warehouse/store/hub graph (12 total from `GraphSeeder` + `CoreGameStateSeeder`)
+- **Products:** 5 core SKUs (beans, milk, cups)
+- **Vendors:** 3 suppliers (Bean Baron, Dairy King, General Supplies Co)
+- **Routes:** 28 logistics routes connecting the graph
+
+**Per-user game data (fresh game via `InitializeNewGame`):**
+- **Inventory:** Baseline stock per location (store + warehouse + secondary stores)
+- **Orders:** 1 shipped order seeded to arrive on Day 3
+- **Transfers:** 2 in-transit transfers seeded to arrive on Days 2 and 4
+- **Spike events:** 3-5 guaranteed spikes scheduled across Days 2-7
+- **Alerts:** None by default
 
 ### 1.4 Database Schema
 
@@ -88,99 +90,97 @@ Schema::create('game_states', function (Blueprint $table) {
 
 ### 2.2 Three-Phase Tick System
 
-The simulation engine executes three sequential phases wrapped in a database transaction:
+The simulation engine increments the day and then runs three sequential phases inside a database transaction:
 
-#### **Phase 1: Event Tick** (lines 44-72)
+#### **Phase 1: Event Tick** (lines 45-78)
 
-Handles time-based game events:
+Handles time-based spike lifecycle and scheduling:
 
 ```php
-protected function eventTick(): void
+protected function processEventTick(int $day): void
 {
-    // End active spikes that expired
-    SpikeEvent::where('user_id', $this->gameState->user_id)
+    $userId = $this->gameState->user_id;
+    $constraintChecker = app(SpikeConstraintChecker::class);
+
+    // End spikes that reach their ends_at_day
+    SpikeEvent::where('user_id', $userId)
         ->where('is_active', true)
-        ->where('ends_at_day', '<=', $this->gameState->day)
-        ->update(['is_active' => false]);
+        ->where('ends_at_day', '<=', $day)
+        ->get()
+        ->each(function (SpikeEvent $spike) {
+            $spike->update(['is_active' => false]);
+            event(new SpikeEnded($spike));
+        });
 
-    // Start pending spikes that reached start day
-    SpikeEvent::where('user_id', $this->gameState->user_id)
+    // Ensure at least one spike covers today (after Day 1)
+    $this->ensureGuaranteedSpike($day);
+
+    // Start spikes that reach their starts_at_day
+    SpikeEvent::where('user_id', $userId)
         ->where('is_active', false)
-        ->where('starts_at_day', '<=', $this->gameState->day)
-        ->where('ends_at_day', '>', $this->gameState->day)
-        ->update(['is_active' => true]);
+        ->where('starts_at_day', '<=', $day)
+        ->where('ends_at_day', '>', $day)
+        ->get()
+        ->each(function (SpikeEvent $spike) use ($constraintChecker, $day) {
+            $spike->update(['is_active' => true]);
+            event(new SpikeOccurred($spike));
+            $constraintChecker->recordSpikeStarted($this->gameState, $spike->type, $day);
+        });
 
-    // Generate new future spike event
-    $this->generateRandomSpike();
+    // Optionally schedule a future spike when constraints allow
+    $this->scheduleOptionalSpike($day, $constraintChecker);
 }
 ```
 
 **Actions:**
 - ✅ Deactivate expired demand spikes (`ends_at_day <= current_day`)
+- ✅ Ensure a guaranteed spike covers today (after Day 1)
 - ✅ Activate scheduled spikes (`starts_at_day <= current_day`)
-- ✅ Generate new random spike for future days
-- ✅ Trigger spike-related events (via Laravel event system)
+- ✅ Schedule optional future spikes when constraints allow
 
-#### **Phase 2: Physics Tick** (lines 74-92)
+#### **Phase 2: Physics Tick** (lines 84-104)
 
-Resolves logistics and deliveries:
+Resolves logistics and deliveries via state transitions:
 
 ```php
-protected function physicsTick(): void
+protected function processPhysicsTick(int $day): void
 {
-    // Complete transfers that arrived
-    Transfer::where('user_id', $this->gameState->user_id)
-        ->where('status', 'In Transit')
-        ->where('delivery_day', '<=', $this->gameState->day)
-        ->update(['status' => 'Completed']);
+    $userId = $this->gameState->user_id;
 
-    // Deliver orders that arrived
-    $deliveredOrders = Order::where('user_id', $this->gameState->user_id)
-        ->where('status', 'Shipped')
-        ->where('delivery_day', '<=', $this->gameState->day)
-        ->get();
+    Transfer::where('user_id', $userId)
+        ->whereState('status', InTransit::class)
+        ->where('delivery_day', '<=', $day)
+        ->get()
+        ->each(fn ($transfer) => $transfer->status->transitionTo(Completed::class));
 
-    foreach ($deliveredOrders as $order) {
-        $order->update(['status' => 'Delivered']);
-        // Update inventory with delivered items
-        $this->processOrderDelivery($order);
-    }
+    Order::where('user_id', $userId)
+        ->whereState('status', Shipped::class)
+        ->where('delivery_day', '<=', $day)
+        ->get()
+        ->each(fn ($order) => $order->status->transitionTo(Delivered::class));
 }
 ```
 
 **Actions:**
 - 🚚 Complete transfers where `delivery_day <= current_day`
 - 📦 Deliver orders where `delivery_day <= current_day`
-- 📊 Update inventory quantities when goods arrive
-- 💰 Apply storage costs (if implemented)
-- 🗑️ Decay perishables (if implemented)
+- 📊 Inventory updates and alerts occur via event listeners on delivery transitions
+- 💰 Apply storage costs and 🗑️ decay perishables via `TimeAdvanced` listeners
 
-#### **Phase 3: Analysis Tick** (lines 94-100)
+#### **Phase 3: Analysis Tick** (lines 106-112)
 
-Runs pathfinding and alert generation:
+Runs isolation analysis and alert generation:
 
 ```php
-protected function analysisTick(): void
+protected function processAnalysisTick(int $day): void
 {
-    // Run BFS pathfinding to detect isolated locations
-    $pathfinder = new PathfindingService($this->gameState->user_id);
-    $isolatedLocations = $pathfinder->findIsolatedLocations();
-
-    // Generate alerts for unreachable inventory
-    foreach ($isolatedLocations as $location) {
-        Alert::create([
-            'user_id' => $this->gameState->user_id,
-            'type' => 'isolation',
-            'severity' => 'high',
-            'message' => "Location {$location->name} has no viable logistics routes"
-        ]);
-    }
+    app(GenerateIsolationAlerts::class)->handle($this->gameState->user_id);
 }
 ```
 
 **Actions:**
-- 🔍 Run BFS algorithm to detect unreachable locations
-- ⚠️ Generate isolation alerts for stranded inventory
+- 🔍 Detect isolated locations
+- ⚠️ Generate isolation alerts
 - 📈 Recalculate KPIs (cash flow, inventory value)
 - 🎯 Generate suggested actions for dashboard
 
@@ -188,16 +188,19 @@ protected function analysisTick(): void
 
 ```php
 DB::transaction(function () {
-    $this->eventTick();
-    $this->physicsTick();
-    $this->analysisTick();
-
-    // Atomic increment ensures consistency
     $this->gameState->increment('day');
+    $this->gameState->refresh();
+    $day = $this->gameState->day;
+
+    $this->processEventTick($day);
+    $this->processPhysicsTick($day);
+    $this->processAnalysisTick($day);
+
+    event(new TimeAdvanced($day, $this->gameState));
 });
 ```
 
-**Why Transaction?** Ensures all three phases complete or none do (prevents partial state corruption)
+**Why Transaction?** Ensures day increment + tick phases are atomic (prevents partial state corruption)
 
 ---
 
@@ -394,12 +397,13 @@ Schema::create('alerts', function (Blueprint $table) {
 
 **Reputation Calculation:**
 ```php
-// app/Http/Middleware/HandleInertiaRequests.php:65
+// app/Http/Middleware/HandleInertiaRequests.php
 $reputation = 85;
-$unreadAlerts = Alert::where('user_id', $userId)->where('is_read', false)->count();
-$reputation -= min(15, $unreadAlerts * 3);  // -3 per alert, capped at -15
-$reputation = max(0, min(100, $reputation));
+$alertCount = Alert::where('is_read', false)->count();
+$reputation -= min(15, $alertCount * 3);  // -3 per alert, capped at -15
+return max(0, min(100, $reputation));
 ```
+Note: current implementation uses global unread alerts (not user-scoped).
 
 ### 4.5 Strategy Changes (Future)
 
@@ -448,46 +452,40 @@ Alert::where('user_id', auth()->id())
 
 ### 5.2 Middleware Sharing Strategy
 
-**File:** `app/Http/Middleware/HandleInertiaRequests.php` (lines 43-78)
+**File:** `app/Http/Middleware/HandleInertiaRequests.php` (lines 43-112)
 
-On **every authenticated request** to game routes:
+On each request, `game` is lazily resolved for authenticated users:
 
 ```php
 public function share(Request $request): array
 {
-    $gameState = GameState::firstOrCreate([
-        'user_id' => auth()->id()
-    ], [
-        'cash' => 1_000_000,
-        'xp' => 0,
-        'day' => 1
-    ]);
-
     return [
         ...parent::share($request),
-        'game' => [
-            'state' => [
-                'cash' => $gameState->cash,
-                'xp' => $gameState->xp,
-                'day' => $gameState->day,
-                'level' => floor($gameState->xp / 1000) + 1,
-                'reputation' => $this->calculateReputation($gameState),
-                'strikes' => $this->calculateStrikes($gameState)
-            ],
-            'locations' => Location::all(),
-            'products' => Product::all(),
-            'vendors' => Vendor::all(),
-            'alerts' => Alert::where('user_id', $gameState->user_id)
-                            ->where('is_read', false)
-                            ->orderBy('created_at', 'desc')
-                            ->get(),
-            'currentSpike' => SpikeEvent::where('user_id', $gameState->user_id)
-                                       ->where('is_active', true)
-                                       ->first()
-        ]
+        'name' => config('app.name'),
+        'auth' => [
+            'user' => $request->user(),
+        ],
+        'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+        'game' => fn () => $request->user() ? $this->getGameData($request->user()) : null,
+    ];
+}
+
+protected function getGameData(User $user): array
+{
+    return [
+        'state' => $this->getGameState($user),
+        'locations' => Location::select('id', 'name', 'address', 'max_storage')->get(),
+        'products' => Product::with('vendors:id,name')
+            ->select('id', 'name', 'category', 'is_perishable', 'storage_cost')
+            ->get(),
+        'vendors' => Vendor::select('id', 'name', 'reliability_score', 'metrics')->get(),
+        'alerts' => Alert::where('is_read', false)->latest()->take(10)->get(),
+        'currentSpike' => SpikeEvent::where('is_active', true)->first(),
     ];
 }
 ```
+
+Note: alerts and current spikes are not yet scoped per-user in the middleware.
 
 ### 5.3 Frontend Access Pattern
 
@@ -549,9 +547,9 @@ Cache::remember("game_state_{$userId}", 60, function () use ($userId) {
 
 ### 6.1 Feasibility Assessment
 
-**Effort:** Low-Medium (2-3 hours)
-**Files Modified:** 7
-**Complexity:** Simple database cleanup with one migration blocker
+**Effort:** Low (1-2 hours)
+**Files Modified:** 6
+**Complexity:** Simple database cleanup and UI wiring (no schema blocker)
 
 ### 6.2 Implementation Plan
 
@@ -580,7 +578,7 @@ public function resetGame(Request $request)
             'day' => 1
         ]);
 
-        // Reset inventory (REQUIRES user_id column - see Step 3)
+        // Reset inventory (user-scoped inventories already exist)
         Inventory::where('user_id', $userId)->delete();
         // OR: Update to baseline quantities
         // Inventory::where('user_id', $userId)->update(['quantity' => 0]);
@@ -601,48 +599,11 @@ Route::post('/game/reset', [GameController::class, 'resetGame'])
     ->middleware(['auth', 'verified']);
 ```
 
-#### **Step 3: Fix Inventory Table (Migration Required)**
+#### **Step 3: Inventory Table Status (Already Addressed)**
 
-**Current Issue:** `inventories` table has NO `user_id` column
+**Current State:** `inventories` is already scoped by `user_id` with a unique constraint on (`user_id`, `location_id`, `product_id`).
 
-**Migration:** `database/migrations/2026_01_XX_add_user_id_to_inventories.php`
-
-```php
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
-
-return new class extends Migration
-{
-    public function up(): void
-    {
-        Schema::table('inventories', function (Blueprint $table) {
-            $table->foreignId('user_id')
-                  ->after('id')
-                  ->constrained()
-                  ->cascadeOnDelete();
-
-            // Update unique constraint to include user_id
-            $table->dropUnique(['location_id', 'product_id']);
-            $table->unique(['user_id', 'location_id', 'product_id']);
-        });
-    }
-
-    public function down(): void
-    {
-        Schema::table('inventories', function (Blueprint $table) {
-            $table->dropForeign(['user_id']);
-            $table->dropColumn('user_id');
-            $table->unique(['location_id', 'product_id']);
-        });
-    }
-};
-```
-
-**Run Migration:**
-```bash
-php artisan migrate
-```
+**Reference Migration:** `database/migrations/2026_01_17_184437_add_location_id_to_orders_table.php`
 
 #### **Step 4: Frontend Reset Button**
 
@@ -942,18 +903,16 @@ public function exportSaveData(Request $request)
 |------|-------|------------|------|
 | Backend reset logic | 1 | Low | 20 min |
 | Route definition | 1 | Trivial | 5 min |
-| Inventory user_id migration | 2 | Low | 30 min |
 | Frontend button component | 1 | Low | 30 min |
 | Confirmation dialog | 1 | Low | 20 min |
 | UI integration | 1 | Trivial | 10 min |
 | Feature tests | 1 | Low | 45 min |
-| **TOTAL** | **8 files** | **Low-Medium** | **~2.5 hours** |
+| **TOTAL** | **6 files** | **Low** | **~1.5 hours** |
 
 ### 6.5 Risks & Blockers
 
 | Risk | Impact | Mitigation |
 |------|--------|------------|
-| **Inventory migration** | High (data loss if wrong) | Test on staging, backup DB first |
 | **Cascade delete failures** | Medium (orphaned data) | Verify foreign key constraints |
 | **Cache invalidation** | Low (stale data shown) | Force full page reload after reset |
 | **Race conditions** | Low (concurrent resets) | Use database transaction |
@@ -970,7 +929,8 @@ public function exportSaveData(Request $request)
 | `app/Models/GameState.php` | Game state model | Full file |
 | `app/Services/SimulationService.php` | Day advancement engine | 24-100 (three-phase tick) |
 | `app/Http/Controllers/GameController.php` | API endpoints | `advanceDay()`, `placeOrder()`, `createTransfer()` |
-| `app/Providers/GameServiceProvider.php` | Initialization & DI | 46-55 (firstOrCreate) |
+| `app/Providers/GameServiceProvider.php` | Service bindings + event wiring | Full file |
+| `app/Actions/InitializeNewGame.php` | Per-user game bootstrapping | Full file |
 | `app/Http/Middleware/HandleInertiaRequests.php` | State sharing | 43-78 (share method) |
 | `database/migrations/2026_01_16_*_create_game_states_table.php` | Schema definition | Full file |
 
@@ -992,9 +952,9 @@ public function exportSaveData(Request $request)
 | `orders` | Purchase decisions | `user_id`, `vendor_id`, `total_cost`, `delivery_day` |
 | `order_items` | Order line items | `order_id`, `product_id`, `quantity` |
 | `transfers` | Inventory movements | `user_id`, `source_location_id`, `target_location_id` |
-| `spike_events` | Demand spikes | `user_id`, `starts_at_day`, `ends_at_day`, `is_active` |
+| `spike_events` | Demand spikes | `user_id`, `starts_at_day`, `ends_at_day`, `is_active`, `is_guaranteed` |
 | `alerts` | System notifications | `user_id`, `type`, `severity`, `is_read` |
-| `inventories` | Stock levels | `location_id`, `product_id`, `quantity` ⚠️ NO user_id |
+| `inventories` | Stock levels | `user_id`, `location_id`, `product_id`, `quantity` |
 
 ---
 
@@ -1011,10 +971,18 @@ public function exportSaveData(Request $request)
 │                    DATABASE TRANSACTION                      │
 │                                                              │
 │  ┌──────────────────────────────────────────────────────┐  │
+│  ┌──────────────────────────────────────────────────────┐  │
+│  │  DAY INCREMENT                                       │  │
+│  │  └─ gameState->increment('day')                      │  │
+│  └──────────────────────────────────────────────────────┘  │
+│                             │                                │
+│                             ▼                                │
+│  ┌──────────────────────────────────────────────────────┐  │
 │  │  PHASE 1: EVENT TICK                                 │  │
 │  │  ├─ End expired spikes (ends_at_day <= current_day)  │  │
-│  │  ├─ Start pending spikes (starts_at_day <= day)      │  │
-│  │  └─ Generate new random spike for future             │  │
+│  │  ├─ Ensure guaranteed spike for today                │  │
+│  │  ├─ Start scheduled spikes (starts_at_day <= day)    │  │
+│  │  └─ Schedule optional future spike                   │  │
 │  └──────────────────────────────────────────────────────┘  │
 │                             │                                │
 │                             ▼                                │
@@ -1022,22 +990,19 @@ public function exportSaveData(Request $request)
 │  │  PHASE 2: PHYSICS TICK                               │  │
 │  │  ├─ Complete transfers (delivery_day <= current_day) │  │
 │  │  ├─ Deliver orders (delivery_day <= current_day)     │  │
-│  │  ├─ Update inventory quantities                      │  │
-│  │  ├─ Apply storage costs                              │  │
-│  │  └─ Decay perishables                                │  │
+│  │  ├─ Inventory updates via delivery listeners         │  │
+│  │  ├─ Apply storage costs (TimeAdvanced)               │  │
+│  │  └─ Decay perishables (TimeAdvanced)                 │  │
 │  └──────────────────────────────────────────────────────┘  │
 │                             │                                │
 │                             ▼                                │
 │  ┌──────────────────────────────────────────────────────┐  │
 │  │  PHASE 3: ANALYSIS TICK                              │  │
-│  │  ├─ Run BFS pathfinding (find isolated locations)    │  │
+│  │  ├─ Detect isolated locations                        │  │
 │  │  ├─ Generate isolation alerts                        │  │
 │  │  ├─ Recalculate KPIs (cash flow, inventory value)    │  │
 │  │  └─ Generate suggested actions                       │  │
 │  └──────────────────────────────────────────────────────┘  │
-│                             │                                │
-│                             ▼                                │
-│                   gameState->increment('day')                │
 │                                                              │
 └────────────────────────────┬────────────────────────────────┘
                              │
@@ -1063,10 +1028,10 @@ public function exportSaveData(Request $request)
 ## 9. Answers Summary
 
 ### Q1: What is the initial state of the gameplay loop?
-**Answer:** Players start at Day 1 with $10,000 cash, 0 XP, level 1, 85 reputation, and 0 strikes. The world is pre-seeded with 3 locations, 6 products, 5 vendors, and 7 routes. No orders, transfers, or alerts exist at start.
+**Answer:** Players start at Day 1 with $10,000 cash, 0 XP, level 1, 85 reputation, and 0 strikes. The world graph (locations, routes), vendors, and products are pre-seeded. Per-user state includes baseline inventory, 1 shipped order (arrives Day 3), 2 in-transit transfers (arrive Days 2 and 4), and 3-5 initial spikes scheduled for Days 2-7. Alerts start empty.
 
 ### Q2: How does the gameplay loop evolve after Day 1?
-**Answer:** Player clicks "Next Day" → triggers three-phase tick (events, physics, analysis) → day increments. Spikes activate/end, orders/transfers complete, inventory updates, alerts generate. The loop is player-initiated with no automatic progression.
+**Answer:** Player clicks "Next Day" → day increments → three-phase tick (events, physics, analysis) runs. Spikes activate/end, orders/transfers complete, inventory updates via listeners, and alerts generate. The loop is player-initiated with no automatic progression.
 
 ### Q3: How should the gameplay loop resolve? Is it hard-capped at Day 7?
 **Answer:** **No end condition exists.** The game is designed for indefinite sandbox play. The Day 30 counter is cosmetic UI only—players can advance beyond it. No day cap, game-over state, or victory/defeat conditions are implemented.
@@ -1081,7 +1046,7 @@ public function exportSaveData(Request $request)
 All actions are queryable for history/analytics.
 
 ### Q5: If a "Reset" feature is implemented, how much of the codebase would need to be changed?
-**Answer:** **7 files, ~2-3 hours effort.** Main blocker is adding `user_id` to `inventories` table (requires migration). Otherwise, straightforward database cleanup in transaction with confirmation dialog UI. No architectural changes needed.
+**Answer:** **6 files, ~1-2 hours effort.** No schema blocker now that `inventories` is user-scoped. Implementation is straightforward cleanup in a transaction with a confirmation dialog UI.
 
 ---
 
