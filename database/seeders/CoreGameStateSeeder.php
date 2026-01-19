@@ -2,19 +2,23 @@
 
 namespace Database\Seeders;
 
-use App\Models\Inventory;
 use App\Models\Location;
 use App\Models\Product;
 use App\Models\Vendor;
 use Illuminate\Database\Seeder;
 
+/**
+ * Seeds global world data: vendors, products, and one main location.
+ * Per-user inventory is handled by InitializeNewGame action.
+ */
 class CoreGameStateSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Create Main Store
-        $location = Location::factory()->create([
+        // 1. Create Main Store (additional locations seeded by GraphSeeder)
+        Location::factory()->create([
             'name' => 'Moonshine Central',
+            'type' => 'store',
             'max_storage' => 1000,
         ]);
 
@@ -64,23 +68,6 @@ class CoreGameStateSeeder extends Seeder
         $dairyVendor->products()->attach([$wholeMilk->id, $oatMilk->id]);
         $suppliesVendor->products()->attach([$cups->id]);
 
-        // 5. Initialize Inventory
-        Inventory::create([
-            'location_id' => $location->id,
-            'product_id' => $arabicaBeans->id,
-            'quantity' => 50,
-        ]);
-
-        Inventory::create([
-            'location_id' => $location->id,
-            'product_id' => $wholeMilk->id,
-            'quantity' => 20,
-        ]);
-
-        Inventory::factory()->create([
-            'location_id' => $location->id,
-            'product_id' => $cups->id,
-            'quantity' => 500,
-        ]);
+        // Note: Per-user inventory is now seeded by InitializeNewGame action
     }
 }
