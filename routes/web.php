@@ -31,6 +31,7 @@ Route::middleware(['auth', 'verified'])->prefix('game')->name('game.')->group(fu
     Route::post('/transfers', [GameController::class, 'createTransfer'])->name('transfers.store');
     Route::put('/policy', [GameController::class, 'updatePolicy'])->name('policy.update');
     Route::post('/alerts/{alert}/read', [GameController::class, 'markAlertRead'])->name('alerts.read');
+    Route::post('/reset', [GameController::class, 'resetGame'])->name('reset');
 
     // Logistics API
     Route::get('/logistics/routes', [\App\Http\Controllers\LogisticsController::class, 'getRoutes'])->name('logistics.routes');

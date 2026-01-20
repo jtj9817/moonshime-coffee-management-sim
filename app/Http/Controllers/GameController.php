@@ -19,6 +19,8 @@ use App\Models\Transfer;
 use App\Models\Vendor;
 use App\Events\OrderPlaced;
 use App\Services\SimulationService;
+use App\Actions\InitializeNewGame;
+use App\Models\GameState;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -341,6 +343,39 @@ class GameController extends Controller
         $alert->update(['is_read' => true]);
 
         return back();
+    }
+
+    /**
+     * Reset the game to Day 1 state.
+     */
+    public function resetGame(InitializeNewGame $initializer): \Illuminate\Http\RedirectResponse
+    {
+        DB::transaction(function () use ($initializer) {
+            $user = auth()->user();
+
+            // Clear all game data
+            Order::where('user_id', $user->id)->delete();
+            Transfer::where('user_id', $user->id)->delete();
+            Alert::where('user_id', $user->id)->delete();
+            SpikeEvent::where('user_id', $user->id)->delete();
+            Inventory::where('user_id', $user->id)->delete();
+            
+            // Reset GameState
+            $gameState = GameState::where('user_id', $user->id)->first();
+            if ($gameState) {
+                $gameState->update([
+                    'day' => 1,
+                    'cash' => 1000000,
+                    'xp' => 0,
+                    // Reset other fields?
+                ]);
+            }
+
+            // Re-seed
+            $initializer->handle($user);
+        });
+
+        return to_route('game.dashboard')->with('success', 'Game has been reset to Day 1.');
     }
 
     // ==================== Helper Methods ====================

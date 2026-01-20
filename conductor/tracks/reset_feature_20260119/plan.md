@@ -1,8 +1,8 @@
 # Implementation Plan - Reset Feature
 
 ## Phase 1: Backend Reset Endpoint
-- [ ] Task: Add `resetGame` route to `routes/web.php` (POST /game/reset).
-- [ ] Task: Implement `GameController::resetGame` logic with DB transaction and `InitializeNewGame` call.
+- [x] Task: Add `resetGame` route to `routes/web.php` (POST /game/reset).
+- [x] Task: Implement `GameController::resetGame` logic with DB transaction and `InitializeNewGame` call.
 - [ ] Task: Conductor - User Manual Verification 'Backend Reset Endpoint' (Protocol in workflow.md)
 
 ## Phase 2: Frontend Reset UX

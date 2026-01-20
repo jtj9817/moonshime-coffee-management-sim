@@ -46,8 +46,10 @@ class LogisticsController extends Controller
         $routesData = $routes->map(fn(Route $route) => [
             'id' => $route->id,
             'name' => ucfirst($route->transport_mode) . " Route",
-            'source_location_id' => $route->source_id,
-            'target_location_id' => $route->target_id,
+            'source_id' => $route->source_id,
+            'target_id' => $route->target_id,
+            'source' => $route->source,
+            'target' => $route->target,
             'transport_mode' => $route->transport_mode,
             'cost' => $this->logistics->calculateCost($route),
             'transit_days' => $route->transit_days,
@@ -60,7 +62,7 @@ class LogisticsController extends Controller
 
         return response()->json([
             'success' => true,
-            'routes' => $routesData,
+            'data' => $routesData,
         ]);
     }
 
