@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { formatCurrency } from '@/lib/formatCurrency';
 import GameLayout from '@/layouts/game-layout';
 import { VendorModel, type BreadcrumbItem } from '@/types';
 
@@ -131,7 +132,9 @@ export default function Vendors({ vendors }: VendorsProps) {
                                         <p className="text-stone-500">Avg Order</p>
                                         <p className="font-bold">
                                             $
-                                            {vendor.orders_avg_total_cost?.toLocaleString() ?? '0'}
+                                            {vendor.orders_avg_total_cost !== undefined
+                                                ? formatCurrency(vendor.orders_avg_total_cost)
+                                                : '0.00'}
                                         </p>
                                     </div>
                                 </div>

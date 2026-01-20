@@ -11,6 +11,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { formatCurrency } from '@/lib/formatCurrency';
 import { OrderModel } from '@/types';
 
 interface CancelOrderDialogProps {
@@ -65,7 +66,7 @@ export function CancelOrderDialog({
                         <div className="flex justify-between text-sm">
                             <span className="text-stone-500">Refund Amount:</span>
                             <span className="font-bold text-emerald-600 font-mono">
-                                +${order.total_cost.toLocaleString()}
+                                +${formatCurrency(order.total_cost)}
                             </span>
                         </div>
                         <div className="flex justify-between text-sm">

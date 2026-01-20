@@ -16,6 +16,7 @@ import { calcMaxPerishableOrder } from '../services/orderCalculations';
 import { evaluateBulkTierBreakeven } from '../services/skuMath';
 import { chooseBestVendorGivenUrgency } from '../services/vendorService';
 import { SupplierItem, Supplier, Item, DraftOrder, DraftLineItem, OrderWarning, ConsolidationSuggestion } from '../types';
+import { formatCurrency } from '../lib/formatCurrency';
 
 import ProductIcon from './ProductIcon';
 
@@ -236,7 +237,7 @@ const Ordering: React.FC = () => {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-xl border border-stone-200 shadow-sm flex-shrink-0">
             <div>
                <h2 className="text-xl font-bold text-stone-900">Sourcing Catalog</h2>
-               <p className="text-sm text-stone-500">Available Budget: <span className="text-emerald-600 font-bold">${gameState.cash.toLocaleString()}</span></p>
+               <p className="text-sm text-stone-500">Available Budget: <span className="text-emerald-600 font-bold">${formatCurrency(gameState.cash)}</span></p>
             </div>
             
             {/* Target Location Selector */}

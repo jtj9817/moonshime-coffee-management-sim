@@ -22,7 +22,7 @@ class ApplyStorageCosts
             ->sum(DB::raw('inventories.quantity * products.storage_cost'));
 
         if ($totalStorageCost > 0) {
-            $gameState->decrement('cash', (int) $totalStorageCost);
+            $gameState->decrement('cash', round((float) $totalStorageCost, 2));
         }
     }
 }

@@ -11,6 +11,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import GameLayout from '@/layouts/game-layout';
+import { formatCurrency } from '@/lib/formatCurrency';
 import { type BreadcrumbItem } from '@/types';
 
 interface WasteEvent {
@@ -68,7 +69,7 @@ export default function Reports({
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold text-rose-600">
-                                ${totalWasteValue.toLocaleString()}
+                                ${formatCurrency(totalWasteValue)}
                             </div>
                         </CardContent>
                     </Card>
@@ -113,7 +114,7 @@ export default function Reports({
                                                     {item.cause}
                                                 </span>
                                                 <span className="text-stone-500">
-                                                    ${item.amount.toLocaleString()}
+                                                    ${formatCurrency(item.amount)}
                                                 </span>
                                             </div>
                                             <div className="h-2 w-full overflow-hidden rounded-full bg-stone-200 dark:bg-stone-700">
@@ -148,7 +149,7 @@ export default function Reports({
                                             <div className="mb-1 flex items-center justify-between text-sm">
                                                 <span className="font-medium">{item.location}</span>
                                                 <span className="text-stone-500">
-                                                    ${item.amount.toLocaleString()}
+                                                    ${formatCurrency(item.amount)}
                                                 </span>
                                             </div>
                                             <div className="h-2 w-full overflow-hidden rounded-full bg-stone-200 dark:bg-stone-700">
@@ -197,7 +198,7 @@ export default function Reports({
                                     <TableCell className="capitalize">{event.cause}</TableCell>
                                     <TableCell className="text-right">{event.quantity}</TableCell>
                                     <TableCell className="text-right text-rose-600">
-                                        ${event.value.toLocaleString()}
+                                        ${formatCurrency(event.value)}
                                     </TableCell>
                                     <TableCell className="text-stone-500">{event.date}</TableCell>
                                 </TableRow>

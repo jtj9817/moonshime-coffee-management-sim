@@ -21,6 +21,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { useGame } from '@/contexts/game-context';
+import { formatCurrency } from '@/lib/formatCurrency';
 import { RouteModel } from '@/types';
 
 import { RouteCapacityMeter } from './route-capacity-meter';
@@ -375,17 +376,17 @@ export function NewOrderDialog({
                         <div className="flex flex-col gap-2 border-b border-stone-200 pb-2 mb-2 dark:border-stone-700">
                             <div className="flex justify-between text-sm">
                                 <span className="text-stone-500">Items Subtotal</span>
-                                <span>${itemsSubtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                                <span>${formatCurrency(itemsSubtotal)}</span>
                             </div>
                             <div className="flex justify-between text-sm">
                                 <span className="text-stone-500">Shipping Cost</span>
-                                <span>${shippingCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                                <span>${formatCurrency(shippingCost)}</span>
                             </div>
                         </div>
 
                         <div className="flex justify-between font-bold text-lg">
                             <span>Total Cost</span>
-                            <span>${totalCost.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                            <span>${formatCurrency(totalCost)}</span>
                         </div>
 
                         {/* Error Messages */}
@@ -422,11 +423,10 @@ export function NewOrderDialog({
                         disabled={processing || data.items.length === 0 || !calculatedPath || isOverCapacity}
                         className={`bg-amber-600 hover:bg-amber-700 w-full sm:w-auto ${processing ? 'opacity-80' : ''}`}
                     >
-                        {processing ? 'Placing Order...' : `Confirm Order ($${totalCost.toLocaleString()})`}
+                        {processing ? 'Placing Order...' : `Confirm Order ($${formatCurrency(totalCost)})`}
                     </Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
     );
 }
-

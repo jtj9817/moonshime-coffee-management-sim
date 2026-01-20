@@ -11,6 +11,7 @@ import { Link } from 'react-router-dom';
 import { useApp } from '../App';
 import { generateAlerts } from '../services/cockpitService';
 import { Alert, Quest } from '../types';
+import { formatCurrency } from '../lib/formatCurrency';
 
 import SpikeMonitor from './SpikeMonitor';
 
@@ -24,7 +25,7 @@ const QuestCard: React.FC<{ quest: Quest; onClaim: (id: string) => void }> = ({ 
             </span>
             <div className="flex items-center gap-1 text-xs font-bold text-amber-600">
                 {quest.reward.xp} XP
-                {quest.reward.cash && <span className="text-emerald-600 ml-1">+${quest.reward.cash}</span>}
+                {quest.reward.cash && <span className="text-emerald-600 ml-1">+${formatCurrency(quest.reward.cash)}</span>}
             </div>
         </div>
         <h4 className={`font-bold text-sm ${quest.isCompleted ? 'text-emerald-800 line-through' : 'text-stone-900'}`}>{quest.title}</h4>

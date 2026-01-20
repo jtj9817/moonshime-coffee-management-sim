@@ -150,7 +150,7 @@ class GameController extends Controller
         $vendors = Vendor::withCount('orders')
             ->get()
             ->map(function ($vendor) {
-                $vendor->orders_avg_total_cost = $vendor->orders()->avg('total_cost');
+                $vendor->orders_avg_total_cost = (float) $vendor->orders()->avg('total_cost');
 
                 return $vendor;
             });
@@ -362,7 +362,7 @@ class GameController extends Controller
             if ($gameState) {
                 $gameState->update([
                     'day' => 1,
-                    'cash' => 1000000,
+                    'cash' => 10000.00,
                     'xp' => 0,
                     // Reset other fields?
                 ]);
@@ -390,7 +390,7 @@ class GameController extends Controller
         $pendingOrders = Order::where('status', 'pending')->count();
 
         return [
-            ['label' => 'Inventory Value', 'value' => '$'.number_format($totalInventoryValue, 0)],
+            ['label' => 'Inventory Value', 'value' => '$'.number_format($totalInventoryValue, 2)],
             ['label' => 'Low Stock Items', 'value' => $lowStockCount, 'trend' => $lowStockCount > 5 ? 'down' : 'up'],
             ['label' => 'Pending Orders', 'value' => $pendingOrders],
             ['label' => 'Locations', 'value' => Location::count()],
@@ -409,7 +409,7 @@ class GameController extends Controller
                 'type' => 'inventory',
                 'title' => 'Stock Champion',
                 'description' => 'Maintain at least 100 units of each product',
-                'reward' => ['xp' => 100, 'cash' => 500],
+                'reward' => ['xp' => 100, 'cash' => 5.00],
                 'targetValue' => 100,
                 'currentValue' => 75,
                 'isCompleted' => false,
@@ -449,7 +449,7 @@ class GameController extends Controller
 
         return [
             'totalOrders' => $orders->count(),
-            'totalSpent' => $orders->sum('total_cost'),
+            'totalSpent' => (float) $orders->sum('total_cost'),
             'avgDeliveryTime' => 2, // Placeholder
             'onTimeDeliveryRate' => 95, // Placeholder
         ];

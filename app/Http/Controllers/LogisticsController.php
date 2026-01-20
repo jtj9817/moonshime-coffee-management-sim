@@ -104,7 +104,7 @@ class LogisticsController extends Controller
                 'capacity' => $route->capacity,
                 'is_premium' => $this->logistics->isPremiumRoute($route),
             ]),
-            'total_cost' => $path->sum(fn($r) => $this->logistics->calculateCost($r)),
+            'total_cost' => round($path->sum(fn($r) => $this->logistics->calculateCost($r)), 2),
         ]);
     }
 

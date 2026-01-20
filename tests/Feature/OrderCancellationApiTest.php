@@ -11,11 +11,11 @@ use function Pest\Laravel\postJson;
 
 test('authenticated users can cancel shipped orders', function () {
     $user = User::factory()->create();
-    $gameState = GameState::factory()->create(['user_id' => $user->id, 'cash' => 1000]);
+    $gameState = GameState::factory()->create(['user_id' => $user->id, 'cash' => 10.00]);
     $order = Order::factory()->create([
         'user_id' => $user->id,
         'status' => Shipped::class,
-        'total_cost' => 500,
+        'total_cost' => 5.00,
     ]);
 
     actingAs($user)
@@ -27,7 +27,7 @@ test('authenticated users can cancel shipped orders', function () {
         ]);
 
     expect($order->fresh()->status)->toBeInstanceOf(Cancelled::class);
-    expect($gameState->fresh()->cash)->toBe(1500); // 1000 + 500 refund
+    expect($gameState->fresh()->cash)->toBe(15.00); // 10.00 + 5.00 refund
 });
 
 test('users cannot cancel delivered orders', function () {

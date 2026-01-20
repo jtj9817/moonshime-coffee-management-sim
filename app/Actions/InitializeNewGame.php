@@ -27,7 +27,7 @@ class InitializeNewGame
     {
         $gameState = GameState::firstOrCreate(
             ['user_id' => $user->id],
-            ['cash' => 1000000, 'xp' => 0, 'day' => 1]
+            ['cash' => 10000.00, 'xp' => 0, 'day' => 1]
         );
 
         // Only seed state if this is a fresh game (day 1)
@@ -133,7 +133,7 @@ class InitializeNewGame
                     items: [[
                         'product_id' => $product->id,
                         'quantity' => 50,
-                        'cost_per_unit' => 100,
+                        'cost_per_unit' => 1.00,
                     ]],
                     path: $path
                 );

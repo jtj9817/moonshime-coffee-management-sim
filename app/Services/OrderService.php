@@ -61,14 +61,14 @@ class OrderService
 
         return DB::transaction(function () use ($user, $vendor, $targetLocation, $items, $path) {
             // 2. Calculate totals
-            $totalCost = 0;
+            $totalCost = 0.0;
             foreach ($items as $item) {
-                $totalCost += $item['quantity'] * $item['cost_per_unit'];
+                $totalCost += $item['quantity'] * (float) $item['cost_per_unit'];
             }
             
             // Add Logistics Cost
             $logisticsCost = $path->sum(fn($route) => $this->logistics->calculateCost($route));
-            $totalCost += $logisticsCost;
+            $totalCost = round($totalCost + $logisticsCost, 2);
 
             // Transits
             $totalDays = $path->sum('transit_days'); 
@@ -93,7 +93,11 @@ class OrderService
 
             // 4. Create Items
             foreach ($items as $item) {
-                $order->items()->create($item);
+                $order->items()->create([
+                    'product_id' => $item['product_id'],
+                    'quantity' => $item['quantity'],
+                    'cost_per_unit' => round((float) $item['cost_per_unit'], 2),
+                ]);
             }
 
             // 5. Create Shipments

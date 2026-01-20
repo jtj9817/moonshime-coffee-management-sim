@@ -29,7 +29,8 @@ class ToPending extends Transition
             throw new RuntimeException('Game state not found for user.');
         }
 
-        if ($gameState->cash < $this->order->total_cost) {
+        $orderTotal = round((float) $this->order->total_cost, 2);
+        if ($gameState->cash < $orderTotal) {
             throw new RuntimeException('Insufficient funds to place order.');
         }
 

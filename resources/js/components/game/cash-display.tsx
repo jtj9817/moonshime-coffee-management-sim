@@ -7,6 +7,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { formatCurrency } from '@/lib/formatCurrency';
 
 interface CashDisplayProps {
     cash: number;
@@ -47,11 +48,11 @@ export function CashDisplay({ cash, className = '' }: CashDisplayProps) {
                             <span
                                 className={`font-mono font-bold transition-all duration-300 ${getCashColor()} ${delta ? 'scale-105' : 'scale-100'}`}
                             >
-                                ${cash.toLocaleString()}
+                                ${formatCurrency(cash)}
                             </span>
                             {delta && (
                                 <span className={`text-[10px] font-bold ${delta > 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                                    {delta > 0 ? '+' : ''}{delta.toLocaleString()}
+                                    {delta > 0 ? '+' : ''}{formatCurrency(delta)}
                                 </span>
                             )}
                         </div>

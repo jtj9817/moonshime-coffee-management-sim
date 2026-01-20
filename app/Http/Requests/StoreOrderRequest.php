@@ -16,6 +16,25 @@ class StoreOrderRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        if (!$this->has('items')) {
+            return;
+        }
+
+        $items = collect($this->input('items', []))
+            ->map(function (array $item) {
+                if (isset($item['unit_price'])) {
+                    $item['unit_price'] = round((float) $item['unit_price'], 2);
+                }
+
+                return $item;
+            })
+            ->toArray();
+
+        $this->merge(['items' => $items]);
+    }
+
     public function rules(): array
     {
         return [
@@ -26,7 +45,7 @@ class StoreOrderRequest extends FormRequest
             'items' => ['required', 'array', 'min:1'],
             'items.*.product_id' => ['required', 'exists:products,id'],
             'items.*.quantity' => ['required', 'integer', 'min:1'],
-            'items.*.unit_price' => ['required', 'numeric', 'min:0'],
+            'items.*.unit_price' => ['required', 'decimal:0,2', 'min:0'],
         ];
     }
 
@@ -145,9 +164,9 @@ class StoreOrderRequest extends FormRequest
             // 3. Validate Funds
             $shippingCost = $path->sum(fn($r) => $logistics->calculateCost($r));
             $itemsCost = $items->sum(fn($item) => ($item['quantity'] ?? 0) * ($item['unit_price'] ?? 0));
-            $totalCost = $itemsCost + $shippingCost;
+            $totalCost = round($itemsCost + $shippingCost, 2);
 
-            $cash = GameState::where('user_id', auth()->id())->value('cash');
+            $cash = (float) GameState::where('user_id', auth()->id())->value('cash');
 
             if ($cash < $totalCost) {
                 $validator->errors()->add('total', "Insufficient funds. Order total: \${$totalCost}, Available: \${$cash}.");

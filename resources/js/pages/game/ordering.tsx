@@ -15,6 +15,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { formatCurrency } from '@/lib/formatCurrency';
 import GameLayout from '@/layouts/game-layout';
 import { OrderModel, type BreadcrumbItem } from '@/types';
 
@@ -158,7 +159,7 @@ export default function Ordering({ orders, vendorProducts }: OrderingProps) {
                                             </div>
                                         </TableCell>
                                         <TableCell className="text-right font-mono">
-                                            ${order.total_cost.toLocaleString()}
+                                            ${formatCurrency(order.total_cost)}
                                         </TableCell>
                                         <TableCell>{getStatusBadge(order.status)}</TableCell>
                                         <TableCell>

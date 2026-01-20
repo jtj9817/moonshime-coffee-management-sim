@@ -9,7 +9,7 @@ uses(RefreshDatabase::class);
 test('route model has expected attributes', function () {
     $route = Route::factory()->create([
         'transport_mode' => 'Truck',
-        'cost' => 100,
+        'cost' => 1.00,
         'transit_days' => 2,
         'capacity' => 1000,
         'is_active' => true,
@@ -17,7 +17,7 @@ test('route model has expected attributes', function () {
     ]);
 
     expect($route->transport_mode)->toBe('Truck');
-    expect($route->cost)->toBe(100);
+    expect($route->cost)->toBe(1.00);
     expect($route->transit_days)->toBe(2);
     expect($route->capacity)->toBe(1000);
     expect($route->is_active)->toBeTrue();

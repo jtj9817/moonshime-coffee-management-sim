@@ -43,12 +43,11 @@ test('getValidRoutes returns only active routes between source and target', func
 
 test('calculateCost returns correct cost from route base cost', function () {
     $route = Route::factory()->create([
-        'cost' => 150,
+        'cost' => 1.50,
     ]);
 
     $service = new LogisticsService();
     $cost = $service->calculateCost($route);
 
-    expect($cost)->toBe(150);
+    expect($cost)->toBe(1.50);
 });
-

@@ -32,6 +32,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { useGame } from '@/contexts/game-context';
+import { formatCurrency } from '@/lib/formatCurrency';
 import GameLayout from '@/layouts/game-layout';
 import { TransferModel, type BreadcrumbItem } from '@/types';
 
@@ -219,7 +220,7 @@ export default function Transfers({ transfers, suggestions }: TransfersProps) {
                                                         <div className="mt-1">
                                                             <div className="flex items-center justify-between">
                                                                 <p className="text-xs text-stone-600 dark:text-stone-400">
-                                                                    Estimated cost: <span className="font-bold text-stone-900 dark:text-white">${routeInfo.total_cost?.toLocaleString()}</span>
+                                                                    Estimated cost: <span className="font-bold text-stone-900 dark:text-white">${routeInfo.total_cost !== undefined ? formatCurrency(routeInfo.total_cost) : '0.00'}</span>
                                                                 </p>
                                                                 {hasPremiumRoute && (
                                                                     <Badge variant="outline" className="text-[10px] bg-amber-100 border-amber-500 text-amber-700 dark:bg-amber-900/30">Premium Alternative</Badge>

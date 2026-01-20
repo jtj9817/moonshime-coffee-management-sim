@@ -9,6 +9,7 @@ import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 
 import { useOptionalGame } from '@/contexts/game-context';
+import { formatCurrency } from '@/lib/formatCurrency';
 import { AlertModel } from '@/types/index';
 import { FloatingTextEvent } from '../types';
 
@@ -226,7 +227,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <div className="flex flex-col">
                   <span className="text-[10px] text-stone-500 uppercase font-bold tracking-wider">Budget</span>
                   <span className={`text-xl font-mono font-bold flex items-center gap-1 ${gameState.cash < 1000 ? 'text-rose-500 animate-pulse' : 'text-emerald-400'}`}>
-                    <DollarSign size={16} /> {gameState.cash.toLocaleString()}
+                    <DollarSign size={16} /> {formatCurrency(gameState.cash)}
                   </span>
                 </div>
                 <div className="w-px h-8 bg-stone-800"></div>

@@ -25,6 +25,7 @@ import {
 } from 'recharts';
 
 import { useApp } from '../App';
+import { formatCurrency } from '../lib/formatCurrency';
 import { generateMockWasteData, generateMockPolicyChanges } from '../services/wasteService';
 import { WasteEvent, PolicyChangeLog } from '../types';
 
@@ -230,7 +231,7 @@ const WasteReports: React.FC = () => {
                <div className="bg-white p-5 rounded-xl border border-stone-200 shadow-sm">
                   <div className="text-stone-500 text-xs font-bold uppercase tracking-wider mb-2">Total Waste Cost</div>
                   <div className="text-3xl font-bold text-stone-900 flex items-baseline gap-2">
-                     ${totalWasteCost.toLocaleString()}
+                     ${formatCurrency(totalWasteCost)}
                      <span className="text-sm font-medium text-rose-500 flex items-center">
                         <TrendingUp size={14} /> +4.2%
                      </span>

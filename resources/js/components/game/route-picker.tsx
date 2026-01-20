@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
+import { formatCurrency } from '@/lib/formatCurrency';
 import { RouteModel } from '@/types';
 
 interface RoutePickerProps {
@@ -117,7 +118,7 @@ export function RoutePicker({
                                 <div className="grid grid-cols-2 gap-y-1 gap-x-2 text-xs text-stone-500">
                                     <div className="flex items-center gap-1">
                                         <DollarSign className="h-3 w-3" />
-                                        <span>Cost: ${route.cost.toLocaleString()}</span>
+                                        <span>Cost: ${formatCurrency(route.cost)}</span>
                                     </div>
                                     <div className="flex items-center gap-1">
                                         <Clock className="h-3 w-3" />

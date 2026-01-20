@@ -59,11 +59,11 @@ class LogisticsService
      * Calculate the cost of traversing a route, including spike effects.
      *
      * @param Route $route
-     * @return int
+     * @return float
      */
-    public function calculateCost(Route $route): int
+    public function calculateCost(Route $route): float
     {
-        $baseCost = $route->cost;
+        $baseCost = (float) $route->cost;
 
         // Check for active spikes affecting this specific route
         $spikeMultiplier = SpikeEvent::where('affected_route_id', $route->id)
@@ -71,10 +71,10 @@ class LogisticsService
             ->sum('magnitude');
 
         if ($spikeMultiplier > 0) {
-            return (int) ($baseCost * (1 + $spikeMultiplier));
+            return round($baseCost * (1 + $spikeMultiplier), 2);
         }
 
-        return $baseCost;
+        return round($baseCost, 2);
     }
 
     /**
@@ -104,7 +104,7 @@ class LogisticsService
         $adj = [];
         foreach ($routes as $route) {
             $magnitude = $routeSpikes[$route->id] ?? 0;
-            $effectiveCost = (int) ($route->cost * (1 + $magnitude));
+            $effectiveCost = round(((float) $route->cost) * (1 + $magnitude), 2);
 
             $adj[$route->source_id][] = [
                 'route' => $route,

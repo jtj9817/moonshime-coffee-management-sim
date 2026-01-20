@@ -87,7 +87,7 @@ class DAGListenersTest extends TestCase
     public function test_generate_alert_listener_creates_alert()
     {
         $order = Order::factory()->create([
-            'total_cost' => 2000,
+            'total_cost' => 20.00,
         ]);
 
         $event = new OrderPlaced($order);
@@ -100,7 +100,7 @@ class DAGListenersTest extends TestCase
         ]);
 
         $alert = Alert::first();
-        $this->assertStringContainsString('2000', $alert->message);
+        $this->assertStringContainsString('20', $alert->message);
     }
 
     public function test_deduct_cash_listener_deducts_money_successfully()
@@ -108,12 +108,12 @@ class DAGListenersTest extends TestCase
         $user = User::factory()->create();
         $gameState = GameState::factory()->create([
             'user_id' => $user->id,
-            'cash' => 5000,
+            'cash' => 50.00,
         ]);
 
         $order = Order::factory()->create([
             'user_id' => $user->id,
-            'total_cost' => 2000,
+            'total_cost' => 20.00,
         ]);
 
         $event = new OrderPlaced($order);
@@ -123,7 +123,7 @@ class DAGListenersTest extends TestCase
 
         $listener->handle($event);
 
-        $this->assertEquals(3000, $gameState->fresh()->cash);
+        $this->assertEquals(30.00, $gameState->fresh()->cash);
     }
 
     public function test_deduct_cash_listener_throws_exception_if_insufficient_funds()
@@ -131,12 +131,12 @@ class DAGListenersTest extends TestCase
         $user = User::factory()->create();
         $gameState = GameState::factory()->create([
             'user_id' => $user->id,
-            'cash' => 1000,
+            'cash' => 10.00,
         ]);
 
         $order = Order::factory()->create([
             'user_id' => $user->id,
-            'total_cost' => 2000,
+            'total_cost' => 20.00,
         ]);
 
         $event = new OrderPlaced($order);

@@ -24,7 +24,7 @@ test('routes table has strict foreign key constraints and unique index', functio
         'source_id' => $locA->id,
         'target_id' => $locB->id,
         'transport_mode' => 'Truck',
-        'cost' => 100,
+        'cost' => 1.00,
         'transit_days' => 2,
         'capacity' => 1000
     ]);
@@ -35,7 +35,7 @@ test('routes table has strict foreign key constraints and unique index', functio
         'source_id' => $locA->id,
         'target_id' => $locB->id,
         'transport_mode' => 'Truck',
-        'cost' => 200,
+        'cost' => 2.00,
         'transit_days' => 3,
         'capacity' => 2000
     ]);

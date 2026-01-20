@@ -36,10 +36,10 @@ class StateMachinesTest extends TestCase
 
         \App\Models\GameState::factory()->create([
             'user_id' => $user->id,
-            'cash' => 5000,
+            'cash' => 50.00,
         ]);
 
-        $order = Order::factory()->create(['total_cost' => 3000]);
+        $order = Order::factory()->create(['total_cost' => 30.00]);
 
         $order->status->transitionTo(\App\States\Order\Pending::class);
 
@@ -53,10 +53,10 @@ class StateMachinesTest extends TestCase
 
         \App\Models\GameState::factory()->create([
             'user_id' => $user->id,
-            'cash' => 1000,
+            'cash' => 10.00,
         ]);
 
-        $order = Order::factory()->create(['total_cost' => 3000]);
+        $order = Order::factory()->create(['total_cost' => 30.00]);
 
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Insufficient funds to place order.');
@@ -68,11 +68,11 @@ class StateMachinesTest extends TestCase
     {
         $user = \App\Models\User::factory()->create();
         $this->actingAs($user);
-        \App\Models\GameState::factory()->create(['user_id' => $user->id, 'cash' => 10000]);
+        \App\Models\GameState::factory()->create(['user_id' => $user->id, 'cash' => 100.00]);
 
         $route = Route::factory()->create();
         $order = Order::factory()->create([
-            'total_cost' => 1000,
+            'total_cost' => 10.00,
             'user_id' => $user->id,
             'location_id' => $route->target_id,
         ]);

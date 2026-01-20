@@ -23,7 +23,7 @@ class RouteFactory extends Factory
             'source_id' => Location::factory(),
             'target_id' => Location::factory(),
             'transport_mode' => $mode,
-            'cost' => $this->faker->numberBetween(10, 100),
+            'cost' => $this->faker->randomFloat(2, 0.1, 1.0),
             'transit_days' => $this->faker->numberBetween(1, 10),
             'capacity' => 1000,
             'is_active' => true,

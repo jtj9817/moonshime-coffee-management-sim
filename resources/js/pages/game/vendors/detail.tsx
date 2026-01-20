@@ -13,6 +13,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { formatCurrency } from '@/lib/formatCurrency';
 import GameLayout from '@/layouts/game-layout';
 import { OrderModel, ProductModel, VendorModel, type BreadcrumbItem } from '@/types';
 
@@ -121,7 +122,7 @@ export default function VendorDetail({ vendor, metrics }: VendorDetailProps) {
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">
-                                ${metrics.totalSpent.toLocaleString()}
+                                ${formatCurrency(metrics.totalSpent)}
                             </div>
                         </CardContent>
                     </Card>
@@ -217,7 +218,7 @@ export default function VendorDetail({ vendor, metrics }: VendorDetailProps) {
                                                     <Badge variant="outline">{order.status}</Badge>
                                                 </TableCell>
                                                 <TableCell className="text-right">
-                                                    ${order.total_cost.toLocaleString()}
+                                                    ${formatCurrency(order.total_cost)}
                                                 </TableCell>
                                             </TableRow>
                                         ))}

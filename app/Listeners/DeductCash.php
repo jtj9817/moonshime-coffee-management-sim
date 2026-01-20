@@ -39,11 +39,12 @@ class DeductCash
             throw new RuntimeException('Game state not found for user');
         }
 
-        if ($gameState->cash < $order->total_cost) {
+        $orderTotal = round((float) $order->total_cost, 2);
+        if ($gameState->cash < $orderTotal) {
             throw new RuntimeException('Insufficient funds');
         }
 
-        $gameState->decrement('cash', $order->total_cost);
+        $gameState->decrement('cash', $orderTotal);
     }
 
     protected function handleOrderCancelled(OrderCancelled $event): void
@@ -58,7 +59,7 @@ class DeductCash
         $gameState = GameState::where('user_id', $userId)->first();
 
         if ($gameState) {
-            $gameState->increment('cash', $order->total_cost);
+            $gameState->increment('cash', round((float) $order->total_cost, 2));
         }
     }
 }

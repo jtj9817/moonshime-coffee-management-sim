@@ -3,6 +3,7 @@ import { BarChart3, PieChart, TrendingUp } from 'lucide-react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import GameLayout from '@/layouts/game-layout';
+import { formatCurrency } from '@/lib/formatCurrency';
 import { type BreadcrumbItem } from '@/types';
 
 interface AnalyticsProps {
@@ -53,7 +54,7 @@ export default function Analytics({
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">
-                                ${totalInventoryValue.toLocaleString()}
+                                ${formatCurrency(totalInventoryValue)}
                             </div>
                         </CardContent>
                     </Card>
@@ -66,7 +67,7 @@ export default function Analytics({
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">
-                                ${totalSpending.toLocaleString()}
+                                ${formatCurrency(totalSpending)}
                             </div>
                         </CardContent>
                     </Card>
@@ -123,7 +124,7 @@ export default function Analytics({
                                         <div className="mb-1 flex items-center justify-between text-sm">
                                             <span className="font-medium">{cat.category}</span>
                                             <span className="text-stone-500">
-                                                ${cat.amount.toLocaleString()}
+                                                ${formatCurrency(cat.amount)}
                                             </span>
                                         </div>
                                         <div className="h-2 w-full overflow-hidden rounded-full bg-stone-200 dark:bg-stone-700">
@@ -156,7 +157,7 @@ export default function Analytics({
                                             {loc.name}
                                         </h4>
                                         <p className="mt-1 text-2xl font-bold text-amber-600">
-                                            ${loc.inventoryValue.toLocaleString()}
+                                            ${formatCurrency(loc.inventoryValue)}
                                         </p>
                                         <p className="text-xs text-stone-500">Inventory Value</p>
                                     </div>

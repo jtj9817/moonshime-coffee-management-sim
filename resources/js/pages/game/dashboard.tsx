@@ -18,6 +18,7 @@ import { LogisticsStatusWidget } from '@/components/game/LogisticsStatusWidget';
 import ResetGameButton from '@/components/game/reset-game-button';
 import { WelcomeBanner } from '@/components/game/welcome-banner';
 import { Badge } from '@/components/ui/badge';
+import { formatCurrency } from '@/lib/formatCurrency';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useGame } from '@/contexts/game-context';
@@ -54,7 +55,7 @@ function QuestCard({ quest }: { quest: QuestModel }) {
                 <div className="flex items-center gap-1 text-xs font-bold text-amber-600">
                     {quest.reward.xp} XP
                     {quest.reward.cash && (
-                        <span className="ml-1 text-emerald-600">+${quest.reward.cash}</span>
+                        <span className="ml-1 text-emerald-600">+${formatCurrency(quest.reward.cash)}</span>
                     )}
                 </div>
             </div>

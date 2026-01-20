@@ -23,21 +23,21 @@ test('full disruption lifecycle integration', function () {
     $directRoute = Route::factory()->create([
         'source_id' => $locA->id,
         'target_id' => $locC->id,
-        'cost' => 100,
+        'cost' => 1.00,
         'is_active' => true
     ]);
 
     Route::factory()->create([
         'source_id' => $locA->id,
         'target_id' => $locB->id,
-        'cost' => 50,
+        'cost' => 0.50,
         'is_active' => true
     ]);
 
     Route::factory()->create([
         'source_id' => $locB->id,
         'target_id' => $locC->id,
-        'cost' => 50,
+        'cost' => 0.50,
         'is_active' => true
     ]);
 
@@ -74,7 +74,7 @@ test('full disruption lifecycle integration', function () {
         ->assertJson([
             'success' => true,
             'reachable' => true,
-            'total_cost' => 100 // 50 + 50
+            'total_cost' => 1.00 // 0.50 + 0.50
         ]);
     
     $data = $response->json();

@@ -18,7 +18,7 @@ class MultiHopOrderTest extends TestCase
     {
         // Setup
         $user = User::factory()->create();
-        \App\Models\GameState::factory()->create(['user_id' => $user->id, 'cash' => 10000]);
+        \App\Models\GameState::factory()->create(['user_id' => $user->id, 'cash' => 100.00]);
         $vendor = Vendor::factory()->create();
         $vendorLocation = Location::factory()->create(['type' => 'vendor', 'name' => $vendor->name . ' HQ']);
         
@@ -34,7 +34,7 @@ class MultiHopOrderTest extends TestCase
             'source_id' => $vendorLocation->id,
             'target_id' => $hub->id,
             'transport_mode' => 'truck',
-            'cost' => 100,
+            'cost' => 1.00,
             'transit_days' => 2,
             'capacity' => 1000,
             'is_active' => true
@@ -44,7 +44,7 @@ class MultiHopOrderTest extends TestCase
             'source_id' => $hub->id,
             'target_id' => $store->id,
             'transport_mode' => 'van',
-            'cost' => 200,
+            'cost' => 2.00,
             'transit_days' => 1,
             'capacity' => 500,
             'is_active' => true
@@ -66,7 +66,7 @@ class MultiHopOrderTest extends TestCase
                     [
                         'product_id' => $product->id,
                         'quantity' => 100,
-                        'unit_price' => 10.0
+                        'unit_price' => 0.10
                     ]
                 ]
             ]);
@@ -78,11 +78,11 @@ class MultiHopOrderTest extends TestCase
         $this->assertDatabaseHas('orders', [
             'vendor_id' => $vendor->id,
             'location_id' => $store->id,
-            'total_cost' => (100 * 10) + 100 + 200, // Items + Logistics (Wait, logic adds costs differently)
+            'total_cost' => (100 * 0.10) + 1.00 + 2.00, // Items + Logistics
             // Logic: items cost + route cost.
-            // Items: 100 * 10 = 1000.
-            // Route: 100 (Leg 1) + 200 (Leg 2) = 300.
-            // Total: 1300.
+            // Items: 100 * 0.10 = 10.00.
+            // Route: 1.00 (Leg 1) + 2.00 (Leg 2) = 3.00.
+            // Total: 13.00.
         ]);
         
         // Assert Shipments Created
