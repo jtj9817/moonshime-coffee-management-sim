@@ -20,6 +20,7 @@ A high-stakes, professional tycoon-style game where players build a coffee empir
 - **Intelligent Supply Chain Engine:** A high-performance, graph-based logistics engine that simulates physical routes and complex causal event chains, featuring optimized pathfinding and realistic disruption recovery.
 - **Chaos Engine (Spike Events):** A dynamic event system that introduces random disruptions—such as heatwaves or delivery strikes—requiring rapid tactical adaptation.
 - **Mission & Progression System:** Structured challenges and contracts that unlock new locations, advanced upgrades, and higher-tier logistics capabilities.
+- **Game Reset:** A dedicated feature allowing players to restart their campaign from Day 1, ensuring a clean slate for testing strategies or recovering from bankruptcy.
 
 ## Gameplay Mechanics
 - **Hybrid Management:** A flexible system allowing for both granular micromanagement of orders and high-level, policy-driven automation.
