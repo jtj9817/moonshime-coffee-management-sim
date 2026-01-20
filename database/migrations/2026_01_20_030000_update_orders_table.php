@@ -18,7 +18,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('orders', function (Blueprint $table) {
-            $table->foreignId('route_id')->nullable()->constrained();
+            $table->foreignId('route_id')->nullable()->constrained('routes')->nullOnDelete();
             $table->dropColumn('total_transit_days');
         });
     }

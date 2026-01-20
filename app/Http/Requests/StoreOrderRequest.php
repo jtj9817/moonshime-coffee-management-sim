@@ -32,34 +32,45 @@ class StoreOrderRequest extends FormRequest
 
     public function withValidator(Validator $validator): void
     {
+        $validator->after(function (Validator $validator): void {
+            if ($validator->errors()->any()) {
+                return;
+            }
+
             // 1. Find Best Path
             $logistics = app(LogisticsService::class);
-            
+
             // Assume vendor location is the vendor ID for now, or fetch correct location
             // Since we don't have VendorLocation logic easily, we try to use vendor ID as Location ID
             // or fetch the vendor and get its location.
             // But usually the vendor ID and Location ID are different in this seeding.
             // Let's rely on finding a location with type 'vendor' that corresponds to this vendor.
             // However, the GraphSeeder just made vendors locations.
-            // For now, let's assume `vendor_id` from request maps to `Location` if we find it, 
+            // For now, let's assume `vendor_id` from request maps to `Location` if we find it,
             // or we search for the Vendor Location.
-            
+
             $vendorId = $this->input('vendor_id');
+            $locationId = $this->input('location_id');
             $sourceLocationId = $this->input('source_location_id');
+            $sourceLocation = null;
 
             if ($sourceLocationId) {
                 $sourceLocation = \App\Models\Location::find($sourceLocationId);
+                if (!$sourceLocation) {
+                    $validator->errors()->add('source_location_id', 'Selected source location is invalid.');
+                    return;
+                }
             } else {
                 // Try to find a location with this ID first (if Vendor ID == Location ID)
                 $sourceLocation = \App\Models\Location::where('id', $vendorId)->first();
             }
-            
-            // If not found or if the types don't match what we expect, maybe we need to find 
+
+            // If not found or if the types don't match what we expect, maybe we need to find
             // the location associated with the Vendor model?
             // In CoreGameStateSeeder: Vendor created.
-            // In GraphSeeder: Location created with type='vendor'. 
+            // In GraphSeeder: Location created with type='vendor'.
             // They are NOT linked in the seeder explicitly!
-            // This is a disconnect. 
+            // This is a disconnect.
             // BUT, `new-order-dialog.tsx` selects `selectedSourceId` from `vendorLocations`.
             // And sends `vendor_id` as well.
             // Wait, looking at `new-order-dialog.tsx`:
@@ -69,41 +80,52 @@ class StoreOrderRequest extends FormRequest
             // So the backend only knows the Vendor ID.
             // We need to find the Location for that Vendor.
             // If the Vendor ID != Location ID, we have a problem finding the start node.
-            
-            // Assumption: we pick the first 'vendor' type location that provides the products? 
+
+            // Assumption: we pick the first 'vendor' type location that provides the products?
             // Or we assume 1-to-1 mapping?
             // "Bean Baron" Vendor (ID 1) vs "Bean Baron" Location (ID 105).
             // Currently, there is NO LINK.
             // Verify `Vendor` model...
             // `Vendor` model has `products`. It doesn't have `location_id`.
             // `Location` has `type='vendor'`.
-            
-            // Fix: We should update the Request to accept `source_location_id` OR 
+
+            // Fix: We should update the Request to accept `source_location_id` OR
             // we find any vendor location.
             // `InitializeNewGame` just picked `Location::where('type', 'vendor')->first()`.
             // This implies ANY vendor location is fine? That's weird.
             // Realistically, the Vendor should have a location.
-            
+
             // For now, let's assume we search for a Location with the same name as the Vendor?
-            // OR, given the implementation plan didn't address linking Vendor->Location, 
+            // OR, given the implementation plan didn't address linking Vendor->Location,
             // I should find the best matching location.
-            $vendor = \App\Models\Vendor::find($vendorId);
-            $sourceLocation = \App\Models\Location::where('type', 'vendor')
-                ->where('name', 'like', '%' . $vendor->name . '%') // Fuzzy match
-                ->first();
-                
             if (!$sourceLocation) {
-                 // Fallback to any vendor location
-                 $sourceLocation = \App\Models\Location::where('type', 'vendor')->first();
+                $vendor = \App\Models\Vendor::find($vendorId);
+                if (!$vendor) {
+                    $validator->errors()->add('vendor_id', 'Selected vendor is invalid.');
+                    return;
+                }
+
+                $sourceLocation = \App\Models\Location::where('type', 'vendor')
+                    ->where('name', 'like', '%' . $vendor->name . '%') // Fuzzy match
+                    ->first();
             }
 
             if (!$sourceLocation) {
-                $validator->errors()->add('vendor_id', "No distribution center found for this vendor.");
+                // Fallback to any vendor location
+                $sourceLocation = \App\Models\Location::where('type', 'vendor')->first();
+            }
+
+            if (!$sourceLocation) {
+                $validator->errors()->add('vendor_id', 'No distribution center found for this vendor.');
                 return;
             }
-            
-            $targetLocation = \App\Models\Location::find($this->input('location_id'));
-            
+
+            $targetLocation = \App\Models\Location::find($locationId);
+            if (!$targetLocation) {
+                $validator->errors()->add('location_id', 'Selected destination is invalid.');
+                return;
+            }
+
             $path = $logistics->findBestRoute($sourceLocation, $targetLocation);
 
             if (!$path || $path->isEmpty()) {
@@ -112,20 +134,21 @@ class StoreOrderRequest extends FormRequest
             }
 
             // 2. Validate Capacity (Bottleneck)
-            $totalQuantity = collect($this->input('items'))->sum('quantity');
+            $items = collect($this->input('items', []));
+            $totalQuantity = $items->sum(fn($item) => $item['quantity'] ?? 0);
             $minCapacity = $path->min('capacity');
-            
-            if ($totalQuantity > $minCapacity) {
+
+            if ($minCapacity !== null && $totalQuantity > $minCapacity) {
                 $validator->errors()->add('items', "Order size ({$totalQuantity}) exceeds route capacity ({$minCapacity}).");
             }
 
             // 3. Validate Funds
             $shippingCost = $path->sum(fn($r) => $logistics->calculateCost($r));
-            $itemsCost = collect($this->input('items'))->sum(fn($item) => $item['quantity'] * $item['unit_price']);
+            $itemsCost = $items->sum(fn($item) => ($item['quantity'] ?? 0) * ($item['unit_price'] ?? 0));
             $totalCost = $itemsCost + $shippingCost;
 
             $cash = GameState::where('user_id', auth()->id())->value('cash');
-            
+
             if ($cash < $totalCost) {
                 $validator->errors()->add('total', "Insufficient funds. Order total: \${$totalCost}, Available: \${$cash}.");
             }
@@ -133,5 +156,6 @@ class StoreOrderRequest extends FormRequest
             // Store the path in the request so the Controller doesn't need to recalculate
             $this->merge(['_calculated_path' => $path]);
             $this->merge(['_source_location' => $sourceLocation]);
+        });
     }
 }

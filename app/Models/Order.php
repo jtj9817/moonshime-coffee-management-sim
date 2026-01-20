@@ -21,9 +21,9 @@ class Order extends Model
         'user_id',
         'vendor_id',
         'location_id',
-        'route_id',
         'status',
         'total_cost',
+        'total_transit_days',
         'delivery_date',
         'delivery_day',
     ];
@@ -33,9 +33,9 @@ class Order extends Model
         return [
             'delivery_date' => 'datetime',
             'total_cost' => 'integer',
+            'total_transit_days' => 'integer',
             'status' => OrderState::class,
             'delivery_day' => 'integer',
-            'route_id' => 'integer',
             'user_id' => 'integer',
         ];
     }
@@ -53,11 +53,6 @@ class Order extends Model
     public function location(): BelongsTo
     {
         return $this->belongsTo(Location::class);
-    }
-
-    public function route(): BelongsTo
-    {
-        return $this->belongsTo(Route::class);
     }
 
     public function items(): HasMany
