@@ -10,11 +10,13 @@
 - [x] Task: Implement `GameController::resetGame` logic with DB transaction and `InitializeNewGame` call.
 - [x] Task: Conductor - User Manual Verification 'Backend Reset Endpoint' (Protocol in workflow.md)
 
-## Phase 2: Frontend Reset UX
+- [x] Task: Conductor - User Manual Verification 'Frontend Reset UX' (Protocol in workflow.md)
+
+## Phase 2: Frontend Reset UX [checkpoint: f37da14]
 - [x] Task: Create `ConfirmDialog` component (`resources/js/components/ui/confirm-dialog.tsx`).
 - [x] Task: Create `ResetGameButton` component with API integration (`resources/js/components/game/reset-game-button.tsx`).
 - [x] Task: Integrate `ResetGameButton` into the Dashboard page (`resources/js/Pages/game/dashboard.tsx`).
-- [ ] Task: Conductor - User Manual Verification 'Frontend Reset UX' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Frontend Reset UX' (Protocol in workflow.md)
 
 ## Phase 3: Tests
 - [ ] Task: Create Feature Test `tests/Feature/ResetGameTest.php` to verify state clearing and reseeding.
