@@ -1,11 +1,11 @@
 import { type ReactNode } from 'react';
 
 import { GameHeader } from '@/components/game/game-header';
+import { FlashToast } from '@/components/ui/flash-toast';
 import { GameProvider } from '@/contexts/game-context';
 import AppSidebarLayout from '@/layouts/app/app-sidebar-layout';
 import { type BreadcrumbItem } from '@/types';
 
-import { FlashToast } from '@/components/ui/flash-toast';
 
 interface GameLayoutProps {
     children: ReactNode;

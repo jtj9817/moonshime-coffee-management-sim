@@ -1,5 +1,5 @@
-import { Alert, DashboardKPI, SuggestedAction, InventoryRecord, Item, Location, DraftOrder, InventoryPosition, ConsolidationSuggestion } from '../types';
 import { SUPPLIER_ITEMS, SUPPLIERS } from '../constants';
+import { Alert, DashboardKPI, SuggestedAction, InventoryRecord, Item, Location, DraftOrder, InventoryPosition, ConsolidationSuggestion } from '../types';
 
 // Mock data generator for the operational cockpit
 

@@ -1,5 +1,5 @@
-import { Supplier, SupplierItem, VendorScoreBreakdown } from '../types';
 import { SUPPLIERS, SUPPLIER_ITEMS } from '../constants';
+import { Supplier, SupplierItem, VendorScoreBreakdown } from '../types';
 
 export interface ScoredVendor {
   vendor: Supplier;

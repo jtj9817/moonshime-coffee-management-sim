@@ -1,6 +1,3 @@
-import React, { useState, useMemo } from 'react';
-import { useApp } from '../App';
-import { generateTransferSuggestions } from '../services/transferService';
 import { 
   ArrowRightLeft, 
   Search, 
@@ -16,7 +13,12 @@ import {
   X,
   Package
 } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+
+import { useApp } from '../App';
+import { generateTransferSuggestions } from '../services/transferService';
 import { Transfer, TransferSuggestion } from '../types';
+
 import ProductIcon from './ProductIcon';
 
 const Transfers: React.FC = () => {

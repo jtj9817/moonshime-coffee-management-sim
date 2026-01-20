@@ -1,20 +1,22 @@
 
 
-import React, { useState, useMemo, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { SupplierItem, Supplier, Item, DraftOrder, DraftLineItem, OrderWarning, ConsolidationSuggestion } from '../types';
-import { ITEMS, SUPPLIERS, SUPPLIER_ITEMS } from '../constants';
 import { 
   ShoppingBag, Truck, CheckCircle2, AlertCircle, Search, Filter, Plus, Trash2, 
   ChevronDown, ChevronUp, Package, DollarSign, AlertTriangle, Send, Info, Clock, 
   TrendingUp, Zap, Lightbulb
 } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+
 import { useApp } from '../App';
-import { calculateInventoryPositions } from '../services/inventoryService';
-import { evaluateBulkTierBreakeven } from '../services/skuMath';
-import { calcMaxPerishableOrder } from '../services/orderCalculations';
+import { ITEMS, SUPPLIERS, SUPPLIER_ITEMS } from '../constants';
 import { suggestConsolidationAdds } from '../services/cockpitService';
+import { calculateInventoryPositions } from '../services/inventoryService';
+import { calcMaxPerishableOrder } from '../services/orderCalculations';
+import { evaluateBulkTierBreakeven } from '../services/skuMath';
 import { chooseBestVendorGivenUrgency } from '../services/vendorService';
+import { SupplierItem, Supplier, Item, DraftOrder, DraftLineItem, OrderWarning, ConsolidationSuggestion } from '../types';
+
 import ProductIcon from './ProductIcon';
 
 const Ordering: React.FC = () => {

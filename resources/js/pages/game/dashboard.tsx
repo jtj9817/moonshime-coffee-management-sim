@@ -14,11 +14,12 @@ import {
 } from 'lucide-react';
 import { type ReactNode } from 'react';
 
+import { LogisticsStatusWidget } from '@/components/game/LogisticsStatusWidget';
+import ResetGameButton from '@/components/game/reset-game-button';
+import { WelcomeBanner } from '@/components/game/welcome-banner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { LogisticsStatusWidget } from '@/components/game/LogisticsStatusWidget';
-import { WelcomeBanner } from '@/components/game/welcome-banner';
 import { useGame } from '@/contexts/game-context';
 import GameLayout from '@/layouts/game-layout';
 import { AlertModel, DashboardKPI, QuestModel, type BreadcrumbItem } from '@/types/index';
@@ -176,6 +177,13 @@ export default function Dashboard({ alerts, kpis, quests, logistics_health, acti
             <Head title="Mission Control" />
 
             <div className="flex flex-col gap-6 p-6">
+                <div className="flex items-center justify-between">
+                    <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                        Mission Control
+                    </h1>
+                    <ResetGameButton />
+                </div>
+
                 {/* Day 1 Welcome Banner */}
                 {gameState.day === 1 && (
                     <WelcomeBanner />

@@ -1,6 +1,7 @@
+import { Search, Filter, Star, Truck, ShieldCheck, Box } from 'lucide-react';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Filter, Star, Truck, ShieldCheck, Box } from 'lucide-react';
+
 import { SUPPLIERS } from '../constants';
 import { ItemCategory } from '../types';
 

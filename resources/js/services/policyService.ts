@@ -1,8 +1,9 @@
 
+import { SUPPLIER_ITEMS } from '../constants';
 import { PolicyProfile, PolicyImpactAnalysis, InventoryRecord, Item, Location } from '../types';
+
 import { calculateInventoryPositions } from './inventoryService';
 import { getZScore, calculateSafetyStock, calculateROP } from './skuMath';
-import { SUPPLIER_ITEMS } from '../constants';
 
 export const calculatePolicyImpact = (
   currentPolicy: PolicyProfile,

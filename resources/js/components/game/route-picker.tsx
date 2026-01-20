@@ -1,9 +1,10 @@
+import { AlertTriangle, Clock, DollarSign, Truck } from 'lucide-react';
+import { useEffect, useState } from 'react';
+
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { RouteModel } from '@/types';
-import { AlertTriangle, Clock, DollarSign, Truck } from 'lucide-react';
-import { useEffect, useState } from 'react';
 
 interface RoutePickerProps {
     sourceId?: string;

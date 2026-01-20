@@ -1,6 +1,6 @@
 
-import { Item, Location, WasteEvent, PolicyChangeLog, WasteReason } from '../types';
 import { SUPPLIER_ITEMS } from '../constants';
+import { Item, Location, WasteEvent, PolicyChangeLog, WasteReason } from '../types';
 
 // Helper to get unit price
 const getUnitPrice = (itemId: string): number => {

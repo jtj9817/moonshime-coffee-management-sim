@@ -1,6 +1,6 @@
+import { Calendar } from 'lucide-react';
 import React, { useState, useMemo } from 'react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar, Legend } from 'recharts';
-import { Calendar } from 'lucide-react';
 
 const Analytics: React.FC = () => {
   const [dateRange, setDateRange] = useState({ start: '2023-10-23', end: '2023-10-29' });

@@ -1,8 +1,4 @@
 
-import React, { useState, useMemo, useEffect } from 'react';
-import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area, Cell, PieChart, Pie 
-} from 'recharts';
 import { 
   Trash2, 
   TrendingDown, 
@@ -23,6 +19,11 @@ import {
   User,
   Clock
 } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { 
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area, Cell, PieChart, Pie 
+} from 'recharts';
+
 import { useApp } from '../App';
 import { generateMockWasteData, generateMockPolicyChanges } from '../services/wasteService';
 import { WasteEvent, PolicyChangeLog } from '../types';

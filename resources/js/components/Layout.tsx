@@ -1,11 +1,12 @@
 
-import React, { useState, useEffect, useRef } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, Package, ShoppingCart, BarChart3, Coffee, Bell, Search, 
   ChevronDown, MapPin, Settings, Menu, X, Users, ArrowRightLeft, Activity, PieChart,
   Zap, Clock, DollarSign, Star, AlertOctagon, TrendingUp, Layers
 } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
+
 import { useApp } from '../App';
 import { FloatingTextEvent } from '../types';
 

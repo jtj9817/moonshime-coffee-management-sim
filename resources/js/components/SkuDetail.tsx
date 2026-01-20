@@ -1,7 +1,5 @@
 
 
-import React, { useState, useMemo, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
 import { 
   ArrowLeft, 
   Settings, 
@@ -28,14 +26,18 @@ import {
   ShoppingCart,
   Loader2
 } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, 
   BarChart, Bar, Cell, Legend
 } from 'recharts';
+
 import { useApp } from '../App';
 import { SUPPLIERS, SUPPLIER_ITEMS } from '../constants';
 import { getZScore, calculateSafetyStock, calculateROP, calcLandedCostPerUnit, generateMockForecast } from '../services/skuMath';
 import { ReorderPolicy, CostBreakdown, Supplier, SupplierItem, LandedCostBreakdown } from '../types';
+
 import ProductIcon from './ProductIcon';
 
 const SkuDetail: React.FC = () => {

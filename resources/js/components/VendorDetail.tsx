@@ -1,16 +1,19 @@
 
 
-import React, { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
 import { 
   ArrowLeft, ShieldCheck, Truck, Package, Mail, Phone, AlertTriangle, TrendingUp, DollarSign,
   ShoppingCart, Info, History, FileText, User, Calendar, Star, Clock, Handshake, MessageSquare
 } from 'lucide-react';
-import { useApp } from '../App';
-import { SUPPLIERS, SUPPLIER_ITEMS } from '../constants';
+import React, { useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
 import { 
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area, Legend 
 } from 'recharts';
+
+import { useApp } from '../App';
+import { SUPPLIERS, SUPPLIER_ITEMS } from '../constants';
+
+
 import ProductIcon from './ProductIcon';
 
 const VendorDetail: React.FC = () => {

@@ -2,6 +2,8 @@ import { Head } from '@inertiajs/react';
 import { Clock, Package, Plus, ShoppingCart, Truck, XCircle } from 'lucide-react';
 import { useState } from 'react';
 
+import { CancelOrderDialog } from '@/components/game/cancel-order-dialog';
+import { NewOrderDialog } from '@/components/game/new-order-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,8 +15,6 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { NewOrderDialog } from '@/components/game/new-order-dialog';
-import { CancelOrderDialog } from '@/components/game/cancel-order-dialog';
 import GameLayout from '@/layouts/game-layout';
 import { OrderModel, type BreadcrumbItem } from '@/types';
 

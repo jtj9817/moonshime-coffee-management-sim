@@ -1,15 +1,17 @@
 
 
-import React, { useState, useMemo, useEffect } from 'react';
 import { 
   Search, Filter, ArrowUpDown, AlertTriangle, CheckCircle2, Clock, 
   MoreHorizontal, TrendingDown, Truck, Package, ArrowRight, 
   RefreshCw, Copy, Eye, Info, LayoutGrid, List
 } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
+
 import { useApp } from '../App';
 import { calculateInventoryPositions } from '../services/inventoryService';
 import { InventoryPosition } from '../types';
+
 import ProductIcon from './ProductIcon';
 
 type SortField = 'riskScore' | 'sku' | 'onHand' | 'daysCover' | 'status';

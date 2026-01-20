@@ -22,6 +22,7 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { useGame } from '@/contexts/game-context';
+
 import { AdvanceDayButton } from './advance-day-button';
 import { CashDisplay } from './cash-display';
 import { DayCounter } from './day-counter';

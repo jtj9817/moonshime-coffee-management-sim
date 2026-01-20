@@ -1,5 +1,5 @@
-import { SpikeSignal, EmergencyOption, Item, Location, InventoryRecord, SpikeHistoryEvent } from '../types';
 import { SUPPLIERS, SUPPLIER_ITEMS } from '../constants';
+import { SpikeSignal, EmergencyOption, Item, Location, InventoryRecord, SpikeHistoryEvent } from '../types';
 
 // Simulated spike generator with Supply Chain awareness
 export const detectSpikes = (

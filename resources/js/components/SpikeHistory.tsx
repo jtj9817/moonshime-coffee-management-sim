@@ -1,4 +1,3 @@
-import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Calendar as CalendarIcon, 
   Search, 
@@ -21,12 +20,15 @@ import {
   HelpCircle,
   Truck
 } from 'lucide-react';
-import { useApp } from '../App';
-import { generateSpikeHistory } from '../services/spikeService';
-import { SpikeHistoryEvent } from '../types';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine 
 } from 'recharts';
+
+import { useApp } from '../App';
+import { generateSpikeHistory } from '../services/spikeService';
+import { SpikeHistoryEvent } from '../types';
+
 
 const SpikeHistory: React.FC = () => {
   const { items, locations } = useApp();

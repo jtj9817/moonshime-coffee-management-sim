@@ -1,10 +1,12 @@
+import { Activity, Zap, TrendingUp, AlertCircle, RefreshCw, XCircle } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
+
 import { useApp } from '../App';
 import { detectSpikes, getEmergencyOptions } from '../services/spikeService';
 import { SpikeSignal, EmergencyOption, SpikeFeedback } from '../types';
+
 import EmergencyActionModal from './EmergencyActionModal';
 import PostMortemModal from './PostMortemModal';
-import { Activity, Zap, TrendingUp, AlertCircle, RefreshCw, XCircle } from 'lucide-react';
 
 const SpikeMonitor: React.FC = () => {
   const { locations, items, inventory, currentLocationId } = useApp();

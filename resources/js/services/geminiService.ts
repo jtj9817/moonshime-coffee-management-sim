@@ -1,4 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
+
 import { InventoryRecord, Item, Location } from '../types';
 
 // Initialize the API client

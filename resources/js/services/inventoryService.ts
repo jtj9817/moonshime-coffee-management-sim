@@ -1,3 +1,4 @@
+import { SUPPLIER_ITEMS } from '../constants';
 import { 
   InventoryRecord, 
   Item, 
@@ -7,7 +8,6 @@ import {
   ExpiryLot,
   SupplierItem
 } from '../types';
-import { SUPPLIER_ITEMS } from '../constants';
 
 // Helper to determine status based on metrics
 const calculateStatus = (

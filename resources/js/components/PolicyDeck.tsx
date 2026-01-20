@@ -1,13 +1,14 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { useApp } from '../App';
-import { calculatePolicyImpact } from '../services/policyService';
-import { PolicyProfile, PolicyImpactAnalysis } from '../types';
 import { 
   Sliders, ShieldCheck, DollarSign, Activity, AlertTriangle, Save, RotateCcw, 
   TrendingUp, TrendingDown, Layers, HelpCircle
 } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+
+import { useApp } from '../App';
+import { calculatePolicyImpact } from '../services/policyService';
+import { PolicyProfile, PolicyImpactAnalysis } from '../types';
 
 const PolicyDeck: React.FC = () => {
   const { policies, updatePolicies, inventory, items, locations, gameState } = useApp();

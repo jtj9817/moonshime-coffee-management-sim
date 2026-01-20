@@ -11,9 +11,9 @@
 - [x] Task: Conductor - User Manual Verification 'Backend Reset Endpoint' (Protocol in workflow.md)
 
 ## Phase 2: Frontend Reset UX
-- [ ] Task: Create `ConfirmDialog` component (`resources/js/components/ui/confirm-dialog.tsx`).
-- [ ] Task: Create `ResetGameButton` component with API integration (`resources/js/components/game/reset-game-button.tsx`).
-- [ ] Task: Integrate `ResetGameButton` into the Dashboard page (`resources/js/Pages/game/dashboard.tsx`).
+- [x] Task: Create `ConfirmDialog` component (`resources/js/components/ui/confirm-dialog.tsx`).
+- [x] Task: Create `ResetGameButton` component with API integration (`resources/js/components/game/reset-game-button.tsx`).
+- [x] Task: Integrate `ResetGameButton` into the Dashboard page (`resources/js/Pages/game/dashboard.tsx`).
 - [ ] Task: Conductor - User Manual Verification 'Frontend Reset UX' (Protocol in workflow.md)
 
 ## Phase 3: Tests

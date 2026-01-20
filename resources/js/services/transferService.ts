@@ -1,6 +1,7 @@
-import { InventoryRecord, Item, Location, TransferSuggestion, SupplierItem } from '../types';
-import { calculateInventoryPositions } from './inventoryService';
 import { SUPPLIER_ITEMS } from '../constants';
+import { InventoryRecord, Item, Location, TransferSuggestion, SupplierItem } from '../types';
+
+import { calculateInventoryPositions } from './inventoryService';
 
 const TRANSFER_FIXED_COST = 15.00; // e.g. Courier fee
 const TRANSFER_UNIT_COST = 0.05; // Handling per unit

@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { ItemCategory } from '../types';
 
 const beansIcon = '/assets/beans.svg';
