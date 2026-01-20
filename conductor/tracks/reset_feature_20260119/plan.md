@@ -18,6 +18,6 @@
 - [x] Task: Integrate `ResetGameButton` into the Dashboard page (`resources/js/Pages/game/dashboard.tsx`).
 - [x] Task: Conductor - User Manual Verification 'Frontend Reset UX' (Protocol in workflow.md)
 
-## Phase 3: Tests
+## Phase 3: Tests [checkpoint: 7cfc460]
 - [x] Task: Create Feature Test `tests/Feature/ResetGameTest.php` to verify state clearing and reseeding.
 - [x] Task: Conductor - User Manual Verification 'Tests' (Protocol in workflow.md)
