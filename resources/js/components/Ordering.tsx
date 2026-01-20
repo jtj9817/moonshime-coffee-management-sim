@@ -149,7 +149,7 @@ const Ordering: React.FC = () => {
                   const addQty = nextTier.minQty - line.qty;
                   warnings.push({
                       kind: 'TIER_BAD_DEAL',
-                      message: `Buy ${addQty} more to save $${analysis.netBenefit.toFixed(2)} overall (Breakeven Analysis).`,
+                      message: `Buy ${addQty} more to save $${formatCurrency(analysis.netBenefit)} overall (Breakeven Analysis).`,
                       impact: { cost: analysis.savingsAtTargetTier }
                   });
              }
@@ -183,7 +183,7 @@ const Ordering: React.FC = () => {
             // Fallback generic message if no smart suggestions found
             warnings.push({
                 kind: 'CONSOLIDATION_OPP',
-                message: `Add $${(supplier.freeShippingThreshold - subtotal).toFixed(2)} more to save $${shippingCost} shipping.`,
+                message: `Add $${formatCurrency(supplier.freeShippingThreshold - subtotal)} more to save $${formatCurrency(shippingCost)} shipping.`,
                 impact: { cost: shippingCost }
             });
        }
@@ -451,14 +451,14 @@ const Ordering: React.FC = () => {
                                        <div className="w-1 h-full bg-stone-200 rounded-full"></div>
                                        <div>
                                           <div className="font-bold text-sm text-stone-900">{item?.name}</div>
-                                          <div className="text-xs text-stone-500">{line.qty} {item?.unit} @ ${line.unitPrice}</div>
+                                          <div className="text-xs text-stone-500">{line.qty} {item?.unit} @ ${formatCurrency(line.unitPrice)}</div>
                                           <div className="text-[10px] text-stone-400 mt-0.5 flex items-center gap-1">
                                              <Package size={8} /> {locName}
                                           </div>
                                        </div>
                                     </div>
                                     <div className="flex items-center gap-3">
-                                       <span className="font-medium text-sm text-stone-700">${(line.qty * line.unitPrice).toFixed(2)}</span>
+                                       <span className="font-medium text-sm text-stone-700">${formatCurrency(line.qty * line.unitPrice)}</span>
                                        <button 
                                           onClick={() => removeFromDraft(draft.vendorId, line.id)}
                                           className="text-stone-300 hover:text-rose-500 transition-colors opacity-0 group-hover:opacity-100"
@@ -536,7 +536,7 @@ const Ordering: React.FC = () => {
                            <div className="mb-4">
                               <div className="flex justify-between text-[10px] text-stone-500 mb-1">
                                  <span>Free Shipping Progress</span>
-                                 <span>${subtotal.toFixed(0)} / ${supplier?.freeShippingThreshold}</span>
+                                 <span>${formatCurrency(subtotal)} / ${formatCurrency(supplier?.freeShippingThreshold ?? 0)}</span>
                               </div>
                               <div className="w-full h-1.5 bg-stone-100 rounded-full overflow-hidden">
                                  <div 
@@ -548,12 +548,12 @@ const Ordering: React.FC = () => {
 
                            <div className="flex justify-between text-sm mb-1">
                               <span className="text-stone-500">Subtotal</span>
-                              <span className="font-medium">${subtotal.toFixed(2)}</span>
+                              <span className="font-medium">${formatCurrency(subtotal)}</span>
                            </div>
                            <div className="flex justify-between text-sm mb-3">
                               <span className="text-stone-500">Shipping</span>
                               <span className="font-medium">
-                                 {shippingCost === 0 ? <span className="text-emerald-600 font-bold">FREE</span> : `$${shippingCost.toFixed(2)}`}
+                                 {shippingCost === 0 ? <span className="text-emerald-600 font-bold">FREE</span> : `$${formatCurrency(shippingCost)}`}
                               </span>
                            </div>
                            
@@ -565,7 +565,7 @@ const Ordering: React.FC = () => {
                               {canAfford ? (
                                   <>
                                       <span>Authorize Payment</span>
-                                      <span className="opacity-80 font-normal">| ${total.toFixed(2)}</span>
+                                      <span className="opacity-80 font-normal">| ${formatCurrency(total)}</span>
                                       <Send size={14} />
                                   </>
                               ) : (

@@ -390,7 +390,7 @@ class GameController extends Controller
         $pendingOrders = Order::where('status', 'pending')->count();
 
         return [
-            ['label' => 'Inventory Value', 'value' => '$'.number_format($totalInventoryValue, 2)],
+            ['label' => 'Inventory Value', 'value' => round($totalInventoryValue, 2)],
             ['label' => 'Low Stock Items', 'value' => $lowStockCount, 'trend' => $lowStockCount > 5 ? 'down' : 'up'],
             ['label' => 'Pending Orders', 'value' => $pendingOrders],
             ['label' => 'Locations', 'value' => Location::count()],

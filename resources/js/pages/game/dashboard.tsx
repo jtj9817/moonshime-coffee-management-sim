@@ -222,7 +222,10 @@ export default function Dashboard({ alerts, kpis, quests, logistics_health, acti
                         activeSpikesCount={active_spikes_count} 
                     />
                     
-                    {kpis.map((kpi, index) => (
+                    {kpis.map((kpi, index) => {
+                        const isCurrency = kpi.label === 'Inventory Value' && typeof kpi.value === 'number';
+
+                        return (
                         <Card key={index}>
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                 <CardTitle className="text-sm font-medium text-stone-500 dark:text-stone-400">
@@ -233,11 +236,12 @@ export default function Dashboard({ alerts, kpis, quests, logistics_health, acti
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold text-stone-900 dark:text-white">
-                                    {kpi.value}
+                                    {isCurrency ? `$${formatCurrency(kpi.value)}` : kpi.value}
                                 </div>
                             </CardContent>
                         </Card>
-                    ))}
+                        );
+                    })}
                 </div>
 
                 {/* Main Grid */}
