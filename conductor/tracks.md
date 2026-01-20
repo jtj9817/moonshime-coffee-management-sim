@@ -6,7 +6,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 # Active Tracks
 
-- [~] **Track: Implement game reset functionality (Backend Endpoint, Frontend UX, and Tests).**
+- [x] **Track: Implement game reset functionality (Backend Endpoint, Frontend UX, and Tests).**
     - **ID:** `reset_feature_20260119`
     - **Link:** [./tracks/reset_feature_20260119/](./tracks/reset_feature_20260119/)
 
