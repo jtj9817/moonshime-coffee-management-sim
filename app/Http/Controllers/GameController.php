@@ -190,13 +190,16 @@ class GameController extends Controller
      */
     public function spikeHistory(): Response
     {
+        $userId = auth()->id();
+        
         $spikes = SpikeEvent::with(['location', 'product', 'affectedRoute'])
+            ->where('user_id', $userId)
             ->orderBy('created_at', 'desc')
             ->get();
 
         return Inertia::render('game/spike-history', [
             'spikes' => $spikes,
-            'statistics' => $this->getSpikeStatistics(),
+            'statistics' => $this->getSpikeStatistics($userId),
         ]);
     }
 
@@ -499,12 +502,18 @@ class GameController extends Controller
     /**
      * Get spike statistics.
      */
-    protected function getSpikeStatistics(): array
+    protected function getSpikeStatistics(?int $userId = null): array
     {
+        $query = SpikeEvent::query();
+        
+        if ($userId) {
+            $query->where('user_id', $userId);
+        }
+        
         return [
-            'totalSpikes' => SpikeEvent::count(),
-            'activeSpikes' => SpikeEvent::where('is_active', true)->count(),
-            'resolvedSpikes' => SpikeEvent::where('is_active', false)->count(),
+            'totalSpikes' => (clone $query)->count(),
+            'activeSpikes' => (clone $query)->where('is_active', true)->count(),
+            'resolvedSpikes' => (clone $query)->where('is_active', false)->count(),
         ];
     }
 

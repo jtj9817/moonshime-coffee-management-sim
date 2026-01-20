@@ -148,11 +148,10 @@ export function GameHeader() {
                                     {[...Array(3)].map((_, i) => (
                                         <AlertTriangle
                                             key={i}
-                                            className={`h-4 w-4 ${
-                                                i < gameState.strikes
-                                                    ? 'text-rose-500'
-                                                    : 'text-stone-300 dark:text-stone-600'
-                                            }`}
+                                            className={`h-4 w-4 ${i < gameState.strikes
+                                                ? 'text-rose-500'
+                                                : 'text-stone-300 dark:text-stone-600'
+                                                }`}
                                         />
                                     ))}
                                 </div>
@@ -171,9 +170,9 @@ export function GameHeader() {
 
                 {/* Right: Day Counter + Actions */}
                 <div className="flex items-center gap-4">
-                    {/* Alerts */}
-                    <Tooltip>
-                        <TooltipTrigger asChild>
+                    {/* Alerts Dropdown */}
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="sm" className="relative">
                                 <Bell className="h-4 w-4" />
                                 {alerts.length > 0 && (
@@ -182,11 +181,52 @@ export function GameHeader() {
                                     </span>
                                 )}
                             </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            <p>{alerts.length} unread alerts</p>
-                        </TooltipContent>
-                    </Tooltip>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-80">
+                            <div className="flex items-center justify-between px-3 py-2 border-b">
+                                <span className="text-xs font-semibold uppercase text-stone-500">Comms Log</span>
+                                {alerts.length > 0 && (
+                                    <Badge variant="destructive" className="text-[10px]">{alerts.length} new</Badge>
+                                )}
+                            </div>
+                            {alerts.length === 0 ? (
+                                <div className="p-4 text-center text-sm text-stone-500">No signals received.</div>
+                            ) : (
+                                alerts.map((alert) => (
+                                    <DropdownMenuItem
+                                        key={alert.id}
+                                        className="flex items-start gap-3 p-3 cursor-pointer"
+                                        onClick={() => {
+                                            // Navigate based on alert type
+                                            const destination = (() => {
+                                                switch (alert.type) {
+                                                    case 'order_placed': return '/game/orders';
+                                                    case 'transfer_completed': return '/game/transfers';
+                                                    case 'spike_occurred': return '/game/spike-history';
+                                                    case 'isolation': return alert.location_id
+                                                        ? `/game/dashboard?location=${alert.location_id}`
+                                                        : '/game/dashboard';
+                                                    default: return '/game/dashboard';
+                                                }
+                                            })();
+                                            window.location.href = destination;
+                                        }}
+                                    >
+                                        <div className={`mt-1 h-2 w-2 rounded-full flex-shrink-0 ${alert.severity === 'critical'
+                                            ? 'bg-rose-500'
+                                            : alert.severity === 'warning'
+                                                ? 'bg-amber-500'
+                                                : 'bg-blue-500'
+                                            }`} />
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-medium truncate">{alert.message}</p>
+                                            <p className="text-xs text-stone-500">{new Date(alert.created_at).toLocaleTimeString()}</p>
+                                        </div>
+                                    </DropdownMenuItem>
+                                ))
+                            )}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
 
                     {/* Day Counter */}
                     <DayCounter day={gameState.day} />
