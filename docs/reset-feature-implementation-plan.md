@@ -1,12 +1,8 @@
-Based on the document provided, here is the extracted layout and structure. You can use this as a template for similar technical implementation plans.
-
----
-
 # Reset Feature Implementation Plan
 
 **Created**: 2026-01-19
-**Completed**: TBD
-**Status**: Planned
+**Completed**: 2026-01-19
+**Status**: Completed
 **Purpose**: Add a per-user reset workflow that restores the game to a fresh Day 1 state with baseline inventory and seeded pipeline activity.
 
 ---
@@ -67,47 +63,53 @@ Full reload to refresh Inertia props
 
 ## Implementation Tasks
 
-### Phase 1: Backend Reset Endpoint [Planned]
+### Phase 1: Backend Reset Endpoint [Completed]
 
-#### Task 1.1: Add reset route [Planned]
+#### Task 1.1: Add reset route [Completed]
 **File**: `routes/web.php`
 
 ```php
-Route::post('/game/reset', [GameController::class, 'resetGame'])
-    ->name('game.reset')
-    ->middleware(['auth', 'verified']);
+Route::middleware(['auth', 'verified'])->prefix('game')->name('game.')->group(function () {
+    // ...
+    Route::post('/reset', [GameController::class, 'resetGame'])->name('reset');
+});
 ```
 
 **Key Logic/Responsibilities**:
 * Expose a POST endpoint for reset.
 * Restrict to authenticated, verified users.
 
-#### Task 1.2: Implement reset logic [Planned]
+#### Task 1.2: Implement reset logic [Completed]
 **File**: `app/Http/Controllers/GameController.php`
 
 ```php
-public function resetGame(Request $request): RedirectResponse
+public function resetGame(InitializeNewGame $initializer): \Illuminate\Http\RedirectResponse
 {
-    DB::transaction(function () use ($request) {
-        $user = $request->user();
+    DB::transaction(function () use ($initializer) {
+        $user = auth()->user();
 
+        // Clear all game data
         Order::where('user_id', $user->id)->delete();
         Transfer::where('user_id', $user->id)->delete();
         Alert::where('user_id', $user->id)->delete();
         SpikeEvent::where('user_id', $user->id)->delete();
         Inventory::where('user_id', $user->id)->delete();
+        
+        // Reset GameState
+        $gameState = GameState::where('user_id', $user->id)->first();
+        if ($gameState) {
+            $gameState->update([
+                'day' => 1,
+                'cash' => 1000000,
+                'xp' => 0,
+            ]);
+        }
 
-        GameState::where('user_id', $user->id)->update([
-            'cash' => 1_000_000,
-            'xp' => 0,
-            'day' => 1,
-        ]);
-
-        app(InitializeNewGame::class)->handle($user);
+        // Re-seed
+        $initializer->handle($user);
     });
 
-    return redirect()->route('game.dashboard')
-        ->with('success', 'Game reset successfully.');
+    return to_route('game.dashboard')->with('success', 'Game has been reset to Day 1.');
 }
 ```
 
@@ -118,13 +120,13 @@ public function resetGame(Request $request): RedirectResponse
 
 ---
 
-### Phase 2: Frontend Reset UX [Planned]
+### Phase 2: Frontend Reset UX [Completed]
 
-#### Task 2.1: Add reset button component [Planned]
+#### Task 2.1: Add reset button component [Completed]
 **File**: `resources/js/components/game/reset-game-button.tsx`
 
 ```tsx
-export function ResetGameButton() {
+export default function ResetGameButton() {
     const [showConfirm, setShowConfirm] = useState(false);
 
     const handleReset = () => {
@@ -154,7 +156,7 @@ export function ResetGameButton() {
 * Require user confirmation.
 * Trigger POST request and full reload on success.
 
-#### Task 2.2: Provide confirmation dialog [Planned]
+#### Task 2.2: Provide confirmation dialog [Completed]
 **File**: `resources/js/components/ui/confirm-dialog.tsx`
 
 ```tsx
@@ -180,7 +182,7 @@ export function ConfirmDialog({ open, onClose, onConfirm, title, message }: Conf
 * Present a consistent destructive action dialog.
 * Keep the component reusable for other confirmations.
 
-#### Task 2.3: Integrate reset button on dashboard [Planned]
+#### Task 2.3: Integrate reset button on dashboard [Completed]
 **File**: `resources/js/Pages/game/dashboard.tsx`
 
 ```tsx
@@ -196,9 +198,9 @@ export function ConfirmDialog({ open, onClose, onConfirm, title, message }: Conf
 
 ---
 
-### Phase 3: Tests [Planned]
+### Phase 3: Tests [Completed]
 
-#### Task 3.1: Add feature tests [Planned]
+#### Task 3.1: Add feature tests [Completed]
 **File**: `tests/Feature/ResetGameTest.php`
 
 ```php
@@ -229,13 +231,13 @@ public function test_reset_clears_and_reseeds_user_state(): void
 
 | File | Action | Status |
 | :--- | :--- | :--- |
-| `routes/web.php` | Modify | Planned |
-| `app/Http/Controllers/GameController.php` | Modify | Planned |
-| `app/Actions/InitializeNewGame.php` | Reuse | Planned |
-| `resources/js/components/game/reset-game-button.tsx` | Create | Planned |
-| `resources/js/components/ui/confirm-dialog.tsx` | Create | Planned |
-| `resources/js/Pages/game/dashboard.tsx` | Modify | Planned |
-| `tests/Feature/ResetGameTest.php` | Create | Planned |
+| `routes/web.php` | Modify | Completed |
+| `app/Http/Controllers/GameController.php` | Modify | Completed |
+| `app/Actions/InitializeNewGame.php` | Reuse | Completed |
+| `resources/js/components/game/reset-game-button.tsx` | Create | Completed |
+| `resources/js/components/ui/confirm-dialog.tsx` | Create | Completed |
+| `resources/js/Pages/game/dashboard.tsx` | Modify | Completed |
+| `tests/Feature/ResetGameTest.php` | Create | Completed |
 
 ---
 
@@ -247,9 +249,9 @@ public function test_reset_clears_and_reseeds_user_state(): void
 ---
 
 ## Edge Cases to Handle
-1. **Missing world data**: If locations/products are not seeded, `InitializeNewGame` should no-op without failing. [Planned]
-2. **Unauthorized access**: Guests should be redirected to login. [Planned]
-3. **Concurrent resets**: Use a transaction to keep data consistent. [Planned]
+1. **Missing world data**: If locations/products are not seeded, `InitializeNewGame` should no-op without failing. [Completed]
+2. **Unauthorized access**: Guests should be redirected to login. [Completed]
+3. **Concurrent resets**: Use a transaction to keep data consistent. [Completed]
 
 ---
 
@@ -261,9 +263,9 @@ public function test_reset_clears_and_reseeds_user_state(): void
 ---
 
 ## Success Criteria
-- [ ] `/game/reset` resets the authenticated user's game state to Day 1 defaults.
-- [ ] Baseline inventory and pipeline activity are reseeded after reset.
-- [ ] Reset does not affect other users' data.
-- [ ] Confirmation dialog prevents accidental resets.
+- [x] `/game/reset` resets the authenticated user's game state to Day 1 defaults.
+- [x] Baseline inventory and pipeline activity are reseeded after reset.
+- [x] Reset does not affect other users' data.
+- [x] Confirmation dialog prevents accidental resets.
 
 ---
