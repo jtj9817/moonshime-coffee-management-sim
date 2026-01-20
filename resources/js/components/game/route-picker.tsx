@@ -40,7 +40,7 @@ export function RoutePicker({
                 );
                 if (!response.ok) throw new Error('Failed to fetch routes');
                 const result = await response.json();
-                setRoutes(result.routes);
+                setRoutes(result.data ?? []);
             } catch (err) {
                 setError('Could not load shipping routes.');
                 console.error(err);
@@ -91,8 +91,8 @@ export function RoutePicker({
                         <Card
                             key={route.id}
                             className={`relative cursor-pointer overflow-hidden transition-all hover:border-amber-400 ${isSelected
-                                    ? 'ring-2 ring-amber-500 border-amber-500'
-                                    : 'border-stone-200 dark:border-stone-700'
+                                ? 'ring-2 ring-amber-500 border-amber-500'
+                                : 'border-stone-200 dark:border-stone-700'
                                 } ${isBlocked ? 'opacity-60 grayscale pointer-events-none' : ''}`}
                             onClick={() => !isBlocked && onSelect(route)}
                         >
