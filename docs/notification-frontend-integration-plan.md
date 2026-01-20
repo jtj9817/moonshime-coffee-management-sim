@@ -266,16 +266,135 @@ import { AlertModel } from '@/types';
 
 Completed on 2026-01-19.
 
-### Changes Made
+### The Problem
+
+The notification bell in the header (`Layout.tsx`) was using a legacy `useApp()` hook that wasn't connected to the real backend. The backend has a complete `Alert` system, but the frontend was showing "No signals received" even when alerts existed.
+
+---
+
+### Change 1: Updated Imports (Lines 1-13)
+
+```tsx
+// BEFORE
+import { useApp } from '../App';
+
+// AFTER
+import { router } from '@inertiajs/react';
+import { useOptionalGame } from '@/contexts/game-context';
+import { AlertModel } from '@/types/index';
+```
+
+**Why**: 
+- `router` — needed for programmatic navigation when clicking alerts
+- `useOptionalGame` — the real game context that provides alerts from the backend
+- `AlertModel` — TypeScript type for the alert structure
+
+---
+
+### Change 2: Context Hook Replacement (Lines 27-35)
+
+```tsx
+// BEFORE
+const { notifications, markNotificationRead, ... } = useApp();
+
+// AFTER  
+const game = useOptionalGame();
+const alerts = game?.alerts ?? [];
+const markAlertRead = game?.markAlertRead ?? (() => {});
+const gameState = game?.gameState ?? { cash: 0, xp: 0, day: 1, level: 1, reputation: 0, strikes: 0 };
+```
+
+**Why**: 
+- `useOptionalGame()` returns `null` when not in a `GameProvider` (e.g., login pages), so we use null-safe fallbacks
+- This prevents crashes on unauthenticated routes
+
+---
+
+### Change 3: Navigation Helper Function (Lines 58-73)
+
+```tsx
+const getAlertDestination = (alert: AlertModel): string => {
+  switch (alert.type) {
+    case 'order_placed':      return '/game/orders';
+    case 'transfer_completed': return '/game/transfers';
+    case 'spike_occurred':     return '/game/war-room';
+    case 'isolation':          return alert.location_id 
+                                 ? `/game/dashboard?location=${alert.location_id}` 
+                                 : '/game/dashboard';
+    default:                   return '/game/dashboard';
+  }
+};
+```
+
+**Why**: Maps each alert type to its relevant page so users get context immediately
+
+---
+
+### Change 4: Click Handler (Lines 75-80)
+
+```tsx
+const handleNotificationClick = (alert: AlertModel) => {
+  markAlertRead(alert.id);       // 1. Mark as read in backend
+  setIsNotifOpen(false);         // 2. Close dropdown
+  router.visit(getAlertDestination(alert)); // 3. Navigate
+};
+```
+
+**Why**: Single click does all three actions — no manual navigation needed
+
+---
+
+### Change 5: Updated Rendering (Lines 289-306)
+
+```tsx
+// BEFORE: Used AppNotification with n.type, n.read, n.timestamp
+// AFTER:  Uses AlertModel with alert.severity, alert.is_read, alert.created_at
+
+<div className={`... ${
+  alert.severity === 'critical' ? 'bg-rose-500 shadow-[0_0_8px_...]' 
+  : alert.severity === 'warning' ? 'bg-amber-500' 
+  : 'bg-blue-500'
+}`}>
+```
+
+**Why**: 
+- Backend uses `is_read` (snake_case) not `read`
+- Backend uses `severity` (`critical`/`warning`/`info`) not `type`
+- Colors now match severity: 🔴 critical, 🟠 warning, 🔵 info
+
+---
+
+### Data Flow Summary
+
+```
+┌─ Backend ─────────────────────────────────────────────┐
+│ Alert::create([type, severity, message, ...])         │
+│        ↓                                              │
+│ HandleInertiaRequests → game.alerts (shared props)    │
+└───────────────────────────────────────────────────────┘
+                         ↓
+┌─ Frontend ────────────────────────────────────────────┐
+│ useOptionalGame() → alerts                            │
+│        ↓                                              │
+│ Layout.tsx → Notification Bell                        │
+│        ↓ (click)                                      │
+│ handleNotificationClick()                             │
+│   1. POST /game/alerts/{id}/read                      │
+│   2. Close dropdown                                   │
+│   3. router.visit('/game/orders')                     │
+└───────────────────────────────────────────────────────┘
+```
+
+---
+
+### Files Modified
 
 | File | Changes |
 | :--- | :--- |
-| `resources/js/components/Layout.tsx` | Replaced `useApp` → `useOptionalGame`, added `getAlertDestination` + `handleNotificationClick`, updated notification rendering |
+| [Layout.tsx](file:///mnt/0B8533211952FCF2/moonshime-coffee-management-sim/resources/js/components/Layout.tsx) | Replaced `useApp` → `useOptionalGame`, added `getAlertDestination` + `handleNotificationClick`, updated notification rendering |
 
-### Key Code Changes
+### Git Commit
 
-1. **Imports**: Added `router` from Inertia, `useOptionalGame` from game-context, `AlertModel` type
-2. **Context Hook**: Replaced `useApp()` with `useOptionalGame()` with null-safe fallbacks
-3. **Navigation Helper**: `getAlertDestination(alert)` maps alert types to route paths
-4. **Click Handler**: `handleNotificationClick(alert)` marks read, closes dropdown, navigates
-5. **Rendering**: Updated to use `AlertModel` properties (`is_read`, `severity`, `created_at`)
+```
+756a49c feat(notifications): connect bell UI to backend alerts with deep-link navigation
+```
