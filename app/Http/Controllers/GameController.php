@@ -188,7 +188,9 @@ class GameController extends Controller
      */
     public function spikeHistory(): Response
     {
-        $spikes = SpikeEvent::orderBy('created_at', 'desc')->get();
+        $spikes = SpikeEvent::with(['location', 'product', 'affectedRoute'])
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         return Inertia::render('game/spike-history', [
             'spikes' => $spikes,

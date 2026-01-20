@@ -83,7 +83,15 @@ export interface SpikeEventModel {
     type: string;
     name: string;
     description: string;
+    magnitude: number;
+    duration: number;
+    starts_at_day: number;
+    ends_at_day: number;
     is_active: boolean;
+    is_guaranteed: boolean;
+    location?: LocationModel | null;
+    product?: ProductModel | null;
+    affected_route?: RouteModel | null;
     meta: Record<string, unknown> | null;
     created_at: string;
 }
