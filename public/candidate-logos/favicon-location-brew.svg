@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="6" fill="#1e1b4b"/> <!-- Dark Indigo background -->
+  <!-- Map Pin -->
+  <path d="M16 4C11.5817 4 8 7.58172 8 12C8 16.4183 16 26 16 26C16 26 24 16.4183 24 12C24 7.58172 20.4183 4 16 4Z" fill="#fbbf24"/>
+  <!-- Coffee Bean inside Pin -->
+  <path d="M16 16C13.7909 16 12 14.2091 12 12C12 9.79086 13.7909 8 16 8C18.2091 8 20 9.79086 20 12C20 14.2091 18.2091 16 16 16Z" fill="#78350f"/>
+  <path d="M16 9C16 9 15 10.5 15 12C15 13.5 16 15 16 15" stroke="#fbbf24" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+</svg>

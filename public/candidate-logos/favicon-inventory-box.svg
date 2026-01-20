@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="6" fill="#78350f"/> <!-- Coffee Brown background -->
+  <!-- Box/Crate -->
+  <rect x="6" y="8" width="20" height="18" rx="1" fill="#d97706"/>
+  <path d="M6 14H26" stroke="#b45309" stroke-width="1"/> <!-- Lid crease -->
+  <!-- Tape/Seam -->
+  <rect x="15" y="8" width="2" height="18" fill="#b45309" opacity="0.5"/>
+  <!-- Coffee Stamp -->
+  <circle cx="16" cy="19" r="4" fill="#3f1d0b"/>
+  <path d="M16 17C16 17 15.5 18 15.5 19C15.5 20 16 21 16 21" stroke="#d97706" stroke-width="1" stroke-linecap="round" fill="none"/>
+</svg>
