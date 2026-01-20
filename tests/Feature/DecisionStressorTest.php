@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\Shipment;
 use App\Models\Vendor;
 use App\Services\SimulationService;
 use App\Services\LogisticsService;
@@ -98,7 +99,6 @@ test('scenario b: "the decision stressor" stress test', function () {
         'user_id' => $user->id,
         'vendor_id' => $vendor->id,
         'location_id' => $warehouse->id,
-        'route_id' => $premiumRoute->id,
         'total_cost' => 10000, 
         'status' => 'draft',
     ]);
@@ -109,12 +109,20 @@ test('scenario b: "the decision stressor" stress test', function () {
         'quantity' => 100,
         'cost_per_unit' => 100,
     ]);
+    Shipment::create([
+        'order_id' => $order->id,
+        'route_id' => $premiumRoute->id,
+        'source_location_id' => $premiumRoute->source_id,
+        'target_location_id' => $premiumRoute->target_id,
+        'status' => 'pending',
+        'sequence_index' => 0,
+    ]);
 
     $order->status->transitionTo(Pending::class);
     event(new OrderPlaced($order));
 
     // Verify order is tied to premium route
-    expect($order->fresh()->route_id)->toBe($premiumRoute->id);
+    expect($order->shipments()->value('route_id'))->toBe($premiumRoute->id);
     
     // Verify cash impact ($100,000 - $10,000 = $90,000)
     expect($gameState->fresh()->cash)->toBe(90000);

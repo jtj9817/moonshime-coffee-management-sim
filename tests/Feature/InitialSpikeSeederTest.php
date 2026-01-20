@@ -43,6 +43,8 @@ test('seeded spikes respect 2-day type cooldown', function () {
         ->orderBy('starts_at_day')
         ->get();
 
+    expect($spikes->count())->toBeGreaterThan(0);
+
     // For each spike type, check no two spikes of same type start within 2 days
     $lastDayByType = [];
     foreach ($spikes as $spike) {

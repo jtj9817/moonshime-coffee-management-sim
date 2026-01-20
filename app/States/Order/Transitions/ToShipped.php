@@ -16,23 +16,34 @@ class ToShipped extends Transition
 
     public function handle(): Order
     {
-        if (!$this->order->route_id) {
-            throw new RuntimeException('Cannot ship order without a assigned route.');
+        $shipments = $this->order->shipments()->with('route')->get();
+        if ($shipments->isEmpty()) {
+            throw new RuntimeException('Cannot ship order without assigned shipments.');
         }
 
-        $route = $this->order->route;
-        
-        // Check Capacity (Throughput Limits)
-        $totalQuantity = $this->order->items->sum('quantity');
-        if ($totalQuantity > $route->capacity) {
-            throw new RuntimeException("Order quantity ($totalQuantity) exceeds route capacity ({$route->capacity}).");
+        $routes = $shipments->pluck('route')->filter();
+        if ($routes->count() !== $shipments->count()) {
+            throw new RuntimeException('Cannot ship order with missing route data.');
         }
-        
+
+        // Check Capacity (Throughput Limits)
+        $totalQuantity = $this->order->items()->sum('quantity');
+        $minCapacity = $routes->min('capacity');
+        if ($minCapacity !== null && $totalQuantity > $minCapacity) {
+            throw new RuntimeException("Order quantity ($totalQuantity) exceeds route capacity ({$minCapacity}).");
+        }
+
+        $totalTransitDays = $this->order->total_transit_days;
+        if ($totalTransitDays === null) {
+            $totalTransitDays = (int) $routes->sum('transit_days');
+            $this->order->total_transit_days = $totalTransitDays;
+        }
+
         // Get current day from game state
         $gameState = app(GameState::class);
         $currentDay = $gameState->day;
 
-        $this->order->delivery_day = $currentDay + $route->transit_days;
+        $this->order->delivery_day = $currentDay + (int) $totalTransitDays;
         $this->order->status = new Shipped($this->order);
         $this->order->save();
 

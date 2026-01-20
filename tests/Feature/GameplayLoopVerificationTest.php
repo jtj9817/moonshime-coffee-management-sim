@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\Route;
+use App\Models\Shipment;
 use App\Models\SpikeEvent;
 use App\Models\Vendor;
 use App\Models\User;
@@ -73,10 +74,17 @@ test('comprehensive 5-day gameplay loop simulation with player agency', function
         'user_id' => $user->id,
         'vendor_id' => $vendor->id,
         'location_id' => $warehouse->id,
-        'route_id' => $standardRoute->id,
         'total_cost' => 10000, 
         'status' => 'draft',
     ]);    
+    Shipment::create([
+        'order_id' => $order->id,
+        'route_id' => $standardRoute->id,
+        'source_location_id' => $standardRoute->source_id,
+        'target_location_id' => $standardRoute->target_id,
+        'status' => 'pending',
+        'sequence_index' => 0,
+    ]);
     
     OrderItem::create([
         'order_id' => $order->id,
@@ -126,9 +134,16 @@ test('comprehensive 5-day gameplay loop simulation with player agency', function
         'user_id' => $user->id,
         'vendor_id' => $vendor->id,
         'location_id' => $warehouse->id,
-        'route_id' => $premiumRoute->id,
         'total_cost' => 20000,
         'status' => 'draft',
+    ]);
+    Shipment::create([
+        'order_id' => $emergencyOrder->id,
+        'route_id' => $premiumRoute->id,
+        'source_location_id' => $premiumRoute->source_id,
+        'target_location_id' => $premiumRoute->target_id,
+        'status' => 'pending',
+        'sequence_index' => 0,
     ]);
     
     $emergencyOrder->status->transitionTo(Pending::class);
@@ -200,9 +215,16 @@ test('comprehensive 5-day gameplay loop simulation with player agency', function
         'user_id' => $user->id,
         'vendor_id' => $vendor->id,
         'location_id' => $warehouse->id,
-        'route_id' => $standardRoute->id,
         'total_cost' => 5000,
         'status' => 'draft',
+    ]);
+    Shipment::create([
+        'order_id' => $shippedOrder->id,
+        'route_id' => $standardRoute->id,
+        'source_location_id' => $standardRoute->source_id,
+        'target_location_id' => $standardRoute->target_id,
+        'status' => 'pending',
+        'sequence_index' => 0,
     ]);
     $shippedOrder->status->transitionTo(Pending::class);
     event(new OrderPlaced($shippedOrder));
@@ -220,9 +242,16 @@ test('comprehensive 5-day gameplay loop simulation with player agency', function
         'user_id' => $user->id,
         'vendor_id' => $vendor->id,
         'location_id' => $warehouse->id,
-        'route_id' => $standardRoute->id,
         'total_cost' => 1000,
         'status' => 'draft',
+    ]);
+    Shipment::create([
+        'order_id' => $massiveOrder->id,
+        'route_id' => $standardRoute->id,
+        'source_location_id' => $standardRoute->source_id,
+        'target_location_id' => $standardRoute->target_id,
+        'status' => 'pending',
+        'sequence_index' => 0,
     ]);
     OrderItem::create([
         'order_id' => $massiveOrder->id,

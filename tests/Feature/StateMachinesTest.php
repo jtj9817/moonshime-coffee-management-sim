@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Order;
 use App\Models\Route;
+use App\Models\Shipment;
 use App\Models\Transfer;
 use App\States\OrderState;
 use App\States\TransferState;
@@ -72,8 +73,16 @@ class StateMachinesTest extends TestCase
         $route = Route::factory()->create();
         $order = Order::factory()->create([
             'total_cost' => 1000,
+            'user_id' => $user->id,
+            'location_id' => $route->target_id,
+        ]);
+        Shipment::create([
+            'order_id' => $order->id,
             'route_id' => $route->id,
-            'user_id' => $user->id
+            'source_location_id' => $route->source_id,
+            'target_location_id' => $route->target_id,
+            'status' => 'pending',
+            'sequence_index' => 0,
         ]);
 
         $order->status->transitionTo(\App\States\Order\Pending::class);

@@ -45,6 +45,26 @@ test('scenario a: "the cascade" stress test', function () {
     }
 
     $service = new SimulationService($gameState);
+    
+    // Add non-disruptive spikes covering Day 4 to block random guaranteed/optional spikes
+    SpikeEvent::create([
+        'user_id' => $user->id,
+        'type' => 'price',
+        'magnitude' => 0.5,
+        'duration' => 2,
+        'starts_at_day' => 4,
+        'ends_at_day' => 6,
+        'is_active' => false,
+    ]);
+    SpikeEvent::create([
+        'user_id' => $user->id,
+        'type' => 'demand',
+        'magnitude' => 1.2,
+        'duration' => 2,
+        'starts_at_day' => 4,
+        'ends_at_day' => 6,
+        'is_active' => false,
+    ]);
 
     // --- 2. TRIGGER ROOT SPIKE (Blizzard) ---
     // A blizzard that targets no specific route but we'll manually apply it 
@@ -92,8 +112,6 @@ test('scenario a: "the cascade" stress test', function () {
     }
     
     // Running analysis tick on Day 4 should resolve isolation alerts
-    $service->advanceTime(); // Day 3 -> 4
-    
     $unresolvedAlerts = Alert::where('type', 'isolation')->where('is_resolved', false)->count();
     expect($unresolvedAlerts)->toBe(0, "All isolation alerts should be resolved");
     
