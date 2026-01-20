@@ -119,33 +119,25 @@ class InitializeNewGame
             return; // World not seeded yet
         }
 
-        // Find a route from a vendor location to the store
+        // Seed a shipped order arriving Day 3 (using multi-hop service)
         $vendorLocation = Location::where('type', 'vendor')->first();
-        $route = null;
-        if ($vendorLocation) {
-            $route = Route::where('source_id', $vendorLocation->id)
-                ->where('is_active', true)
-                ->first();
-        }
+        if ($vendorLocation && $store) {
+            $logistics = app(\App\Services\LogisticsService::class);
+            $path = $logistics->findBestRoute($vendorLocation, $store);
 
-        // Seed a shipped order arriving Day 3
-        if ($route) {
-            $order = Order::create([
-                'user_id' => $user->id,
-                'vendor_id' => $vendor->id,
-                'location_id' => $route->target_id,
-                'route_id' => $route->id,
-                'total_cost' => 5000,
-                'status' => 'shipped',
-                'delivery_day' => $gameState->day + 2, // Arrives Day 3
-            ]);
-
-            OrderItem::create([
-                'order_id' => $order->id,
-                'product_id' => $product->id,
-                'quantity' => 50,
-                'cost_per_unit' => 100,
-            ]);
+            if ($path && $path->isNotEmpty()) {
+                app(\App\Services\OrderService::class)->createOrder(
+                    user: $user,
+                    vendor: $vendor,
+                    targetLocation: $store,
+                    items: [[
+                        'product_id' => $product->id,
+                        'quantity' => 50,
+                        'cost_per_unit' => 100,
+                    ]],
+                    path: $path
+                );
+            }
         }
 
         // Seed an in-transit transfer arriving Day 2

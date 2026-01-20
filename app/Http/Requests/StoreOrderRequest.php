@@ -21,7 +21,8 @@ class StoreOrderRequest extends FormRequest
         return [
             'vendor_id' => ['required', 'exists:vendors,id'],
             'location_id' => ['required', 'exists:locations,id'],
-            'route_id' => ['required', 'exists:routes,id'],
+            'source_location_id' => ['nullable', 'exists:locations,id'],
+            // 'route_id' is no longer used
             'items' => ['required', 'array', 'min:1'],
             'items.*.product_id' => ['required', 'exists:products,id'],
             'items.*.quantity' => ['required', 'integer', 'min:1'],
@@ -31,51 +32,106 @@ class StoreOrderRequest extends FormRequest
 
     public function withValidator(Validator $validator): void
     {
-        $validator->after(function (Validator $validator) {
-            if ($validator->errors()->isNotEmpty()) {
-                return;
-            }
-
-            $routeId = $this->input('route_id');
-            $route = Route::find($routeId);
-
-            // 1. Validate Route is Active
-            if (!$route->is_active) {
-                // Check if there's a specific reason from spikes
-                $spike = SpikeEvent::where('affected_route_id', $route->id)
-                    ->where('is_active', true)
-                    ->first();
-                
-                $message = $spike 
-                    ? "Route is blocked: {$spike->type}" 
-                    : 'The selected route is currently inactive.';
-                
-                $validator->errors()->add('route_id', $message);
-                return;
-            }
-
-            // 2. Validate Capacity
-            // Sum of all item quantities
-            $totalQuantity = collect($this->input('items'))->sum('quantity');
+            // 1. Find Best Path
+            $logistics = app(LogisticsService::class);
             
-            // Basic capacity check (static capacity)
-            // Future improvement: check current load if implemented
-            if ($totalQuantity > $route->capacity) {
-                $validator->errors()->add('route_id', "Order size ({$totalQuantity}) exceeds route capacity ({$route->capacity}).");
+            // Assume vendor location is the vendor ID for now, or fetch correct location
+            // Since we don't have VendorLocation logic easily, we try to use vendor ID as Location ID
+            // or fetch the vendor and get its location.
+            // But usually the vendor ID and Location ID are different in this seeding.
+            // Let's rely on finding a location with type 'vendor' that corresponds to this vendor.
+            // However, the GraphSeeder just made vendors locations.
+            // For now, let's assume `vendor_id` from request maps to `Location` if we find it, 
+            // or we search for the Vendor Location.
+            
+            $vendorId = $this->input('vendor_id');
+            $sourceLocationId = $this->input('source_location_id');
+
+            if ($sourceLocationId) {
+                $sourceLocation = \App\Models\Location::find($sourceLocationId);
+            } else {
+                // Try to find a location with this ID first (if Vendor ID == Location ID)
+                $sourceLocation = \App\Models\Location::where('id', $vendorId)->first();
+            }
+            
+            // If not found or if the types don't match what we expect, maybe we need to find 
+            // the location associated with the Vendor model?
+            // In CoreGameStateSeeder: Vendor created.
+            // In GraphSeeder: Location created with type='vendor'. 
+            // They are NOT linked in the seeder explicitly!
+            // This is a disconnect. 
+            // BUT, `new-order-dialog.tsx` selects `selectedSourceId` from `vendorLocations`.
+            // And sends `vendor_id` as well.
+            // Wait, looking at `new-order-dialog.tsx`:
+            // It sends `vendor_id` (selected from `vendorOptions`) AND `location_id` (Target).
+            // It DOES NOT send `source_location_id` in the form payload used by `post()`.
+            // Line 58: { vendor_id, location_id, route_id, items }.
+            // So the backend only knows the Vendor ID.
+            // We need to find the Location for that Vendor.
+            // If the Vendor ID != Location ID, we have a problem finding the start node.
+            
+            // Assumption: we pick the first 'vendor' type location that provides the products? 
+            // Or we assume 1-to-1 mapping?
+            // "Bean Baron" Vendor (ID 1) vs "Bean Baron" Location (ID 105).
+            // Currently, there is NO LINK.
+            // Verify `Vendor` model...
+            // `Vendor` model has `products`. It doesn't have `location_id`.
+            // `Location` has `type='vendor'`.
+            
+            // Fix: We should update the Request to accept `source_location_id` OR 
+            // we find any vendor location.
+            // `InitializeNewGame` just picked `Location::where('type', 'vendor')->first()`.
+            // This implies ANY vendor location is fine? That's weird.
+            // Realistically, the Vendor should have a location.
+            
+            // For now, let's assume we search for a Location with the same name as the Vendor?
+            // OR, given the implementation plan didn't address linking Vendor->Location, 
+            // I should find the best matching location.
+            $vendor = \App\Models\Vendor::find($vendorId);
+            $sourceLocation = \App\Models\Location::where('type', 'vendor')
+                ->where('name', 'like', '%' . $vendor->name . '%') // Fuzzy match
+                ->first();
+                
+            if (!$sourceLocation) {
+                 // Fallback to any vendor location
+                 $sourceLocation = \App\Models\Location::where('type', 'vendor')->first();
+            }
+
+            if (!$sourceLocation) {
+                $validator->errors()->add('vendor_id', "No distribution center found for this vendor.");
+                return;
+            }
+            
+            $targetLocation = \App\Models\Location::find($this->input('location_id'));
+            
+            $path = $logistics->findBestRoute($sourceLocation, $targetLocation);
+
+            if (!$path || $path->isEmpty()) {
+                $validator->errors()->add('location_id', 'No valid route found to this destination.');
+                return;
+            }
+
+            // 2. Validate Capacity (Bottleneck)
+            $totalQuantity = collect($this->input('items'))->sum('quantity');
+            $minCapacity = $path->min('capacity');
+            
+            if ($totalQuantity > $minCapacity) {
+                $validator->errors()->add('items', "Order size ({$totalQuantity}) exceeds route capacity ({$minCapacity}).");
             }
 
             // 3. Validate Funds
-            $logistics = app(LogisticsService::class);
-            $shippingCost = $logistics->calculateCost($route);
-            
+            $shippingCost = $path->sum(fn($r) => $logistics->calculateCost($r));
             $itemsCost = collect($this->input('items'))->sum(fn($item) => $item['quantity'] * $item['unit_price']);
             $totalCost = $itemsCost + $shippingCost;
 
-            $cash = GameState::first()->cash;
+            $cash = GameState::where('user_id', auth()->id())->value('cash');
             
             if ($cash < $totalCost) {
                 $validator->errors()->add('total', "Insufficient funds. Order total: \${$totalCost}, Available: \${$cash}.");
             }
-        });
+
+            // Store the path in the request so the Controller doesn't need to recalculate
+            $this->merge(['_calculated_path' => $path]);
+            $this->merge(['_source_location' => $sourceLocation]);
     }
 }

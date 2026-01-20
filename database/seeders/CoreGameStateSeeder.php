@@ -15,12 +15,8 @@ class CoreGameStateSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Create Main Store (additional locations seeded by GraphSeeder)
-        Location::factory()->create([
-            'name' => 'Moonshine Central',
-            'type' => 'store',
-            'max_storage' => 1000,
-        ]);
+        // 1. Create Main Store is now handled/connected in GraphSeeder
+        // We skip creating it here to avoid isolation.
 
         // 2. Create Vendors
         $beanVendor = Vendor::factory()->create(['name' => 'Bean Baron']);

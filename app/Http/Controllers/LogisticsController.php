@@ -100,6 +100,8 @@ class LogisticsController extends Controller
                 'target' => $route->target->name,
                 'transport_mode' => $route->transport_mode,
                 'cost' => $this->logistics->calculateCost($route),
+                'transit_days' => $route->transit_days,
+                'capacity' => $route->capacity,
                 'is_premium' => $this->logistics->isPremiumRoute($route),
             ]),
             'total_cost' => $path->sum(fn($r) => $this->logistics->calculateCost($r)),

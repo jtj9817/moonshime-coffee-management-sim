@@ -239,39 +239,33 @@ class GameController extends Controller
     /**
      * Place a new order.
      */
+
     public function placeOrder(\App\Http\Requests\StoreOrderRequest $request): \Illuminate\Http\RedirectResponse
     {
         $validated = $request->validated();
-
-        return DB::transaction(function () use ($validated) {
-            $totalCost = collect($validated['items'])->sum(fn($item) => $item['quantity'] * $item['unit_price']);
+        
+        return DB::transaction(function () use ($validated, $request) {
+            $path = $request->input('_calculated_path');
+            // sourceLocation not strictly needed by createOrder if path is provided
             
-            $route = Route::findOrFail($validated['route_id']);
-            // LogisticsService is now calculating cost correctly with spikes in the service, 
-            // but we might want to recalc here to be safe or trust the client passed cost? 
-            // The request validation calculated it safely.
-            // We should use the service to get the real cost to ensure consistency.
-            $shippingCost = app(\App\Services\LogisticsService::class)->calculateCost($route);
-            $totalCost += $shippingCost;
-
-            $order = Order::create([
-                'user_id' => auth()->id(),
-                'vendor_id' => $validated['vendor_id'],
-                'location_id' => $validated['location_id'],
-                'route_id' => $validated['route_id'],
-                'total_cost' => $totalCost,
-                'status' => Draft::class,
-            ]);
-
-            foreach ($validated['items'] as $item) {
-                $order->items()->create([
+            $vendor = Vendor::findOrFail($validated['vendor_id']);
+            $targetLocation = Location::findOrFail($validated['location_id']);
+            
+            $items = collect($validated['items'])->map(function($item) {
+                return [
                     'product_id' => $item['product_id'],
                     'quantity' => $item['quantity'],
                     'cost_per_unit' => $item['unit_price'],
-                ]);
-            }
+                ];
+            })->toArray();
 
-            $order->status->transitionTo(Pending::class);
+            $order = app(\App\Services\OrderService::class)->createOrder(
+                user: auth()->user(),
+                vendor: $vendor,
+                targetLocation: $targetLocation,
+                items: $items,
+                path: $path
+            );
             
             event(new OrderPlaced($order));
 
