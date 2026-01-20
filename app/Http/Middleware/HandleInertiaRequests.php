@@ -71,7 +71,7 @@ class HandleInertiaRequests extends Middleware
     {
         return [
             'state' => $this->getGameState($user),
-            'locations' => Location::select('id', 'name', 'address', 'max_storage')->get(),
+            'locations' => Location::select('id', 'name', 'address', 'max_storage', 'type')->get(),
             'products' => Product::with('vendors:id,name')
                 ->select('id', 'name', 'category', 'is_perishable', 'storage_cost')
                 ->get(),
