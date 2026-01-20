@@ -3,7 +3,12 @@
 ## Phase 1: Backend Reset Endpoint
 - [x] Task: Add `resetGame` route to `routes/web.php` (POST /game/reset).
 - [x] Task: Implement `GameController::resetGame` logic with DB transaction and `InitializeNewGame` call.
-- [ ] Task: Conductor - User Manual Verification 'Backend Reset Endpoint' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Backend Reset Endpoint' (Protocol in workflow.md)
+
+## Phase 1: Backend Reset Endpoint [checkpoint: 1ddd041]
+- [x] Task: Add `resetGame` route to `routes/web.php` (POST /game/reset).
+- [x] Task: Implement `GameController::resetGame` logic with DB transaction and `InitializeNewGame` call.
+- [x] Task: Conductor - User Manual Verification 'Backend Reset Endpoint' (Protocol in workflow.md)
 
 ## Phase 2: Frontend Reset UX
 - [ ] Task: Create `ConfirmDialog` component (`resources/js/components/ui/confirm-dialog.tsx`).
