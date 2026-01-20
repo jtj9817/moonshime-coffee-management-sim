@@ -1,6 +1,6 @@
 import { useForm } from '@inertiajs/react';
-import { Plus, ShoppingCart, Trash2 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { Plus, ShoppingCart, Trash2, ArrowRight } from 'lucide-react';
+import { useMemo, useState, useEffect } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -24,7 +24,6 @@ import { useGame } from '@/contexts/game-context';
 import { RouteModel } from '@/types';
 
 import { RouteCapacityMeter } from './route-capacity-meter';
-import { RoutePicker } from './route-picker';
 
 interface NewOrderDialogProps {
     open: boolean;
@@ -49,7 +48,25 @@ export function NewOrderDialog({
     const { locations } = useGame();
 
     const [selectedSourceId, setSelectedSourceId] = useState<string>('');
-    const [selectedRoute, setSelectedRoute] = useState<RouteModel | null>(null);
+
+    // State for calculated path
+    const [calculatedPath, setCalculatedPath] = useState<{
+        reachable: boolean;
+        path: Array<{
+            id: number;
+            source: string;
+            target: string;
+            transport_mode: string;
+            cost: number;
+            transit_days: number;
+            capacity: number;
+        }>;
+        total_cost: number;
+        total_days: number;
+        min_capacity: number;
+    } | null>(null);
+
+    const [loadingPath, setLoadingPath] = useState(false);
 
     // For adding a new item
     const [currentProductId, setCurrentProductId] = useState<string>('');
@@ -58,6 +75,7 @@ export function NewOrderDialog({
     const { data, setData, post, processing, reset, errors } = useForm({
         vendor_id: '',
         location_id: '',
+        source_location_id: '',
         route_id: 0,
         items: [] as OrderItemForm[],
     });
@@ -72,6 +90,44 @@ export function NewOrderDialog({
     const playerStores = useMemo(() => {
         return (locations ?? []).filter(l => l.type === 'store' || l.name.includes('Central'));
     }, [locations]);
+
+    // Fetch path when source or target changes
+    useEffect(() => {
+        if (!selectedSourceId || !data.location_id) {
+            setCalculatedPath(null);
+            return;
+        }
+
+        setLoadingPath(true);
+        fetch(`/game/logistics/path?source_id=${selectedSourceId}&target_id=${data.location_id}`)
+            .then(res => res.json())
+            .then(result => {
+                if (result.success && result.reachable) {
+                    const path = result.path;
+                    const totalCost = result.total_cost;
+
+                    const totalDays = path.reduce((sum: number, leg: any) => sum + (leg.transit_days || 0), 0);
+                    const minCapacity = Math.min(...path.map((leg: any) => leg.capacity || 1000));
+
+                    setCalculatedPath({
+                        reachable: true,
+                        path: path,
+                        total_cost: totalCost,
+                        total_days: totalDays,
+                        min_capacity: minCapacity
+                    });
+                } else {
+                    setCalculatedPath(null);
+                }
+            })
+            .catch(() => setCalculatedPath(null))
+            .finally(() => setLoadingPath(false));
+    }, [selectedSourceId, data.location_id]);
+
+    // Sync source_location_id with form data
+    useEffect(() => {
+        setData('source_location_id', selectedSourceId);
+    }, [selectedSourceId]);
 
     const handleAddItem = () => {
         if (!currentProductId) return;
@@ -95,31 +151,54 @@ export function NewOrderDialog({
     };
 
     const totalQuantity = data.items.reduce((sum, item) => sum + item.quantity, 0);
-    const isOverCapacity = selectedRoute ? totalQuantity > selectedRoute.capacity : false;
+    const isOverCapacity = calculatedPath ? totalQuantity > calculatedPath.min_capacity : false;
 
     // Derived values for summary
     const itemsSubtotal = data.items.reduce((sum, i) => sum + i.quantity * i.unit_price, 0);
-    const shippingCost = selectedRoute?.cost ?? 0;
+    const shippingCost = calculatedPath?.total_cost ?? 0;
     const totalCost = itemsSubtotal + shippingCost;
-    const excess = selectedRoute ? Math.max(0, totalQuantity - selectedRoute.capacity) : 0;
+    const excess = calculatedPath ? Math.max(0, totalQuantity - calculatedPath.min_capacity) : 0;
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!data.vendor_id || !data.location_id || !selectedRoute || data.items.length === 0 || isOverCapacity) {
+        if (!data.vendor_id || !data.location_id || !calculatedPath || data.items.length === 0 || isOverCapacity) {
             return;
         }
+
+        // We need to inject the fact that we have a calculated path implicitly via the backend
+        // Backend recalculates it.
+        // But the backend expects `route_id`?
+        // We removed `route_id` from StoreOrderRequest validation.
+        // We still have it in form "data" but it's 0.
+
+        // We need to make sure we send `_source_location` or something if we want to be explicit?
+        // No, StoreOrderRequest finds it from vendor_id.
+        // But wait, the frontend has `selectedSourceId`.
+        // If `selectedSourceId` != Vendor ID (which is likely true if Vendor != Vendor Location),
+        // we MUST send `selectedSourceId` to backend so it knows where to start!
+        // My previous update to StoreOrderRequest assumed it could find it.
+        // I should add `source_location_id` to the request payload!
 
         post('/game/orders', {
             preserveScroll: true,
             onSuccess: () => {
                 onOpenChange(false);
                 reset();
-                setSelectedRoute(null);
+                setCalculatedPath(null);
                 setSelectedSourceId('');
             },
         });
     };
+
+    // We need to fix the submit logic to include source location.
+    // I'll assume for now I can't easily change the hook state structure dymanically without re-declaring.
+    // I can stick `source_location_id` into `data` via `setData` when `selectedSourceId` changes?
+    // Better: Add it to initialization.
+
+    // For this tool call, I'm just restoring the file.
+    // I will use `transform` callback if available or just add it to `useForm`.
+    // Let's add `source_location_id` to `useForm`.
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -152,8 +231,6 @@ export function NewOrderDialog({
                                 </SelectContent>
                             </Select>
                         </div>
-
-                        {/* Target Store */}
                         <div className="space-y-2">
                             <Label>Destination Store</Label>
                             <Select value={data.location_id} onValueChange={(v) => setData('location_id', v)}>
@@ -230,7 +307,6 @@ export function NewOrderDialog({
                             </Button>
                         </div>
 
-                        {/* Items List */}
                         {data.items.length > 0 && (
                             <div className="mt-4 space-y-2">
                                 {data.items.map((item, index) => {
@@ -257,16 +333,42 @@ export function NewOrderDialog({
                         )}
                     </div>
 
-                    {/* Route Selection */}
-                    <RoutePicker
-                        sourceId={selectedSourceId}
-                        targetId={data.location_id}
-                        selectedRouteId={selectedRoute?.id}
-                        onSelect={(r) => {
-                            setSelectedRoute(r);
-                            setData('route_id', r.id);
-                        }}
-                    />
+                    {/* Calculated Path Display */}
+                    <div className="space-y-4 rounded-lg border border-indigo-200 bg-indigo-50/50 p-4 dark:border-indigo-900/30 dark:bg-indigo-900/20">
+                        <Label className="text-indigo-900 dark:text-indigo-300">Logistics Path</Label>
+
+                        {loadingPath ? (
+                            <div className="text-sm text-indigo-500 animate-pulse">Finding best route...</div>
+                        ) : calculatedPath ? (
+                            <div className="space-y-3">
+                                <div className="flex justify-between items-center text-sm font-medium">
+                                    <span className="text-indigo-700 dark:text-indigo-400">
+                                        Total Transit: {calculatedPath.total_days} days
+                                    </span>
+                                    <span className="text-indigo-700 dark:text-indigo-400">
+                                        Capacity: {calculatedPath.min_capacity.toLocaleString()} units
+                                    </span>
+                                </div>
+
+                                <div className="space-y-1">
+                                    {calculatedPath.path.map((leg, i) => (
+                                        <div key={i} className="flex items-center gap-2 text-xs text-indigo-600 dark:text-indigo-400">
+                                            <div className="w-5 h-5 rounded-full bg-indigo-200 flex items-center justify-center text-[10px] font-bold">
+                                                {i + 1}
+                                            </div>
+                                            <span>
+                                                {leg.source} → {leg.target} ({leg.transport_mode})
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="text-sm text-stone-500 italic">
+                                {selectedSourceId && data.location_id ? "No route available." : "Select departure and destination to view route."}
+                            </div>
+                        )}
+                    </div>
 
                     {/* Validation Errors & Summary */}
                     <div className="rounded-lg bg-stone-100 p-4 dark:bg-stone-800">
@@ -274,10 +376,6 @@ export function NewOrderDialog({
                             <div className="flex justify-between text-sm">
                                 <span className="text-stone-500">Items Subtotal</span>
                                 <span>${itemsSubtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                                <span className="text-stone-500">Shipping Mode</span>
-                                <span className="capitalize">{selectedRoute?.transport_mode ?? '—'}</span>
                             </div>
                             <div className="flex justify-between text-sm">
                                 <span className="text-stone-500">Shipping Cost</span>
@@ -291,9 +389,8 @@ export function NewOrderDialog({
                         </div>
 
                         {/* Error Messages */}
-                        {(errors.route_id || errors.vendor_id || errors.items) && (
+                        {(errors.vendor_id || errors.items) && (
                             <div className="mt-3 rounded border border-rose-200 bg-rose-50 p-2 text-xs text-rose-600 dark:border-rose-900/30 dark:bg-rose-900/20">
-                                {errors.route_id && <div>Route Error: {errors.route_id}</div>}
                                 {errors.vendor_id && <div>Vendor Error: {errors.vendor_id}</div>}
                                 {typeof errors.items === 'string' && <div>{errors.items}</div>}
                             </div>
@@ -301,11 +398,11 @@ export function NewOrderDialog({
                     </div>
 
                     {/* Capacity Validation */}
-                    {selectedRoute && (
+                    {calculatedPath && (
                         <div className="space-y-1">
                             <RouteCapacityMeter
                                 currentQuantity={totalQuantity}
-                                capacity={selectedRoute.capacity}
+                                capacity={calculatedPath.min_capacity}
                             />
                             {excess > 0 && (
                                 <p className="text-xs text-rose-600 font-medium text-right">
@@ -322,9 +419,8 @@ export function NewOrderDialog({
                     </Button>
                     <Button
                         onClick={handleSubmit}
-                        disabled={processing || data.items.length === 0 || !selectedRoute || totalQuantity > (selectedRoute?.capacity ?? Infinity)}
-                        className={`bg-amber-600 hover:bg-amber-700 w-full sm:w-auto ${processing ? 'opacity-80' : ''
-                            }`}
+                        disabled={processing || data.items.length === 0 || !calculatedPath || isOverCapacity}
+                        className={`bg-amber-600 hover:bg-amber-700 w-full sm:w-auto ${processing ? 'opacity-80' : ''}`}
                     >
                         {processing ? 'Placing Order...' : `Confirm Order ($${totalCost.toLocaleString()})`}
                     </Button>
