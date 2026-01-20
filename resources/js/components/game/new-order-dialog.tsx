@@ -62,15 +62,15 @@ export function NewOrderDialog({
         items: [] as OrderItemForm[],
     });
 
-    const vendorOptions = vendorProducts.map((vp) => vp.vendor);
-    const selectedVendorData = vendorProducts.find((vp) => vp.vendor.id === data.vendor_id);
+    const vendorOptions = (vendorProducts ?? []).map((vp) => vp.vendor);
+    const selectedVendorData = (vendorProducts ?? []).find((vp) => vp.vendor.id === data.vendor_id);
 
     const vendorLocations = useMemo(() => {
-        return locations.filter(l => l.type === 'vendor' || l.type === 'warehouse');
+        return (locations ?? []).filter(l => l.type === 'vendor' || l.type === 'warehouse');
     }, [locations]);
 
     const playerStores = useMemo(() => {
-        return locations.filter(l => l.type === 'store' || l.name.includes('Central'));
+        return (locations ?? []).filter(l => l.type === 'store' || l.name.includes('Central'));
     }, [locations]);
 
     const handleAddItem = () => {
