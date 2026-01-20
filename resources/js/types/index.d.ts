@@ -47,6 +47,7 @@ export interface GameStateShared {
 export interface LocationModel {
     id: string;
     name: string;
+    type: string;
     address: string;
     max_storage: number;
 }

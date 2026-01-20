@@ -291,9 +291,8 @@ export function NewOrderDialog({
                         </div>
 
                         {/* Error Messages */}
-                        {(errors.total || errors.route_id || errors.vendor_id || errors.items) && (
+                        {(errors.route_id || errors.vendor_id || errors.items) && (
                             <div className="mt-3 rounded border border-rose-200 bg-rose-50 p-2 text-xs text-rose-600 dark:border-rose-900/30 dark:bg-rose-900/20">
-                                {errors.total && <div className="font-bold">{errors.total}</div>}
                                 {errors.route_id && <div>Route Error: {errors.route_id}</div>}
                                 {errors.vendor_id && <div>Vendor Error: {errors.vendor_id}</div>}
                                 {typeof errors.items === 'string' && <div>{errors.items}</div>}
