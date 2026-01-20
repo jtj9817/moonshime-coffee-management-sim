@@ -19,5 +19,5 @@
 - [x] Task: Conductor - User Manual Verification 'Frontend Reset UX' (Protocol in workflow.md)
 
 ## Phase 3: Tests
-- [ ] Task: Create Feature Test `tests/Feature/ResetGameTest.php` to verify state clearing and reseeding.
-- [ ] Task: Conductor - User Manual Verification 'Tests' (Protocol in workflow.md)
+- [x] Task: Create Feature Test `tests/Feature/ResetGameTest.php` to verify state clearing and reseeding.
+- [x] Task: Conductor - User Manual Verification 'Tests' (Protocol in workflow.md)
