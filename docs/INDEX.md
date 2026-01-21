@@ -13,6 +13,9 @@ Moonshine Coffee Management Sim is a **turn-based supply chain management simula
 - [CLAUDE.md](../CLAUDE.md) - AI agent development guidelines
 - [Technical Design Document](./technical-design-document.md) - High-level architecture
 
+### ⚠️ Active Issues
+- **[Data Seeding & Synchronization Analysis](./data-seeding-synchronization-analysis.md)** - Critical frontend-backend data mismatches (2026-01-20)
+
 ### Core Documentation
 
 #### 📦 Backend (Laravel)
@@ -58,6 +61,7 @@ docs/
 ├── daily-reporting-infrastructure-analysis.md
 ├── daily-simulation-logic-plan.md
 ├── dashboard-ux-test-gap-analysis.md
+├── data-seeding-synchronization-analysis.md  # ⚠️ Active issue - Frontend/Backend data mismatch
 ├── gameplay-loop-mechanics-analysis.md
 ├── game-state-persistence-brainstorm.md
 ├── logistics-integration-post-completion-cleanup.md
