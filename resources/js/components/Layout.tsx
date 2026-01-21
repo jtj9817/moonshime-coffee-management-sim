@@ -72,7 +72,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const getAlertDestination = (alert: AlertModel): string => {
     switch (alert.type) {
       case 'order_placed':
-        return '/game/orders';
+        return '/game/ordering';
       case 'transfer_completed':
         return '/game/transfers';
       case 'spike_occurred':

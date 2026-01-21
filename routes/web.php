@@ -15,6 +15,7 @@ Route::middleware(['auth', 'verified'])->prefix('game')->name('game.')->group(fu
     Route::get('/inventory', [GameController::class, 'inventory'])->name('inventory');
     Route::get('/sku/{location}/{sku}', [GameController::class, 'skuDetail'])->name('sku-detail');
     Route::get('/ordering', [GameController::class, 'ordering'])->name('ordering');
+    Route::redirect('/orders', '/game/ordering');
     Route::get('/transfers', [GameController::class, 'transfers'])->name('transfers');
     Route::get('/vendors', [GameController::class, 'vendors'])->name('vendors');
     Route::get('/vendors/{vendor}', [GameController::class, 'vendorDetail'])->name('vendor-detail');

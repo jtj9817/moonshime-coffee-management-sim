@@ -200,7 +200,7 @@ export function GameHeader() {
                                             // Navigate based on alert type
                                             const destination = (() => {
                                                 switch (alert.type) {
-                                                    case 'order_placed': return '/game/orders';
+                                                    case 'order_placed': return '/game/ordering';
                                                     case 'transfer_completed': return '/game/transfers';
                                                     case 'spike_occurred': return '/game/spike-history';
                                                     case 'isolation': return alert.location_id
