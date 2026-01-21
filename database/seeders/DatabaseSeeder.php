@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
         // Seed global world data (locations, routes, vendors, products)
         $this->call(CoreGameStateSeeder::class);
         $this->call(GraphSeeder::class);
+        $this->call(InventorySeeder::class);
 
         // Initialize per-user game state (inventory, pipeline, spikes)
         app(InitializeNewGame::class)->handle($user);

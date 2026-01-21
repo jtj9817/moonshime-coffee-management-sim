@@ -16,7 +16,8 @@ class GraphSeeder extends Seeder
         // 1. Create Nodes
         $vendors = Location::factory()->count(3)->create(['type' => 'vendor']);
         $warehouses = Location::factory()->count(2)->create(['type' => 'warehouse']);
-        $hub = Location::factory()->create(['type' => 'hub', 'name' => 'Central Transit Hub']);
+        // Create 3 hubs for multi-path diversity (ensures ≥3 distinct paths)
+        $hubs = Location::factory()->count(3)->create(['type' => 'hub']);
 
         // Create Main Store FIRST so it gets included in route loops
         $mainStore = Location::factory()->create([
@@ -69,28 +70,32 @@ class GraphSeeder extends Seeder
             ]);
         }
 
-        // 5. Connect Vendors to Hub (Air, Fast)
+        // 5. Connect Vendors to Hubs (Air, Fast)
         foreach ($vendors as $vendor) {
-            Route::factory()->create([
-                'source_id' => $vendor->id,
-                'target_id' => $hub->id,
-                'transport_mode' => 'Air',
-                'cost' => 5.00,
-                'transit_days' => 1,
-                'is_active' => true,
-            ]);
+            foreach ($hubs as $hub) {
+                Route::factory()->create([
+                    'source_id' => $vendor->id,
+                    'target_id' => $hub->id,
+                    'transport_mode' => 'Air',
+                    'cost' => 5.00,
+                    'transit_days' => 1,
+                    'is_active' => true,
+                ]);
+            }
         }
 
-        // 6. Connect Hub to Stores (Air, Fast)
-        foreach ($stores as $store) {
-            Route::factory()->create([
-                'source_id' => $hub->id,
-                'target_id' => $store->id,
-                'transport_mode' => 'Air',
-                'cost' => 5.00,
-                'transit_days' => 1,
-                'is_active' => true,
-            ]);
+        // 6. Connect Hubs to Stores (Air, Fast)
+        foreach ($hubs as $hub) {
+            foreach ($stores as $store) {
+                Route::factory()->create([
+                    'source_id' => $hub->id,
+                    'target_id' => $store->id,
+                    'transport_mode' => 'Air',
+                    'cost' => 5.00,
+                    'transit_days' => 1,
+                    'is_active' => true,
+                ]);
+            }
         }
     }
 }

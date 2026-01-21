@@ -15,55 +15,46 @@ class CoreGameStateSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Create Main Store is now handled/connected in GraphSeeder
-        // We skip creating it here to avoid isolation.
+        // 1. Get data from config
+        $productsConfig = config('game_data.products');
+        $vendorsConfig = config('game_data.vendors');
 
-        // 2. Create Vendors
-        $beanVendor = Vendor::factory()->create(['name' => 'Bean Baron']);
-        $dairyVendor = Vendor::factory()->create(['name' => 'Dairy King']);
-        $suppliesVendor = Vendor::factory()->create(['name' => 'General Supplies Co']);
+        // 2. Create all products from config
+        $products = [];
+        foreach ($productsConfig as $productData) {
+            $products[$productData['category']][] = Product::updateOrCreate(
+                ['name' => $productData['name']],
+                [
+                    'category' => $productData['category'],
+                    'is_perishable' => $productData['is_perishable'],
+                    'storage_cost' => $productData['storage_cost'],
+                ]
+            );
+        }
 
-        // 3. Create Products
-        $arabicaBeans = Product::factory()->create([
-            'name' => 'Arabica Beans',
-            'category' => 'Beans',
-            'is_perishable' => false,
-            'storage_cost' => 0.50,
-        ]);
+        // 3. Create vendors from config and attach products by category
+        foreach ($vendorsConfig as $vendorData) {
+            $vendor = Vendor::updateOrCreate(
+                ['name' => $vendorData['name']],
+                [
+                    'reliability_score' => $vendorData['reliability_score'],
+                    'metrics' => $vendorData['metrics'],
+                ]
+            );
 
-        $robustaBeans = Product::factory()->create([
-            'name' => 'Robusta Beans',
-            'category' => 'Beans',
-            'is_perishable' => false,
-            'storage_cost' => 0.40,
-        ]);
+            // Attach products that match the vendor's categories
+            $productIds = [];
+            foreach ($vendorData['categories'] as $category) {
+                if (isset($products[$category])) {
+                    foreach ($products[$category] as $product) {
+                        $productIds[] = $product->id;
+                    }
+                }
+            }
+            $vendor->products()->syncWithoutDetaching($productIds);
+        }
 
-        $wholeMilk = Product::factory()->create([
-            'name' => 'Whole Milk',
-            'category' => 'Milk',
-            'is_perishable' => true,
-            'storage_cost' => 1.00,
-        ]);
-
-        $oatMilk = Product::factory()->create([
-            'name' => 'Oat Milk',
-            'category' => 'Milk',
-            'is_perishable' => true,
-            'storage_cost' => 1.20,
-        ]);
-
-        $cups = Product::factory()->create([
-            'name' => '12oz Cups',
-            'category' => 'Cups',
-            'is_perishable' => false,
-            'storage_cost' => 0.10,
-        ]);
-
-        // 4. Attach Products to Vendors
-        $beanVendor->products()->attach([$arabicaBeans->id, $robustaBeans->id]);
-        $dairyVendor->products()->attach([$wholeMilk->id, $oatMilk->id]);
-        $suppliesVendor->products()->attach([$cups->id]);
-
-        // Note: Per-user inventory is now seeded by InitializeNewGame action
+        // Note: Per-user inventory is seeded by InitializeNewGame action
+        // Location creation and graph connections are handled by GraphSeeder
     }
 }
