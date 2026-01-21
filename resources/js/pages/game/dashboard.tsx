@@ -17,6 +17,7 @@ import { type ReactNode } from 'react';
 import { LogisticsStatusWidget } from '@/components/game/LogisticsStatusWidget';
 import ResetGameButton from '@/components/game/reset-game-button';
 import { WelcomeBanner } from '@/components/game/welcome-banner';
+import { DailyReportCard } from '@/components/game/DailyReportCard';
 import { Badge } from '@/components/ui/badge';
 import { formatCurrency } from '@/lib/formatCurrency';
 import { Button } from '@/components/ui/button';
@@ -31,6 +32,22 @@ interface DashboardProps {
     quests: QuestModel[];
     logistics_health: number;
     active_spikes_count: number;
+    dailyReport: {
+        id: number;
+        user_id: number;
+        day: number;
+        summary_data: {
+            orders_placed: number;
+            spikes_started: number;
+            spikes_ended: number;
+            alerts_generated: number;
+            transfers_completed: number;
+        };
+        metrics: {
+            cash: number;
+            xp: number;
+        };
+    } | null;
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -42,11 +59,10 @@ function QuestCard({ quest }: { quest: QuestModel }) {
 
     return (
         <div
-            className={`rounded-xl border-2 p-4 transition-all ${
-                quest.isCompleted
+            className={`rounded-xl border-2 p-4 transition-all ${quest.isCompleted
                     ? 'border-emerald-200 bg-emerald-50 opacity-80 dark:border-emerald-800 dark:bg-emerald-950'
                     : 'border-stone-200 bg-white hover:border-amber-400 dark:border-stone-700 dark:bg-stone-800'
-            }`}
+                }`}
         >
             <div className="mb-2 flex items-start justify-between">
                 <Badge variant="secondary" className="text-[10px] uppercase">
@@ -60,11 +76,10 @@ function QuestCard({ quest }: { quest: QuestModel }) {
                 </div>
             </div>
             <h4
-                className={`text-sm font-bold ${
-                    quest.isCompleted
+                className={`text-sm font-bold ${quest.isCompleted
                         ? 'text-emerald-800 line-through dark:text-emerald-300'
                         : 'text-stone-900 dark:text-white'
-                }`}
+                    }`}
             >
                 {quest.title}
             </h4>
@@ -150,7 +165,7 @@ function LocationCard({ location, alerts }: { location: { id: string; name: stri
                         <CheckCircle2 size={12} /> Systems Normal
                     </div>
                 )}
-                
+
                 {/* Empty State Call to Action */}
                 {critical > 0 && locationAlerts.some(a => a.message.toLowerCase().includes('stock')) && (
                     <div className="mt-2 text-center">
@@ -170,7 +185,7 @@ function LocationCard({ location, alerts }: { location: { id: string; name: stri
     );
 }
 
-export default function Dashboard({ alerts, kpis, quests, logistics_health, active_spikes_count }: DashboardProps) {
+export default function Dashboard({ alerts, kpis, quests, logistics_health, active_spikes_count, dailyReport }: DashboardProps) {
     const { locations, currentSpike, gameState } = useGame();
 
     return (
@@ -188,6 +203,11 @@ export default function Dashboard({ alerts, kpis, quests, logistics_health, acti
                 {/* Day 1 Welcome Banner */}
                 {gameState.day === 1 && (
                     <WelcomeBanner />
+                )}
+
+                {/* Daily Report Card - shows after day 1 */}
+                {dailyReport && (
+                    <DailyReportCard report={dailyReport} />
                 )}
 
                 {/* Active Spike Alert */}
@@ -217,29 +237,29 @@ export default function Dashboard({ alerts, kpis, quests, logistics_health, acti
 
                 {/* KPIs */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-                    <LogisticsStatusWidget 
-                        health={logistics_health} 
-                        activeSpikesCount={active_spikes_count} 
+                    <LogisticsStatusWidget
+                        health={logistics_health}
+                        activeSpikesCount={active_spikes_count}
                     />
-                    
+
                     {kpis.map((kpi, index) => {
                         const isCurrency = kpi.label === 'Inventory Value' && typeof kpi.value === 'number';
 
                         return (
-                        <Card key={index}>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium text-stone-500 dark:text-stone-400">
-                                    {kpi.label}
-                                </CardTitle>
-                                {kpi.trend === 'up' && <TrendingUp className="h-4 w-4 text-emerald-500" />}
-                                {kpi.trend === 'down' && <AlertTriangle className="h-4 w-4 text-rose-500" />}
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold text-stone-900 dark:text-white">
-                                    {isCurrency ? `$${formatCurrency(kpi.value)}` : kpi.value}
-                                </div>
-                            </CardContent>
-                        </Card>
+                            <Card key={index}>
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                    <CardTitle className="text-sm font-medium text-stone-500 dark:text-stone-400">
+                                        {kpi.label}
+                                    </CardTitle>
+                                    {kpi.trend === 'up' && <TrendingUp className="h-4 w-4 text-emerald-500" />}
+                                    {kpi.trend === 'down' && <AlertTriangle className="h-4 w-4 text-rose-500" />}
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="text-2xl font-bold text-stone-900 dark:text-white">
+                                        {isCurrency ? `$${formatCurrency(kpi.value)}` : kpi.value}
+                                    </div>
+                                </CardContent>
+                            </Card>
                         );
                     })}
                 </div>
