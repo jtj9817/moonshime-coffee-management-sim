@@ -171,8 +171,8 @@ export interface TransferModel {
     status: string;
     delivery_day: number | null;
     created_at: string;
-    sourceLocation?: LocationModel;
-    targetLocation?: LocationModel;
+    source_location?: LocationModel;
+    target_location?: LocationModel;
 }
 
 // KPI Types (for dashboard)

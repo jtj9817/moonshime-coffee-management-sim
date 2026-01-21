@@ -1,6 +1,6 @@
 import { Head, useForm } from '@inertiajs/react';
 import { ArrowRight, ArrowRightLeft, MapPin, Plus, Truck, AlertTriangle, Info } from 'lucide-react';
-import { useState, useEffect, type ReactNode } from 'react';
+import { useMemo, useState, useEffect, type ReactNode } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -84,6 +84,24 @@ export default function Transfers({ transfers, suggestions }: TransfersProps) {
     } | null>(null);
     const [loadingRoute, setLoadingRoute] = useState(false);
     const [showAlternative, setShowAlternative] = useState(false);
+
+    const locationNameById = useMemo(() => {
+        const map = new Map<string, string>();
+        locations.forEach((location) => {
+            map.set(location.id, location.name);
+        });
+        return map;
+    }, [locations]);
+
+    const getLocationName = (locationId?: string, fallbackName?: string) => {
+        if (fallbackName) {
+            return fallbackName;
+        }
+        if (!locationId) {
+            return 'Unknown';
+        }
+        return locationNameById.get(locationId) ?? 'Unknown';
+    };
 
     const { data, setData, post, processing, errors, reset } = useForm({
         source_location_id: '',
@@ -397,11 +415,17 @@ export default function Transfers({ transfers, suggestions }: TransfersProps) {
                                     <TableCell>
                                         <div className="flex items-center gap-2">
                                             <span className="font-medium">
-                                                {transfer.sourceLocation?.name ?? 'Unknown'}
+                                                {getLocationName(
+                                                    transfer.source_location_id,
+                                                    transfer.source_location?.name
+                                                )}
                                             </span>
                                             <ArrowRight className="h-4 w-4 text-stone-400" />
                                             <span className="font-medium">
-                                                {transfer.targetLocation?.name ?? 'Unknown'}
+                                                {getLocationName(
+                                                    transfer.target_location_id,
+                                                    transfer.target_location?.name
+                                                )}
                                             </span>
                                         </div>
                                     </TableCell>
