@@ -23,6 +23,7 @@ class Alert extends Model
         'data',
         'is_read',
         'is_resolved',
+        'created_day',
     ];
 
     protected $casts = [
@@ -30,6 +31,7 @@ class Alert extends Model
         'is_read' => 'boolean',
         'is_resolved' => 'boolean',
         'user_id' => 'integer',
+        'created_day' => 'integer',
     ];
 
     public function user(): BelongsTo

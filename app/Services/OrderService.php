@@ -89,6 +89,7 @@ class OrderService
                 'total_transit_days' => $totalDays,
                 'delivery_day' => $deliveryDay,
                 'delivery_date' => now()->addDays($totalDays),
+                'created_day' => $gameState ? $gameState->day : 1,
             ]);
 
             // 4. Create Items

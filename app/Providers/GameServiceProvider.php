@@ -17,6 +17,7 @@ use App\Listeners\UpdateMetrics;
 use App\Listeners\DecayPerishables;
 use App\Listeners\ProcessDeliveries;
 use App\Listeners\GenerateSpike;
+use App\Listeners\CreateDailyReport;
 use App\Services\InventoryManagementService;
 use App\Services\InventoryMathService;
 use App\Services\PrismAiService;
@@ -100,6 +101,7 @@ class GameServiceProvider extends ServiceProvider
         // Simulation Chain
         Event::listen(TimeAdvanced::class, [DecayPerishables::class, 'onTimeAdvanced']);
         Event::listen(TimeAdvanced::class, ApplyStorageCosts::class);
+        Event::listen(TimeAdvanced::class, CreateDailyReport::class);
 
         // DAG Chain for OrderPlaced
         Event::listen(OrderPlaced::class, DeductCash::class);

@@ -26,6 +26,7 @@ class Order extends Model
         'total_transit_days',
         'delivery_date',
         'delivery_day',
+        'created_day',
     ];
 
     protected function casts(): array
@@ -36,6 +37,7 @@ class Order extends Model
             'total_transit_days' => 'integer',
             'status' => OrderState::class,
             'delivery_day' => 'integer',
+            'created_day' => 'integer',
             'user_id' => 'integer',
         ];
     }

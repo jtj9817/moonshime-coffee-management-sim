@@ -21,6 +21,7 @@ use App\Events\OrderPlaced;
 use App\Services\SimulationService;
 use App\Actions\InitializeNewGame;
 use App\Models\GameState;
+use App\Models\DailyReport;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -39,12 +40,24 @@ class GameController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
+        $userId = auth()->id();
+        $gameState = GameState::where('user_id', $userId)->first();
+        $previousDay = $gameState ? $gameState->day - 1 : 0;
+        
+        $dailyReport = null;
+        if ($previousDay >= 1) {
+            $dailyReport = DailyReport::where('user_id', $userId)
+                ->where('day', $previousDay)
+                ->first();
+        }
+
         return Inertia::render('game/dashboard', [
             'alerts' => $alerts,
             'kpis' => $this->calculateKPIs(),
             'quests' => $this->getActiveQuests(),
             'logistics_health' => $logisticsService->getLogisticsHealth(),
             'active_spikes_count' => SpikeEvent::where('is_active', true)->count(),
+            'dailyReport' => $dailyReport,
         ]);
     }
 
