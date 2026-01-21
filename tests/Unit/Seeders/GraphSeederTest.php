@@ -14,21 +14,23 @@ test('graph seeder creates expected topology', function () {
     expect(Location::where('type', 'vendor')->count())->toBeGreaterThanOrEqual(3);
     expect(Location::where('type', 'warehouse')->count())->toBeGreaterThanOrEqual(2);
     expect(Location::where('type', 'store')->count())->toBeGreaterThanOrEqual(5);
-    expect(Location::where('type', 'hub')->count())->toBeGreaterThanOrEqual(1);
-    
-    // Verify Routes
-    expect(Route::count())->toBeGreaterThanOrEqual(28);
+    expect(Location::where('type', 'hub')->count())->toBeGreaterThanOrEqual(3); // Now 3 hubs
 
-    // Verify specific connections exist
-    $vendor = Location::where('type', 'vendor')->first();
-    $warehouse = Location::where('type', 'warehouse')->first();
-    
-    // Check if there is at least one route from a vendor to a warehouse
-    // Note: Since we connect ALL vendors to ALL warehouses, this must exist.
-    $route = Route::where('source_id', $vendor->id)
-                  ->where('target_id', $warehouse->id)
-                  ->first();
-    
-    expect($route)->not->toBeNull();
-    expect($route->transport_mode)->toBe('Truck');
+    // Verify Routes - increased with 3 hubs
+    // 3 vendors × 2 warehouses = 6 (vendor→warehouse)
+    // 2 warehouses × 6 stores = 12 (warehouse→store)
+    // 5 stores chained = 5 (store→store)
+    // 3 vendors × 3 hubs = 9 (vendor→hub)
+    // 3 hubs × 6 stores = 18 (hub→store)
+    // Total: 50+ routes
+    expect(Route::count())->toBeGreaterThanOrEqual(40);
+
+    // Verify multi-hop connectivity exists - at least one vendor connected to a hub via Air
+    $vendorToHubRoute = Route::where('transport_mode', 'Air')
+        ->whereHas('source', fn($q) => $q->where('type', 'vendor'))
+        ->whereHas('target', fn($q) => $q->where('type', 'hub'))
+        ->first();
+
+    expect($vendorToHubRoute)->not->toBeNull('At least one vendor should be connected to a hub via Air');
+    expect($vendorToHubRoute->transport_mode)->toBe('Air');
 });
