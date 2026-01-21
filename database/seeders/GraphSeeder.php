@@ -16,16 +16,16 @@ class GraphSeeder extends Seeder
         // 1. Create Nodes
         $vendors = Location::factory()->count(3)->create(['type' => 'vendor']);
         $warehouses = Location::factory()->count(2)->create(['type' => 'warehouse']);
-        $stores = Location::factory()->count(5)->create(['type' => 'store']);
         $hub = Location::factory()->create(['type' => 'hub', 'name' => 'Central Transit Hub']);
-        
-        // Create Main Store and include it in the stores list for connectivity
+
+        // Create Main Store FIRST so it gets included in route loops
         $mainStore = Location::factory()->create([
             'name' => 'Moonshine Central',
             'type' => 'store',
             'max_storage' => 1000,
         ]);
-        
+
+        $stores = Location::factory()->count(5)->create(['type' => 'store']);
         $stores->push($mainStore);
 
         // 2. Connect Vendors to Warehouses (Truck, Cheap, Reliable)
