@@ -49,6 +49,7 @@ export default function Login({
                                     tabIndex={1}
                                     autoComplete="email"
                                     placeholder="email@example.com"
+                                    className="border-stone-300 bg-white dark:border-stone-600 dark:bg-stone-900"
                                 />
                                 <InputError message={errors.email} />
                             </div>
@@ -74,6 +75,7 @@ export default function Login({
                                     tabIndex={2}
                                     autoComplete="current-password"
                                     placeholder="Password"
+                                    className="border-stone-300 bg-white dark:border-stone-600 dark:bg-stone-900"
                                 />
                                 <InputError message={errors.password} />
                             </div>

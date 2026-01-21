@@ -37,6 +37,7 @@ export default function Register() {
                                     autoComplete="name"
                                     name="name"
                                     placeholder="Full name"
+                                    className="border-stone-300 bg-white dark:border-stone-600 dark:bg-stone-900"
                                 />
                                 <InputError
                                     message={errors.name}
@@ -54,6 +55,7 @@ export default function Register() {
                                     autoComplete="email"
                                     name="email"
                                     placeholder="email@example.com"
+                                    className="border-stone-300 bg-white dark:border-stone-600 dark:bg-stone-900"
                                 />
                                 <InputError message={errors.email} />
                             </div>
@@ -68,6 +70,7 @@ export default function Register() {
                                     autoComplete="new-password"
                                     name="password"
                                     placeholder="Password"
+                                    className="border-stone-300 bg-white dark:border-stone-600 dark:bg-stone-900"
                                 />
                                 <InputError message={errors.password} />
                             </div>
@@ -84,6 +87,7 @@ export default function Register() {
                                     autoComplete="new-password"
                                     name="password_confirmation"
                                     placeholder="Confirm password"
+                                    className="border-stone-300 bg-white dark:border-stone-600 dark:bg-stone-900"
                                 />
                                 <InputError
                                     message={errors.password_confirmation}
