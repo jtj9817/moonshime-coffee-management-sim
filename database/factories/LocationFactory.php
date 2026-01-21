@@ -16,11 +16,27 @@ class LocationFactory extends Factory
      */
     public function definition(): array
     {
+        $type = $this->faker->randomElement(['store', 'hub', 'warehouse', 'vendor']);
+
         return [
-            'name' => 'Test Coffee',
-            'address' => '123 Test St',
+            'name' => $this->generateName($type),
+            'address' => $this->faker->address(),
             'max_storage' => $this->faker->numberBetween(100, 1000),
-            'type' => 'store',
+            'type' => $type,
         ];
+    }
+
+    /**
+     * Generate a contextual name based on location type.
+     */
+    protected function generateName(string $type): string
+    {
+        return match ($type) {
+            'store' => $this->faker->unique()->company() . ' Coffee',
+            'hub' => $this->faker->unique()->city() . ' Distribution Hub',
+            'warehouse' => $this->faker->unique()->city() . ' Depot',
+            'vendor' => $this->faker->unique()->lastName() . ' Imports',
+            default => $this->faker->unique()->company(),
+        };
     }
 }
