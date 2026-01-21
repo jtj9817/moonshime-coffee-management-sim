@@ -139,17 +139,17 @@ We employ the **Informational Blocking** pattern for all interactive forms (e.g.
 This roadmap focuses on realizing the **Hybrid Event-Topology** and finalizing the system migration.
 
 ### Phase 1: Physical Graph Foundation (Logistics)
-- [ ] **Database:** Create `routes` table with weights (cost, time, capacity) and constraints.
-- [ ] **Seeder:** Implement `GraphSeeder` to generate a connected world topology (Hub-and-Spoke).
-- [ ] **Service:** Implement `LogisticsService` with `getValidRoutes($source, $target)` and basic path cost calculation.
+- [x] **Database:** Create `routes` table with weights (cost, time, capacity) and constraints.
+- [x] **Seeder:** Implement `GraphSeeder` to generate a connected world topology (Hub-and-Spoke).
+- [x] **Service:** Implement `LogisticsService` with `getValidRoutes($source, $target)` and basic path cost calculation.
 
 ### Phase 2: Causal Event System (Advanced Simulation)
-- [ ] **Model Update:** Refactor `SpikeEvent` to include polymorphic targeting (targeting `Route` or `Location`).
-- [ ] **Factory:** Update `SpikeEventFactory` to generate graph-aware events (e.g., "Road Closure" blocking specific Routes).
-- [ ] **Listeners:** Create listeners that toggle `Route->is_active` based on Spike start/end events.
+- [x] **Model Update:** Refactor `SpikeEvent` to include polymorphic targeting (targeting `Route` or `Location`).
+- [x] **Factory:** Update `SpikeEventFactory` to generate graph-aware events (e.g., "Road Closure" blocking specific Routes).
+- [x] **Listeners:** Create listeners that toggle `Route->is_active` based on Spike start/end events.
 
 ### Phase 3: Advanced Algorithms & Analysis
-- [ ] **Pathfinding:** Implement **Dijkstra’s Algorithm** in `LogisticsService` for optimal transfer suggestions.
+- [x] **Pathfinding:** Implement **Dijkstra’s Algorithm** in `LogisticsService` for optimal transfer suggestions.
 - [ ] **Reachability:** Implement **BFS** in `SimulationService` to detect isolated nodes during the Analysis Tick.
 - [ ] **Integration:** Wire `SimulationService` to trigger Alerts when isolation is detected.
 

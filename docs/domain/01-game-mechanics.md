@@ -73,7 +73,7 @@ When a new game is initialized:
 
 1. **Database Setup**:
    - Create locations (3 locations)
-   - Create products (11 SKUs)
+   - Create products (12 SKUs) - *See `config/game_data.php`*
    - Create vendors (4 suppliers)
    - Set up routes (6 bidirectional routes)
    - Seed initial inventory
@@ -234,7 +234,7 @@ Order Validation:
 
 ### SKU Categories
 
-The game includes **11 products** across categories:
+The game includes **12 products** across categories:
 
 1. **Beans** (1 SKU): Espresso Blend
 2. **Milk** (2 SKUs): Oat Milk, Almond Milk
@@ -246,6 +246,7 @@ The game includes **11 products** across categories:
 8. **Seasonal** (1 SKU): Pumpkin Spice Sauce
 9. **Food** (1 SKU): Bacon Gouda Sandwich
 10. **Sauce** (1 SKU): Dark Mocha Sauce
+11. **Pastry** (1 SKU): Butter Croissant
 
 ### Perishability
 
@@ -255,6 +256,7 @@ The game includes **11 products** across categories:
 - Pumpkin Spice Sauce (14 days)
 - Bacon Gouda Sandwich (90 days, frozen)
 - Dark Mocha Sauce (30 days)
+- Butter Croissant (3 days)
 
 **Non-Perishable**:
 - Beans, Cups, Syrup, Tea, Sugar, Cleaning supplies

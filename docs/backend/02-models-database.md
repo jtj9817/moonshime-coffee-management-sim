@@ -159,7 +159,7 @@ Represents the current game state for a user.
 **Columns**:
 - `id` - Primary key
 - `user_id` - Foreign key to users
-- `cash` - Current cash balance (decimal)
+- `cash` - Current cash balance (decimal:2)
 - `day` - Current game day (integer)
 - `reputation` - Reputation score 0-100 (decimal)
 - `last_spike_day` - Last day a spike occurred
@@ -237,7 +237,7 @@ Represents an item/SKU in the inventory system.
 - `is_perishable` - Boolean flag
 - `shelf_life_days` - Estimated shelf life
 - `bulk_threshold` - Quantity threshold for bulk
-- `storage_cost_per_unit` - Cost per unit per day (decimal)
+- `storage_cost_per_unit` - Cost per unit per day (decimal:2)
 - `created_at`, `updated_at` - Timestamps
 
 **Relationships**:
@@ -370,7 +370,7 @@ Represents a purchase order from a vendor.
 - `status` - Order status (state machine)
 - `placed_day` - Day order was placed
 - `delivery_day` - Expected delivery day
-- `total_cost` - Total order cost (decimal)
+- `total_cost` - Total order cost (decimal:2)
 - `notes` - Optional notes (text)
 - `created_at`, `updated_at` - Timestamps
 
@@ -420,8 +420,8 @@ Represents a line item in an order.
 - `order_id` - Foreign key to orders
 - `product_id` - Foreign key to products
 - `quantity` - Quantity ordered
-- `unit_price` - Price per unit (decimal)
-- `subtotal` - Line item subtotal (decimal)
+- `unit_price` - Price per unit (decimal:2)
+- `subtotal` - Line item subtotal (decimal:2)
 - `created_at`, `updated_at` - Timestamps
 
 **Relationships**:
@@ -449,7 +449,7 @@ Represents a shipping route between two locations.
 - `origin_id` - Origin location ID
 - `destination_id` - Destination location ID
 - `transit_days` - Transit time in days
-- `base_cost` - Base shipping cost (decimal)
+- `base_cost` - Base shipping cost (decimal:2)
 - `capacity_per_day` - Maximum shipments per day
 - `is_active` - Whether route is active (boolean)
 - `notes` - Optional notes (text)
@@ -523,7 +523,7 @@ Represents an internal transfer between locations.
 - `status` - Transfer status (state machine)
 - `created_day` - Day transfer was created
 - `delivery_day` - Expected delivery day
-- `cost` - Transfer cost (decimal)
+- `cost` - Transfer cost (decimal:2)
 - `notes` - Optional notes (text)
 - `created_at`, `updated_at` - Timestamps
 
@@ -687,6 +687,28 @@ Migrations are timestamped and executed in order. Key migrations:
 6. **Events**: spike_events, alerts
 7. **Logistics**: routes, shipments
 8. **Enhancements**: Additional columns and indexes
+
+## Data Seeding & Configuration
+
+The application uses a "Single Source of Truth" approach for game data to ensure consistency between the Laravel backend and React frontend.
+
+### Configuration File
+
+**File**: `config/game_data.php`
+
+This file defines:
+- **Categories**: All 11 product categories (Beans, Milk, Cups, etc.)
+- **Products**: Detailed definitions for all items (storage cost, shelf life, etc.)
+- **Vendors**: Supplier definitions including reliability scores and category assignments
+
+This configuration mirrors the frontend constants defined in `resources/js/constants.ts`.
+
+### Seeding Process
+
+The `CoreGameStateSeeder` reads from `config('game_data')` to populate the database, ensuring that:
+1. All categories are represented
+2. Product attributes match frontend expectations
+3. Vendors are correctly linked to products they supply
 
 ## Related Documentation
 
