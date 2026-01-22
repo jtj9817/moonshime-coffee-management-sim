@@ -62,6 +62,14 @@ The action contains several hard-coded values that define the initial game diffi
 
 This seeder populates the global "world" data (Products, Vendors) based on the `config/game_data.php` configuration.
 
+**Configuration Source:** `/config/game_data.php` (hard-coded definitions mirroring `resources/js/constants.ts`)
+
+**Hard-Coded World Data:**
+- 12 products across 11 categories (Beans, Milk, Cups, Syrup, Tea, Sugar, Cleaning, Seasonal, Food, Sauce, Pastry)
+- 4 vendors (BeanCo Global, RapidSupplies, Dairy Direct, ValueBulk) with reliability scores and product category assignments
+
+**Note:** The configuration file itself is hard-coded—there is no separate config for world topology, logistics costs, or transit times.
+
 ### 1. Failure Modes
 
 | Failure Type | Cause | Consequence |
@@ -70,8 +78,94 @@ This seeder populates the global "world" data (Products, Vendors) based on the `
 | **Domain Violation** | Typo in `vendors.categories` vs `products.category` string matching. | **Vendor-Product Mismatch:** Vendors are created but have **no products attached**. `InitializeNewGame` may blindly order a product from a vendor that doesn't technically sell it, or fail if no valid vendor-product pair is found. |
 | **Integration Failure** | `GraphSeeder` fails or creates disconnected graph. | `CoreGameStateSeeder` creates the *business* entities, but if the *logistics* entities (Locations/Routes) are missing/disconnected, `InitializeNewGame` order generation fails. |
 
+---
+
+## `Database\Seeders\GraphSeeder` Analysis
+
+This seeder creates the logistics network (Locations and Routes) with **no external configuration**—all values are hard-coded in the seeder file.
+
+**Hard-Coded Topology:**
+- **3 vendors** (type='vendor')
+- **2 warehouses** (type='warehouse')
+- **3 hubs** (type='hub') - for multi-path diversity
+- **6 stores** (1 main store "Moonshine Central" + 5 additional)
+
+**Hard-Coded Routes:**
+| Connection | Transport | Cost | Transit Days |
+|-----------|-----------|------|--------------|
+| Vendor → Warehouse | Truck | $0.50 | 2 days |
+| Warehouse → Store | Truck | $1.00 | 1 day |
+| Store → Store (chain) | Truck | $1.50 | 3 days |
+| Vendor → Hub | Air | $5.00 | 1 day |
+| Hub → Store | Air | $5.00 | 1 day |
+
+**No Configuration File Exists:** Unlike products/vendors, there is no `config/graph.php` or similar. All topology and pricing is embedded directly in the seeder.
+
+### 1. Failure Modes
+
+| Failure Type | Cause | Consequence |
+| :--- | :--- | :--- |
+| **Incomplete Graph** | Seeder fails mid-execution (e.g., Location creation succeeds, Route creation fails). | Partial logistics network exists. Some stores/hubs may be unreachable, causing `InitializeNewGame` order/transfer generation to fail silently. |
+| **No Idempotency** | Running seeder multiple times. | Duplicate locations and routes created (names may be unique, but graph complexity grows exponentially). |
+
 ### 2. Recommendations for Improvement
+*   **Externalize Configuration:** Create `config/graph.php` with topology definitions (location counts, route costs) to enable easier tuning.
+*   **Idempotency Checks:** Use `Location::firstOrCreate()` and check for existing routes before creating to support safe re-seeding.
+
+---
+
+## `Database\Seeders\InventorySeeder` Analysis
+
+Seeds global (non-user-specific) inventory for all store-product combinations using Faker-generated random values.
+
+**Behavior:**
+- Every store gets every product
+- Quantity: 50-200 units (random)
+- Uses `Inventory::updateOrCreate()` for idempotency
+
+**Note:** This is distinct from `InitializeNewGame`, which creates user-specific inventory with hard-coded levels.
+
+---
+
+## Seeding Orchestration
+
+The complete initialization chain is orchestrated by `DatabaseSeeder.php`:
+
+```
+DatabaseSeeder::run()
+├── CoreGameStateSeeder (Products, Vendors from config/game_data.php)
+├── GraphSeeder (Locations, Routes - hard-coded)
+├── InventorySeeder (Global inventory - Faker random)
+└── InitializeNewGame->handle(User)
+    ├── seedInitialInventory (User-specific, hard-coded levels)
+    ├── seedPipelineActivity (User-specific orders/transfers)
+    └── SpikeSeeder->seedInitialSpikes (3-5 spikes, days 2-7)
+```
+
+**Critical Dependency:** `InitializeNewGame` depends on `CoreGameStateSeeder` and `GraphSeeder` having run first. If they haven't, the action returns early without errors (silent failure).
+
+---
+
+## Environment Independence
+
+**None of the seeders or `InitializeNewGame` check `APP_ENV`.**
+
+- No `env()` or `app()->environment()` calls exist in any seeder or initialization code
+- All logic runs identically across `local`, `testing`, `staging`, and `production` environments
+- `SpikeSeeder::run()` has a comment "Local/dev seeding only" but the implementation only checks for `GameState` existence, not the environment
+
+**Implication:** Seeding behavior cannot be customized per environment without code changes.
+
+---
+
+### 2. Recommendations for Improvement
+*   **Strict Typing:** Replace string-based category matching in seeders with Enums or Constants to prevent configuration typos.
+*   **Validation:** Add explicit checks that `config/game_data.php` is properly structured before running seeder operations.
+
+---
+
+## Overall Recommendations for Improvement
+
 *   **Transactions:** Wrap `InitializeNewGame::handle` in a `DB::transaction` to prevent partial state.
 *   **Idempotency:** Add checks (e.g., `Transfer::firstOrCreate`) to prevent duplicate pipeline activity on retry.
 *   **Validation:** Throw explicit exceptions if world data (Locations, Products, Routes) is missing during initialization, rather than failing silently.
-*   **Strict Typing:** Replace string-based category matching in seeders with Enums or Constants to prevent configuration typos.
