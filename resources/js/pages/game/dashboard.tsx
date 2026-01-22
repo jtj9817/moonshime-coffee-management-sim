@@ -60,8 +60,8 @@ function QuestCard({ quest }: { quest: QuestModel }) {
     return (
         <div
             className={`rounded-xl border-2 p-4 transition-all ${quest.isCompleted
-                    ? 'border-emerald-200 bg-emerald-50 opacity-80 dark:border-emerald-800 dark:bg-emerald-950'
-                    : 'border-stone-200 bg-white hover:border-amber-400 dark:border-stone-700 dark:bg-stone-800'
+                ? 'border-emerald-200 bg-emerald-50 opacity-80 dark:border-emerald-800 dark:bg-emerald-950'
+                : 'border-stone-200 bg-white hover:border-amber-400 dark:border-stone-700 dark:bg-stone-800'
                 }`}
         >
             <div className="mb-2 flex items-start justify-between">
@@ -77,8 +77,8 @@ function QuestCard({ quest }: { quest: QuestModel }) {
             </div>
             <h4
                 className={`text-sm font-bold ${quest.isCompleted
-                        ? 'text-emerald-800 line-through dark:text-emerald-300'
-                        : 'text-stone-900 dark:text-white'
+                    ? 'text-emerald-800 line-through dark:text-emerald-300'
+                    : 'text-stone-900 dark:text-white'
                     }`}
             >
                 {quest.title}
@@ -186,7 +186,7 @@ function LocationCard({ location, alerts }: { location: { id: string; name: stri
 }
 
 export default function Dashboard({ alerts, kpis, quests, logistics_health, active_spikes_count, dailyReport }: DashboardProps) {
-    const { locations, currentSpike, gameState } = useGame();
+    const { locations, activeSpikes, gameState } = useGame();
 
     return (
         <>
@@ -211,7 +211,7 @@ export default function Dashboard({ alerts, kpis, quests, logistics_health, acti
                 )}
 
                 {/* Active Spike Alert */}
-                {currentSpike && (
+                {activeSpikes.length > 0 && (
                     <div className="flex items-center justify-between rounded-xl border-2 border-rose-500 bg-rose-50 p-4 dark:border-rose-600 dark:bg-rose-950">
                         <div className="flex items-center gap-3">
                             <div className="rounded-lg bg-rose-500 p-2">
@@ -219,16 +219,20 @@ export default function Dashboard({ alerts, kpis, quests, logistics_health, acti
                             </div>
                             <div>
                                 <h3 className="font-bold text-rose-700 dark:text-rose-300">
-                                    Active Spike: {currentSpike.name}
+                                    {activeSpikes.length === 1
+                                        ? `Active Spike: ${activeSpikes[0].name}`
+                                        : `${activeSpikes.length} Active Spikes`}
                                 </h3>
                                 <p className="text-sm text-rose-600 dark:text-rose-400">
-                                    {currentSpike.description}
+                                    {activeSpikes.length === 1
+                                        ? activeSpikes[0].description
+                                        : 'Multiple disruptions require your attention'}
                                 </p>
                             </div>
                         </div>
                         <Link href="/game/spike-history">
                             <Button variant="outline" className="border-rose-500 text-rose-600 hover:bg-rose-100">
-                                View Details
+                                {activeSpikes.length === 1 ? 'View Details' : 'Open War Room'}
                                 <ArrowRight className="ml-2 h-4 w-4" />
                             </Button>
                         </Link>
@@ -256,7 +260,7 @@ export default function Dashboard({ alerts, kpis, quests, logistics_health, acti
                                 </CardHeader>
                                 <CardContent>
                                     <div className="text-2xl font-bold text-stone-900 dark:text-white">
-                                        {isCurrency ? `$${formatCurrency(kpi.value)}` : kpi.value}
+                                        {isCurrency ? `$${formatCurrency(kpi.value as number)}` : kpi.value}
                                     </div>
                                 </CardContent>
                             </Card>

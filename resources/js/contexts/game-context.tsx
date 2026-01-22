@@ -19,6 +19,8 @@ interface GameContextType {
     products: ProductModel[];
     vendors: VendorModel[];
     alerts: AlertModel[];
+    activeSpikes: SpikeEventModel[];
+    // Derived: first active spike (backwards compatible)
     currentSpike: SpikeEventModel | null;
 
     // Local state
@@ -77,7 +79,8 @@ export function GameProvider({ children }: GameProviderProps) {
         products: game.products,
         vendors: game.vendors,
         alerts: game.alerts,
-        currentSpike: game.currentSpike,
+        activeSpikes: game.activeSpikes ?? [],
+        currentSpike: game.activeSpikes?.[0] ?? null,
         currentLocationId,
         setCurrentLocationId,
         advanceDay,

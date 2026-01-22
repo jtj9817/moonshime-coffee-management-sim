@@ -95,6 +95,33 @@ export interface SpikeEventModel {
     affected_route?: RouteModel | null;
     meta: Record<string, unknown> | null;
     created_at: string;
+    // Resolution tracking
+    acknowledged_at: string | null;
+    mitigated_at: string | null;
+    resolved_at: string | null;
+    resolved_by: 'time' | 'player' | null;
+    resolution_cost: number | null;
+    action_log: ActionLogEntry[] | null;
+    // Playbook data (enriched by backend)
+    playbook?: SpikePlaybook;
+}
+
+export interface ActionLogEntry {
+    action: string;
+    timestamp: string;
+    details?: string;
+}
+
+export interface SpikePlaybook {
+    description: string;
+    actions: PlaybookAction[];
+    canResolveEarly: boolean;
+    resolutionCost: number;
+}
+
+export interface PlaybookAction {
+    label: string;
+    href: string;
 }
 
 export interface RouteModel {
@@ -119,7 +146,7 @@ export interface GameShared {
     products: ProductModel[];
     vendors: VendorModel[];
     alerts: AlertModel[];
-    currentSpike: SpikeEventModel | null;
+    activeSpikes: SpikeEventModel[];
 }
 
 export interface SharedData {

@@ -56,7 +56,7 @@ class GameController extends Controller
             'kpis' => $this->calculateKPIs(),
             'quests' => $this->getActiveQuests(),
             'logistics_health' => $logisticsService->getLogisticsHealth(),
-            'active_spikes_count' => SpikeEvent::where('is_active', true)->count(),
+            'active_spikes_count' => SpikeEvent::forUser(auth()->id())->active()->count(),
             'dailyReport' => $dailyReport,
         ]);
     }
@@ -199,20 +199,33 @@ class GameController extends Controller
     }
 
     /**
-     * Display the spike history page.
+     * Display the spike history page (War Room).
      */
     public function spikeHistory(): Response
     {
         $userId = auth()->id();
+        $gameState = GameState::where('user_id', $userId)->first();
+        $currentDay = $gameState ? $gameState->day : 1;
         
+        // Get all spikes with enriched playbook data
         $spikes = SpikeEvent::with(['location', 'product', 'affectedRoute'])
             ->where('user_id', $userId)
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->get()
+            ->map(function (SpikeEvent $spike) {
+                return array_merge($spike->toArray(), [
+                    'playbook' => $spike->getPlaybook(),
+                ]);
+            });
+
+        // Separate active spikes for the Active Events section
+        $activeSpikes = $spikes->filter(fn($spike) => $spike['is_active']);
 
         return Inertia::render('game/spike-history', [
             'spikes' => $spikes,
+            'activeSpikes' => $activeSpikes->values(),
             'statistics' => $this->getSpikeStatistics($userId),
+            'currentDay' => $currentDay,
         ]);
     }
 
@@ -521,6 +534,7 @@ class GameController extends Controller
             'totalSpikes' => (clone $query)->count(),
             'activeSpikes' => (clone $query)->where('is_active', true)->count(),
             'resolvedSpikes' => (clone $query)->where('is_active', false)->count(),
+            'resolvedByPlayer' => (clone $query)->where('resolved_by', 'player')->count(),
         ];
     }
 
