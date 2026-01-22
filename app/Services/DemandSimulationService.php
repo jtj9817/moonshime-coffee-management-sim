@@ -32,13 +32,15 @@ class DemandSimulationService
             ->whereHas('inventories', function ($query) use ($userId) {
                 $query->where('user_id', $userId);
             })
+            ->with(['inventories' => function ($query) use ($userId) {
+                // Load only the current user's inventories to avoid cross-user depletion.
+                $query->where('user_id', $userId)->with('product');
+            }])
             ->get();
 
         foreach ($stores as $store) {
             // Get inventory at this location
-            $inventories = $store->inventories()
-                ->where('user_id', $userId)
-                ->get();
+            $inventories = $store->inventories;
 
             foreach ($inventories as $inventory) {
                 if ($inventory->quantity <= 0) {
