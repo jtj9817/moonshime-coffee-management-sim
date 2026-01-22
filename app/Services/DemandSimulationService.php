@@ -27,12 +27,18 @@ class DemandSimulationService
     {
         $userId = $gameState->user_id;
 
-        // Get all retail/store locations for this user
-        $stores = Location::where('type', 'store')->get();
+        // Get all retail/store locations that have inventory for this user
+        $stores = Location::where('type', 'store')
+            ->whereHas('inventories', function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            })
+            ->get();
 
         foreach ($stores as $store) {
             // Get inventory at this location
-            $inventories = Inventory::where('location_id', $store->id)->get();
+            $inventories = $store->inventories()
+                ->where('user_id', $userId)
+                ->get();
 
             foreach ($inventories as $inventory) {
                 if ($inventory->quantity <= 0) {

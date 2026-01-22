@@ -29,18 +29,19 @@ class SpikeResolutionService
         }
 
         $cost = $spike->resolution_cost_estimate;
+        $costDollars = round($cost / 100, 2);
         $gameState = GameState::where('user_id', $spike->user_id)->firstOrFail();
 
-        if ($gameState->cash < $cost) {
+        if ($gameState->cash < $costDollars) {
             throw new \RuntimeException(
-                "Insufficient funds. Required: $" . number_format($cost / 100, 2) . 
-                ", Available: $" . number_format($gameState->cash / 100, 2)
+                "Insufficient funds. Required: $" . number_format($costDollars, 2) .
+                ", Available: $" . number_format((float) $gameState->cash, 2)
             );
         }
 
-        DB::transaction(function () use ($spike, $gameState, $cost) {
+        DB::transaction(function () use ($spike, $gameState, $cost, $costDollars) {
             // Deduct cash
-            $gameState->decrement('cash', $cost);
+            $gameState->decrement('cash', $costDollars);
 
             // Get the current day from game state
             $currentDay = $gameState->day;
