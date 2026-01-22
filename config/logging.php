@@ -118,6 +118,14 @@ return [
             'replace_placeholders' => true,
         ],
 
+        'game-initialization' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/game-init.log'),
+            'level' => env('LOG_LEVEL', 'info'),
+            'days' => env('LOG_DAILY_DAYS', 14),
+            'replace_placeholders' => true,
+        ],
+
         'null' => [
             'driver' => 'monolog',
             'handler' => NullHandler::class,

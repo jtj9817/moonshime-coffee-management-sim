@@ -142,7 +142,7 @@ DatabaseSeeder::run()
     └── SpikeSeeder->seedInitialSpikes (3-5 spikes, days 2-7)
 ```
 
-**Critical Dependency:** `InitializeNewGame` depends on `CoreGameStateSeeder` and `GraphSeeder` having run first. If they haven't, the action returns early without errors (silent failure).
+**Critical Dependency:** `InitializeNewGame` depends on `CoreGameStateSeeder` and `GraphSeeder` having run first. ~~If they haven't, the action returns early without errors (silent failure).~~ **Now throws explicit `RuntimeException` with descriptive message.**
 
 ---
 
@@ -158,14 +158,49 @@ DatabaseSeeder::run()
 
 ---
 
-### 2. Recommendations for Improvement
-*   **Strict Typing:** Replace string-based category matching in seeders with Enums or Constants to prevent configuration typos.
-*   **Validation:** Add explicit checks that `config/game_data.php` is properly structured before running seeder operations.
+## Improvements Implemented
+
+The following improvements have been implemented to address the failure modes documented above:
+
+### ✅ Transactions
+- `InitializeNewGame::handle()` is now wrapped in `DB::transaction()` to prevent partial state on failure
+
+### ✅ Validation with Explicit Errors
+- All seeders validate configuration and dependencies before processing
+- `InitializeNewGame` throws `RuntimeException` with descriptive messages when:
+  - No stores found
+  - No warehouse found
+  - No products found
+  - No vendor found
+
+### ✅ Idempotency
+- `InitializeNewGame` uses `firstOrCreate` for inventory and transfers
+- Checks for existing user inventory/transfers before seeding
+- `GraphSeeder` logs warnings when locations already exist
+
+### ✅ Comprehensive Logging
+- New `game-initialization` log channel in `config/logging.php`
+- Daily rotating logs at `storage/logs/game-init-{date}.log`
+- All seeders log:
+  - Start/completion with timing
+  - Entity counts (products, vendors, locations, routes)
+  - Warnings for missing dependencies or category mismatches
+  - Errors with full stack traces
+- `InitializeNewGame` logs:
+  - User ID and email at start
+  - GameState creation details
+  - Inventory seeding progress
+  - Transfer/order creation details
+  - Warnings when no route found
+
+### ✅ Production Debugging (Laravel Forge)
+- Logs accessible via Forge dashboard at Site → Logs
+- SSH access: `tail -f storage/logs/game-init-$(date +%Y-%m-%d).log`
+- 14-day log retention (configurable via `LOG_DAILY_DAYS`)
 
 ---
 
-## Overall Recommendations for Improvement
+## Remaining Recommendations
 
-*   **Transactions:** Wrap `InitializeNewGame::handle` in a `DB::transaction` to prevent partial state.
-*   **Idempotency:** Add checks (e.g., `Transfer::firstOrCreate`) to prevent duplicate pipeline activity on retry.
-*   **Validation:** Throw explicit exceptions if world data (Locations, Products, Routes) is missing during initialization, rather than failing silently.
+*   **Strict Typing:** Replace string-based category matching in seeders with Enums or Constants to prevent configuration typos.
+
