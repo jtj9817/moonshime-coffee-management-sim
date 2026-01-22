@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -31,6 +32,12 @@ class SpikeEvent extends Model
         'is_active',
         'is_guaranteed',
         'meta',
+        'acknowledged_at',
+        'mitigated_at',
+        'resolved_at',
+        'resolved_by',
+        'resolution_cost',
+        'action_log',
     ];
 
     protected $casts = [
@@ -42,6 +49,11 @@ class SpikeEvent extends Model
         'is_guaranteed' => 'boolean',
         'meta' => 'array',
         'user_id' => 'integer',
+        'acknowledged_at' => 'datetime',
+        'mitigated_at' => 'datetime',
+        'resolved_at' => 'datetime',
+        'resolution_cost' => 'integer',
+        'action_log' => 'array',
     ];
 
     /**
@@ -151,5 +163,97 @@ class SpikeEvent extends Model
     public function children(): HasMany
     {
         return $this->hasMany(SpikeEvent::class, 'parent_id');
+    }
+
+    // ========== Query Scopes ==========
+
+    /**
+     * Scope to active spikes only.
+     */
+    public function scopeActive(Builder $query): Builder
+    {
+        return $query->where('is_active', true);
+    }
+
+    /**
+     * Scope to a specific user.
+     */
+    public function scopeForUser(Builder $query, int $userId): Builder
+    {
+        return $query->where('user_id', $userId);
+    }
+
+    /**
+     * Scope to spikes resolved by player (not time).
+     */
+    public function scopeResolvedByPlayer(Builder $query): Builder
+    {
+        return $query->where('resolved_by', 'player');
+    }
+
+    // ========== Helper Methods ==========
+
+    /**
+     * Check if this spike type can be resolved early.
+     * Only breakdown and blizzard support early resolution.
+     */
+    public function isResolvable(): bool
+    {
+        return in_array($this->type, ['breakdown', 'blizzard']);
+    }
+
+    /**
+     * Calculate the estimated cost to resolve this spike early.
+     * Cost formula: base cost × magnitude factor
+     */
+    public function getResolutionCostEstimateAttribute(): int
+    {
+        if (!$this->isResolvable()) {
+            return 0;
+        }
+
+        $baseCost = match ($this->type) {
+            'breakdown' => 50000, // $500 base in cents
+            'blizzard' => 75000,  // $750 base in cents
+            default => 0,
+        };
+
+        // Scale by magnitude (higher magnitude = higher cost)
+        return (int) ($baseCost * max(1, (float) $this->magnitude));
+    }
+
+    /**
+     * Get playbook data for this spike.
+     */
+    public function getPlaybook(): array
+    {
+        $actions = match ($this->type) {
+            'demand' => [
+                ['label' => 'Order More Stock', 'href' => '/game/ordering'],
+                ['label' => 'Transfer Inventory', 'href' => '/game/transfers'],
+            ],
+            'delay' => [
+                ['label' => 'View Affected Orders', 'href' => '/game/ordering'],
+                ['label' => 'Order from Alternate Vendor', 'href' => '/game/ordering'],
+            ],
+            'price' => [
+                ['label' => 'Review Order Costs', 'href' => '/game/ordering'],
+                ['label' => 'Find Alternative Products', 'href' => '/game/ordering'],
+            ],
+            'breakdown' => [
+                ['label' => 'Transfer Stock Out', 'href' => '/game/transfers'],
+            ],
+            'blizzard' => [
+                ['label' => 'Check Route Status', 'href' => '/game/transfers'],
+            ],
+            default => [],
+        };
+
+        return [
+            'description' => $this->description,
+            'actions' => $actions,
+            'canResolveEarly' => $this->isResolvable(),
+            'resolutionCost' => $this->resolution_cost_estimate,
+        ];
     }
 }

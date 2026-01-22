@@ -33,6 +33,7 @@ class SimulationService
 
             $this->processEventTick($day);
             $this->processPhysicsTick($day);
+            $this->processConsumptionTick($day);
             $this->processAnalysisTick($day);
             
             event(new TimeAdvanced($day, $this->gameState));
@@ -53,7 +54,11 @@ class SimulationService
             ->where('ends_at_day', '<=', $day)
             ->get()
             ->each(function (SpikeEvent $spike) {
-                $spike->update(['is_active' => false]);
+                $spike->update([
+                    'is_active' => false,
+                    'resolved_at' => now(),
+                    'resolved_by' => 'time',
+                ]);
                 event(new SpikeEnded($spike));
             });
 
@@ -146,6 +151,14 @@ class SimulationService
             ->where('delivery_day', '<=', $day)
             ->get()
             ->each(fn ($order) => $order->status->transitionTo(\App\States\Order\Delivered::class));
+    }
+
+    /**
+     * Consumption Tick: Process daily customer demand and inventory depletion.
+     */
+    protected function processConsumptionTick(int $day): void
+    {
+        app(DemandSimulationService::class)->processDailyConsumption($this->gameState, $day);
     }
 
     /**

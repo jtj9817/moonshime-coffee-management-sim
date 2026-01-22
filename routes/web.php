@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\GameController;
+use App\Http\Controllers\SpikeController;
 use App\Http\Controllers\WelcomeController;
 use Illuminate\Support\Facades\Route;
 
@@ -38,6 +39,11 @@ Route::middleware(['auth', 'verified'])->prefix('game')->name('game.')->group(fu
     Route::get('/logistics/routes', [\App\Http\Controllers\LogisticsController::class, 'getRoutes'])->name('logistics.routes');
     Route::get('/logistics/path', [\App\Http\Controllers\LogisticsController::class, 'getPath'])->name('logistics.path');
     Route::get('/logistics/health', [\App\Http\Controllers\LogisticsController::class, 'health'])->name('logistics.health');
+
+    // Spike Resolution
+    Route::post('/spikes/{spike}/resolve', [SpikeController::class, 'resolve'])->name('spikes.resolve');
+    Route::post('/spikes/{spike}/mitigate', [SpikeController::class, 'mitigate'])->name('spikes.mitigate');
+    Route::post('/spikes/{spike}/acknowledge', [SpikeController::class, 'acknowledge'])->name('spikes.acknowledge');
 });
 
 // Legacy dashboard redirect

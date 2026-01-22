@@ -69,6 +69,16 @@ class HandleInertiaRequests extends Middleware
      */
     protected function getGameData(User $user): array
     {
+        $activeSpikes = SpikeEvent::forUser($user->id)
+            ->active()
+            ->with(['location', 'product', 'affectedRoute'])
+            ->get()
+            ->map(function (SpikeEvent $spike) {
+                return array_merge($spike->toArray(), [
+                    'playbook' => $spike->getPlaybook(),
+                ]);
+            });
+
         return [
             'state' => $this->getGameState($user),
             'locations' => Location::select('id', 'name', 'address', 'max_storage', 'type')->get(),
@@ -80,7 +90,7 @@ class HandleInertiaRequests extends Middleware
                 ->latest()
                 ->take(10)
                 ->get(),
-            'currentSpike' => SpikeEvent::where('is_active', true)->first(),
+            'activeSpikes' => $activeSpikes,
         ];
     }
 
