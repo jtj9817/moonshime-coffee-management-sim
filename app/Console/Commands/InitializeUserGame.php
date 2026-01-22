@@ -45,12 +45,52 @@ class InitializeUserGame extends Command
 
         $this->info("Checking game state for user: {$user->name} ({$user->email})");
 
+        // 1. Ensure Global Game Data Exists
+        $this->ensureGlobalDataExists();
+
+        // 2. Initialize User State if needed
         if ($user->gameState) {
             $this->displayUserData($user);
             return Command::SUCCESS;
         }
 
         return $this->initializeUser($user);
+    }
+
+    /**
+     * Check if global game data matches expectations, otherwise seed it.
+     */
+    protected function ensureGlobalDataExists()
+    {
+        $productCount = Product::count();
+        $locationCount = Location::count();
+        $routeCount = Route::count();
+
+        $this->info("Checking global world data...");
+
+        if ($productCount === 0 || $locationCount === 0 || $routeCount === 0) {
+            $this->warn("Global game data is incomplete or missing. Seeding world...");
+            
+            if ($productCount === 0) {
+                $this->info('- Seeding Products & Vendors (CoreGameStateSeeder)...');
+                $this->call('db:seed', [
+                    '--class' => CoreGameStateSeeder::class,
+                    '--force' => true,
+                ]);
+            }
+
+            if ($locationCount === 0 || $routeCount === 0) {
+                $this->info('- Seeding Logistics Network (GraphSeeder)...');
+                $this->call('db:seed', [
+                    '--class' => \Database\Seeders\GraphSeeder::class,
+                    '--force' => true,
+                ]);
+            }
+            
+            $this->info("Global world data seeded successfully.");
+        } else {
+            $this->info("Global world data looks good (Products: {$productCount}, Locations: {$locationCount}, Routes: {$routeCount}).");
+        }
     }
 
     /**
@@ -61,14 +101,9 @@ class InitializeUserGame extends Command
         $this->info('No existing game state found. initializing...');
 
         try {
-            // 1. Run CoreGameStateSeeder to ensure global data exists
-            $this->info('Running CoreGameStateSeeder...');
-            $this->call('db:seed', [
-                '--class' => CoreGameStateSeeder::class,
-                '--force' => true,
-            ]);
-
-            // 2. Run InitializeNewGame action
+            // Note: Global seeding is now handled by ensureGlobalDataExists()
+            
+            // Run InitializeNewGame action
             $this->info('Running InitializeNewGame action...');
             $action = app(InitializeNewGame::class);
             
