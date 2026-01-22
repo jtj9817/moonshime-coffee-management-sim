@@ -66,7 +66,7 @@
     - [x] Implement "Active Events" card grid with Playbook actions.
     - [x] Implement "History" table with new resolution status columns.
     - [x] Connect "Resolve Early" button to backend endpoint.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3' (Protocol in workflow.md)
 
 ## Phase 4: Final Verification & Polish
 - [ ] Task: Integration Testing
