@@ -34,6 +34,7 @@ import {
 import { useGame } from '@/contexts/game-context';
 import { formatCurrency } from '@/lib/formatCurrency';
 import GameLayout from '@/layouts/game-layout';
+import game from '@/routes/game';
 import { TransferModel, type BreadcrumbItem } from '@/types';
 
 interface TransfersProps {
@@ -138,7 +139,7 @@ export default function Transfers({ transfers, suggestions }: TransfersProps) {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(route('game.transfers.store'), {
+        post(game.transfers.store.url(), {
             onSuccess: () => {
                 setIsDialogOpen(false);
                 reset();

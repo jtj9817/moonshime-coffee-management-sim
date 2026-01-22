@@ -3,13 +3,14 @@ import { RotateCcw } from 'lucide-react';
 import React, { useState } from 'react';
 
 import ConfirmDialog from '@/components/ui/confirm-dialog';
+import game from '@/routes/game';
 
 export default function ResetGameButton() {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const { post, processing } = useForm();
 
   const handleReset = () => {
-    post(route('game.reset'), {
+    post(game.reset.url(), {
       onSuccess: () => {
         setIsConfirmOpen(false);
       },
