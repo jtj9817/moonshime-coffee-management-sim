@@ -1,6 +1,6 @@
 # Implementation Plan: Analytics Data Integration & Enhancement
 
-## Phase 1: Database Migrations & Historical Tracking
+## Phase 1: Database Migrations & Historical Tracking [checkpoint: fa8fe14]
 - [x] Task: Create migration for `unit_price` and indices
     - [x] Create migration adding `unit_price` to `products`
     - [x] Add indices for `products.category` and `daily_reports(user_id, day)`
@@ -13,7 +13,7 @@
     - [x] Write test for `SnapshotInventoryLevels` listener triggered by `TimeAdvanced`
     - [x] Implement listener logic to copy current `inventories` to `inventory_history` for the current day
     - [x] Verify listener handles duplicate runs gracefully
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Database Migrations & Historical Tracking' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Database Migrations & Historical Tracking' (Protocol in workflow.md)
 
 ## Phase 2: Data Provider Refactoring (Existing Metrics)
 - [ ] Task: Refactor `getInventoryTrends`
