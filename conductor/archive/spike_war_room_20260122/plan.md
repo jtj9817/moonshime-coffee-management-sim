@@ -27,7 +27,7 @@
         -   Prevent re-activation by setting `ends_at_day` to the current day and `is_active=false`.
         -   Update tracking fields (`resolved_by='player'`, `resolved_at`, `resolution_cost`, etc.).
     - [x] Implement `mitigate(SpikeEvent $spike)` method.
-- [ ] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md)
 
 ## Phase 2: Simulation Mechanics (Demand & Price)
 - [x] Task: Implement Demand Simulation
@@ -38,18 +38,18 @@
         -   Check for active `demand` spikes matching the store (and optionally product).
         -   Apply magnitude multiplier.
         -   Decrement inventory & record stats.
-    - [ ] Update spike generation rules so `demand` spikes have unambiguous targets (recommended: always set `location_id` to a store; optionally set `product_id` to a specific product).
+    - [x] Update spike generation rules so `demand` spikes have unambiguous targets (recommended: always set `location_id` to a store; optionally set `product_id` to a specific product).
     - [x] Wire into `SimulationService` loop (post-physics, pre-analysis).
-    - [ ] Create `DemandSimulationTest` to verify multiplier effects.
+    - [x] Create `DemandSimulationTest` to verify multiplier effects.
 - [x] Task: Implement Price Simulation
     - [x] Create `PricingService` (or method in `OrderService`).
     - [x] Implement `calculateUnitCost(Product $product, array $context = [])` (or similar):
         -   Check for active `price` spikes matching `product_id` (optionally vendor-scoped via `spike.meta.vendor_id` if implemented).
         -   Apply magnitude multiplier.
-    - [ ] Update `OrderService::createOrder` to apply pricing multipliers at order placement time (affects `order.total_cost` and thus `DeductCash`).
-    - [ ] Update spike generation rules so `price` spikes have unambiguous targets (recommended: always set `product_id`).
-    - [ ] Create `PriceSimulationTest` to verify order cost increases.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)
+    - [x] Update `OrderService::createOrder` to apply pricing multipliers at order placement time (affects `order.total_cost` and thus `DeductCash`).
+    - [x] Update spike generation rules so `price` spikes have unambiguous targets (recommended: always set `product_id`).
+    - [x] Create `PriceSimulationTest` to verify order cost increases.
+- [x] Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)
 
 ## Phase 3: Frontend Integration (Dashboard & War Room)
 - [x] Task: Expose Spike Data via Inertia

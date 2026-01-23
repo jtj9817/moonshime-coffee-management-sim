@@ -6,13 +6,13 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 # Active Tracks
 
-- [ ] **Track: War Room UX for Spike Events, including Resolve Early mechanics and backend simulation integration.**
-    - **ID:** `spike_war_room_20260122`
-    - **Link:** [./tracks/spike_war_room_20260122/](./tracks/spike_war_room_20260122/)
-
 ---
 
 # Archived Tracks
+
+- [x] **Track: War Room UX for Spike Events, including Resolve Early mechanics and backend simulation integration.**
+    - **ID:** `spike_war_room_20260122`
+    - **Link:** [./archive/spike_war_room_20260122/](./archive/spike_war_room_20260122/)
 
 - [x] **Track: Change the data seeders so that they will generate more realistic data based on the data-seeding-synchronization-analysis.md requirements.**
     - **ID:** `data_seeding_realism_20260120`
