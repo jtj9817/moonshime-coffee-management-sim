@@ -6,7 +6,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 # Active Tracks
 
-- [ ] **Track: Refactor the Analytics page UI to use real backend data and APIs, integrating necessary backend changes for historical trends and enhanced metrics.**
+- [~] **Track: Refactor the Analytics page UI to use real backend data and APIs, integrating necessary backend changes for historical trends and enhanced metrics.**
     - **ID:** `analytics_refactor_20260123`
     - **Link:** [./tracks/analytics_refactor_20260123/](./tracks/analytics_refactor_20260123/)
 

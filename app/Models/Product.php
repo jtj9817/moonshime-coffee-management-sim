@@ -18,6 +18,7 @@ class Product extends Model
         'category',
         'is_perishable',
         'storage_cost',
+        'unit_price',
     ];
 
     protected function casts(): array
@@ -25,6 +26,7 @@ class Product extends Model
         return [
             'is_perishable' => 'boolean',
             'storage_cost' => 'float',
+            'unit_price' => 'float',
         ];
     }
 

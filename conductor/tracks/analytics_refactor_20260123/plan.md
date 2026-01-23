@@ -1,18 +1,18 @@
 # Implementation Plan: Analytics Data Integration & Enhancement
 
 ## Phase 1: Database Migrations & Historical Tracking
-- [ ] Task: Create migration for `unit_price` and indices
-    - [ ] Create migration adding `unit_price` to `products`
-    - [ ] Add indices for `products.category` and `daily_reports(user_id, day)`
-    - [ ] Run migration
-- [ ] Task: Create `inventory_history` migration
-    - [ ] Create migration for `inventory_history` (user_id, location_id, product_id, day, quantity)
-    - [ ] Add composite unique constraint on (user_id, location_id, product_id, day)
-    - [ ] Run migration
-- [ ] Task: Implement Inventory Snapshot Listener
-    - [ ] Write test for `SnapshotInventoryLevels` listener triggered by `TimeAdvanced`
-    - [ ] Implement listener logic to copy current `inventories` to `inventory_history` for the current day
-    - [ ] Verify listener handles duplicate runs gracefully
+- [x] Task: Create migration for `unit_price` and indices
+    - [x] Create migration adding `unit_price` to `products`
+    - [x] Add indices for `products.category` and `daily_reports(user_id, day)`
+    - [x] Run migration
+- [x] Task: Create `inventory_history` migration
+    - [x] Create migration for `inventory_history` (user_id, location_id, product_id, day, quantity)
+    - [x] Add composite unique constraint on (user_id, location_id, product_id, day)
+    - [x] Run migration
+- [x] Task: Implement Inventory Snapshot Listener
+    - [x] Write test for `SnapshotInventoryLevels` listener triggered by `TimeAdvanced`
+    - [x] Implement listener logic to copy current `inventories` to `inventory_history` for the current day
+    - [x] Verify listener handles duplicate runs gracefully
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Database Migrations & Historical Tracking' (Protocol in workflow.md)
 
 ## Phase 2: Data Provider Refactoring (Existing Metrics)
