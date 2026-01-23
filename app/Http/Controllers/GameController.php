@@ -624,7 +624,8 @@ class GameController extends Controller
                     ->where('user_id', auth()->id())
                     ->where('location_id', $spike->location_id)
                     ->where('product_id', $spike->product_id)
-                    ->whereBetween('day', [$spike->starts_at_day, $spike->ends_at_day])
+                    ->where('day', '>=', $spike->starts_at_day)
+                    ->where('day', '<', $spike->ends_at_day)
                     ->get();
                 
                 if ($history->isNotEmpty()) {
