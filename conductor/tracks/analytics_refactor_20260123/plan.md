@@ -27,7 +27,7 @@
     - [x] Refactor logic in `GameController` with eager loading to avoid N+1
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Data Provider Refactoring (Existing Metrics)' (Protocol in workflow.md)
 
-## Phase 3: Extended Analytics Logic [checkpoint: edeb21b]
+## Phase 3: Extended Analytics Logic [checkpoint: 00adb7b]
 - [x] Task: Implement `getStorageUtilization`
     - [x] Write test for storage utilization logic
     - [x] Implement backend method in `GameController`
