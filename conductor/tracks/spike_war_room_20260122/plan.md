@@ -69,15 +69,15 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 3' (Protocol in workflow.md)
 
 ## Phase 4: Final Verification & Polish
-- [ ] Task: Integration Testing
-    - [ ] Create `Feature/SpikeWarRoomTest.php`:
+- [x] Task: Integration Testing
+    - [x] Create `Feature/SpikeWarRoomTest.php`:
         -   Verify resolving a breakdown restores storage.
         -   Verify resolving a blizzard opens the route.
         -   Verify cash deduction.
-    - [ ] Create `Feature/SpikeSimulationTest.php`:
+    - [x] Create `Feature/SpikeSimulationTest.php`:
         -   Run simulation days with active demand/price spikes.
         -   Assert inventory drops faster or order costs are higher.
-- [ ] Task: UI Polish
-    - [ ] Add visual feedback for "Resolved" state (animations/toasts).
-    - [ ] Ensure mobile responsiveness for new War Room cards.
+- [x] Task: UI Polish
+    - [x] Add visual feedback for "Resolved" state (animations/toasts).
+    - [x] Ensure mobile responsiveness for new War Room cards.
 - [ ] Task: Conductor - User Manual Verification 'Phase 4' (Protocol in workflow.md)

@@ -7,11 +7,12 @@ import {
     Clock,
     DollarSign,
     ExternalLink,
+    PartyPopper,
     Shield,
     Timer,
     Zap,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -194,6 +195,7 @@ function ActiveEventCard({ spike, currentDay, onResolve }: ActiveEventCardProps)
 export default function SpikeHistory({ spikes, activeSpikes, statistics, currentDay }: SpikeHistoryProps) {
     const [resolving, setResolving] = useState<SpikeEventModel | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
 
     const handleResolve = (spike: SpikeEventModel) => {
         setResolving(spike);
@@ -206,12 +208,21 @@ export default function SpikeHistory({ spikes, activeSpikes, statistics, current
             onSuccess: () => {
                 setResolving(null);
                 setIsSubmitting(false);
+                setShowSuccessAnimation(true);
             },
             onError: () => {
                 setIsSubmitting(false);
             },
         });
     };
+
+    // Auto-hide success animation after 3 seconds
+    useEffect(() => {
+        if (showSuccessAnimation) {
+            const timer = setTimeout(() => setShowSuccessAnimation(false), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [showSuccessAnimation]);
 
     return (
         <GameLayout breadcrumbs={breadcrumbs}>
@@ -234,7 +245,7 @@ export default function SpikeHistory({ spikes, activeSpikes, statistics, current
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
+                <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium text-stone-500">
@@ -296,7 +307,7 @@ export default function SpikeHistory({ spikes, activeSpikes, statistics, current
                                 Active Events ({activeSpikes.length})
                             </h2>
                         </div>
-                        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                             {activeSpikes.map((spike) => (
                                 <ActiveEventCard
                                     key={spike.id}
@@ -376,6 +387,15 @@ export default function SpikeHistory({ spikes, activeSpikes, statistics, current
                     </Table>
                 </div>
             </div>
+
+            {/* Success Animation Overlay */}
+            {showSuccessAnimation && (
+                <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center">
+                    <div className="animate-bounce rounded-full bg-emerald-500 p-6 shadow-2xl">
+                        <PartyPopper className="h-12 w-12 text-white" />
+                    </div>
+                </div>
+            )}
 
             {/* Resolve Confirmation Dialog */}
             <Dialog open={!!resolving} onOpenChange={() => setResolving(null)}>
