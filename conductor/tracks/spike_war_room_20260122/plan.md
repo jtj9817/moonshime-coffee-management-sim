@@ -80,4 +80,4 @@
 - [x] Task: UI Polish
     - [x] Add visual feedback for "Resolved" state (animations/toasts).
     - [x] Ensure mobile responsiveness for new War Room cards.
-- [ ] Task: Conductor - User Manual Verification 'Phase 4' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 4' (Protocol in workflow.md)
