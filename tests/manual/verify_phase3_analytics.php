@@ -19,19 +19,16 @@ if (app()->environment('production')) {
     die("Error: Cannot run manual tests in production!\n");
 }
 
-use Illuminate\Support\Facades\{DB, Log};
+use Illuminate\Support\Facades\{DB, Log, Auth};
 use Carbon\Carbon;
-use Illuminate\Foundation\Testing\TestCase;
-use Tests\CreatesApplication;
 
-// Helper class to use actingAs logic
-class ManualTestRunner extends TestCase {
-    use CreatesApplication;
-    
-    public function runTest($user) {
-        $this->createApplication();
-        return $this->actingAs($user)->get(route('game.analytics'));
-    }
+// Remove ManualTestRunner and direct TestCase usage
+// Helper to extract props from Inertia Response
+function getInertiaProps($response) {
+    $reflection = new ReflectionClass($response);
+    $property = $reflection->getProperty('props');
+    $property->setAccessible(true);
+    return $property->getValue($response);
 }
 
 $testRunId = 'verify_analytics_' . Carbon::now()->format('Y_m_d_His');
@@ -116,10 +113,11 @@ try {
     // === EXECUTION PHASE ===
     logInfo("Executing Analytics Request...");
     
-    $runner = new ManualTestRunner();
-    $response = $runner->runTest($user);
+    Auth::login($user);
+    $controller = new \App\Http\Controllers\GameController();
+    $response = $controller->analytics();
     
-    $props = $response->getOriginalContent()->getData()['page']['props'];
+    $props = getInertiaProps($response);
     
     // Inspect Results
     logInfo("--- Inspection Results ---");

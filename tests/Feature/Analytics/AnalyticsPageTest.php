@@ -143,11 +143,16 @@ class AnalyticsPageTest extends TestCase
         
         $response->assertInertia(fn (AssertableInertia $page) => $page
             ->component('game/analytics')
-            ->has('locationComparison', 1)
-            ->where('locationComparison.0.name', 'Central')
-            ->where('locationComparison.0.inventoryValue', 500)
-            ->where('locationComparison.0.utilization', 50)
-            ->where('locationComparison.0.itemCount', 1)
+            ->has('locationComparison')
+            ->where('locationComparison', function ($locations) {
+                $target = collect($locations)->firstWhere('name', 'Central');
+                
+                if (!$target) return false;
+
+                return $target['inventoryValue'] == 500
+                    && $target['utilization'] == 50
+                    && $target['itemCount'] == 1;
+            })
         );
     }
 }

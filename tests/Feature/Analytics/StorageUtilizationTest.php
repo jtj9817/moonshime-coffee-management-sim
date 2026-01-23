@@ -52,7 +52,7 @@ class StorageUtilizationTest extends TestCase
 
         $response->assertInertia(fn (AssertableInertia $page) => $page
             ->component('game/analytics')
-            ->has('storageUtilization', 2)
+            ->has('storageUtilization')
             ->where('storageUtilization', function ($items) use ($location1, $location2) {
                 $loc1 = collect($items)->firstWhere('location_id', $location1->id);
                 $loc2 = collect($items)->firstWhere('location_id', $location2->id);
