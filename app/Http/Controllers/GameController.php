@@ -486,11 +486,14 @@ class GameController extends Controller
      */
     protected function getInventoryTrends(): array
     {
-        return [
-            ['day' => 1, 'value' => 1000],
-            ['day' => 2, 'value' => 950],
-            ['day' => 3, 'value' => 1100],
-        ];
+        return DB::table('inventory_history')
+            ->where('user_id', auth()->id())
+            ->select('day', DB::raw('SUM(quantity) as value'))
+            ->groupBy('day')
+            ->orderBy('day')
+            ->get()
+            ->map(fn($item) => ['day' => (int) $item->day, 'value' => (int) $item->value])
+            ->toArray();
     }
 
     /**
@@ -498,10 +501,17 @@ class GameController extends Controller
      */
     protected function getSpendingByCategory(): array
     {
-        return Product::select('category')
-            ->distinct()
-            ->pluck('category')
-            ->map(fn ($cat) => ['category' => $cat, 'amount' => rand(1000, 5000)])
+        return OrderItem::query()
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->join('products', 'order_items.product_id', '=', 'products.id')
+            ->where('orders.user_id', auth()->id())
+            ->select('products.category', DB::raw('SUM(order_items.quantity * order_items.cost_per_unit) as amount'))
+            ->groupBy('products.category')
+            ->get()
+            ->map(fn($item) => [
+                'category' => $item->category,
+                'amount' => (float) $item->amount
+            ])
             ->toArray();
     }
 
@@ -510,13 +520,29 @@ class GameController extends Controller
      */
     protected function getLocationComparison(): array
     {
-        return Location::all()->map(fn ($loc) => [
-            'name' => $loc->name,
-            'inventoryValue' => Inventory::where('location_id', $loc->id)
-                ->with('product')
-                ->get()
-                ->sum(fn ($inv) => $inv->quantity * ($inv->product->storage_cost ?? 0)),
-        ])->toArray();
+        $locations = Location::with(['inventories' => function ($query) {
+            $query->where('user_id', auth()->id())->with('product');
+        }])->get();
+
+        return $locations->map(function ($loc) {
+            $inventories = $loc->inventories;
+
+            $inventoryValue = $inventories->sum(fn ($inv) => $inv->quantity * $inv->product->unit_price);
+            
+            $totalQuantity = $inventories->sum('quantity');
+            $utilization = $loc->max_storage > 0 
+                ? round(($totalQuantity / $loc->max_storage) * 100, 1) 
+                : 0;
+
+            $itemCount = $inventories->unique('product_id')->count();
+
+            return [
+                'name' => $loc->name,
+                'inventoryValue' => (float) $inventoryValue,
+                'utilization' => (float) $utilization,
+                'itemCount' => (int) $itemCount,
+            ];
+        })->toArray();
     }
 
     /**

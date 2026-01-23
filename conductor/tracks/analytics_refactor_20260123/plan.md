@@ -16,15 +16,15 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Database Migrations & Historical Tracking' (Protocol in workflow.md)
 
 ## Phase 2: Data Provider Refactoring (Existing Metrics)
-- [ ] Task: Refactor `getInventoryTrends`
-    - [ ] Write test for `getInventoryTrends` querying `inventory_history`
-    - [ ] Implement query logic in `GameController`
-- [ ] Task: Refactor `getSpendingByCategory`
-    - [ ] Write test for `getSpendingByCategory` joining `orders` and `order_items`
-    - [ ] Implement query logic in `GameController` calculating real sums
-- [ ] Task: Enhance `getLocationComparison`
-    - [ ] Write test for enhanced location comparison (utilization %, item counts)
-    - [ ] Refactor logic in `GameController` with eager loading to avoid N+1
+- [x] Task: Refactor `getInventoryTrends`
+    - [x] Write test for `getInventoryTrends` querying `inventory_history`
+    - [x] Implement query logic in `GameController`
+- [x] Task: Refactor `getSpendingByCategory`
+    - [x] Write test for `getSpendingByCategory` joining `orders` and `order_items`
+    - [x] Implement query logic in `GameController` calculating real sums
+- [x] Task: Enhance `getLocationComparison`
+    - [x] Write test for enhanced location comparison (utilization %, item counts)
+    - [x] Refactor logic in `GameController` with eager loading to avoid N+1
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Data Provider Refactoring (Existing Metrics)' (Protocol in workflow.md)
 
 ## Phase 3: Extended Analytics Logic
