@@ -205,12 +205,17 @@ export default function SpikeHistory({ spikes, activeSpikes, statistics, current
         if (!resolving) return;
         setIsSubmitting(true);
         router.post(`/game/spikes/${resolving.id}/resolve`, {}, {
-            onSuccess: () => {
-                setResolving(null);
-                setIsSubmitting(false);
-                setShowSuccessAnimation(true);
+            onSuccess: (page) => {
+                const flash = (page.props as { flash?: { success?: string } }).flash;
+                if (flash?.success) {
+                    setResolving(null);
+                    setShowSuccessAnimation(true);
+                }
             },
             onError: () => {
+                setIsSubmitting(false);
+            },
+            onFinish: () => {
                 setIsSubmitting(false);
             },
         });
