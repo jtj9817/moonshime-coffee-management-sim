@@ -28,15 +28,15 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Data Provider Refactoring (Existing Metrics)' (Protocol in workflow.md)
 
 ## Phase 3: Extended Analytics Logic
-- [ ] Task: Implement `getStorageUtilization`
-    - [ ] Write test for storage utilization logic
-    - [ ] Implement backend method in `GameController`
-- [ ] Task: Implement `getOrderFulfillmentMetrics`
-    - [ ] Write test for fulfillment rate and avg delivery time calculations
-    - [ ] Implement backend method in `GameController`
-- [ ] Task: Implement `getSpikeImpactAnalysis`
-    - [ ] Write test for spike correlation logic
-    - [ ] Implement backend method in `GameController`
+- [x] Task: Implement `getStorageUtilization`
+    - [x] Write test for storage utilization logic
+    - [x] Implement backend method in `GameController`
+- [x] Task: Implement `getOrderFulfillmentMetrics`
+    - [x] Write test for fulfillment rate and avg delivery time calculations
+    - [x] Implement backend method in `GameController`
+- [x] Task: Implement `getSpikeImpactAnalysis`
+    - [x] Write test for spike correlation logic
+    - [x] Implement backend method in `GameController`
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Extended Analytics Logic' (Protocol in workflow.md)
 
 ## Phase 4: Frontend UI Refactoring

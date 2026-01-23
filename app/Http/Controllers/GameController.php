@@ -195,6 +195,9 @@ class GameController extends Controller
             'inventoryTrends' => $this->getInventoryTrends(),
             'spendingByCategory' => $this->getSpendingByCategory(),
             'locationComparison' => $this->getLocationComparison(),
+            'storageUtilization' => $this->getStorageUtilization(),
+            'fulfillmentMetrics' => $this->getOrderFulfillmentMetrics(),
+            'spikeImpactAnalysis' => $this->getSpikeImpactAnalysis(),
         ]);
     }
 
@@ -541,6 +544,109 @@ class GameController extends Controller
                 'inventoryValue' => (float) $inventoryValue,
                 'utilization' => (float) $utilization,
                 'itemCount' => (int) $itemCount,
+            ];
+        })->toArray();
+    }
+
+    /**
+     * Get storage utilization for analytics.
+     */
+    protected function getStorageUtilization(): array
+    {
+        return Location::with(['inventories' => function ($query) {
+            $query->where('user_id', auth()->id());
+        }])->get()
+        ->map(function ($loc) {
+            $used = $loc->inventories->sum('quantity');
+            $capacity = $loc->max_storage;
+            $percentage = $capacity > 0 ? round(($used / $capacity) * 100, 1) : 0;
+            
+            return [
+                'location_id' => $loc->id,
+                'name' => $loc->name,
+                'capacity' => (int) $capacity,
+                'used' => (int) $used,
+                'percentage' => (float) $percentage,
+            ];
+        })->toArray();
+    }
+
+    /**
+     * Get order fulfillment metrics for analytics.
+     */
+    protected function getOrderFulfillmentMetrics(): array
+    {
+        $userId = auth()->id();
+        
+        $totalOrders = Order::where('user_id', $userId)->count();
+        $deliveredOrders = Order::where('user_id', $userId)
+            ->whereState('status', Delivered::class)
+            ->get();
+            
+        $deliveredCount = $deliveredOrders->count();
+        
+        $fulfillmentRate = $totalOrders > 0 
+            ? round(($deliveredCount / $totalOrders) * 100, 1) 
+            : 0;
+
+        $totalTransitDays = $deliveredOrders->sum(function ($order) {
+            return max(0, $order->delivery_day - $order->created_day);
+        });
+        
+        $averageDeliveryTime = $deliveredCount > 0 
+            ? round($totalTransitDays / $deliveredCount, 1) 
+            : 0;
+
+        return [
+            'totalOrders' => $totalOrders,
+            'deliveredOrders' => $deliveredCount,
+            'fulfillmentRate' => (float) $fulfillmentRate,
+            'averageDeliveryTime' => (float) $averageDeliveryTime,
+        ];
+    }
+
+    /**
+     * Get spike impact analysis for analytics.
+     */
+    protected function getSpikeImpactAnalysis(): array
+    {
+        $spikes = SpikeEvent::with(['product', 'location'])
+            ->where('user_id', auth()->id())
+            ->orderBy('created_at', 'desc')
+            ->take(10)
+            ->get();
+
+        return $spikes->map(function ($spike) {
+            $impact = null;
+            
+            if ($spike->product_id && $spike->location_id) {
+                $history = DB::table('inventory_history')
+                    ->where('user_id', auth()->id())
+                    ->where('location_id', $spike->location_id)
+                    ->where('product_id', $spike->product_id)
+                    ->whereBetween('day', [$spike->starts_at_day, $spike->ends_at_day])
+                    ->get();
+                
+                if ($history->isNotEmpty()) {
+                    $min = $history->min('quantity');
+                    $avg = $history->avg('quantity');
+                    
+                    $impact = [
+                        'min_inventory' => (int) $min,
+                        'avg_inventory' => round($avg, 1),
+                    ];
+                }
+            }
+            
+            return [
+                'id' => $spike->id,
+                'type' => $spike->type,
+                'name' => $spike->name,
+                'start_day' => $spike->starts_at_day,
+                'end_day' => $spike->ends_at_day,
+                'product_name' => $spike->product ? $spike->product->name : 'N/A',
+                'location_name' => $spike->location ? $spike->location->name : 'N/A',
+                'impact' => $impact,
             ];
         })->toArray();
     }
