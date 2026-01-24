@@ -39,7 +39,7 @@
     - [x] Implement backend method in `GameController`
 - [x] Task: Conductor - User Manual Verification 'Phase 3: Extended Analytics Logic' (Protocol in workflow.md)
 
-## Phase 4: Frontend UI Refactoring
+## Phase 4: Frontend UI Refactoring & Fixes [checkpoint: pending]
 - [x] Task: Update TypeScript interfaces
     - [x] Define `EnhancedAnalyticsProps` in `analytics.tsx`
 - [x] Task: Create Tabs Component
@@ -61,4 +61,15 @@
 - [x] Task: Integrate Tabs into Main Analytics Page
     - [x] Replace single-page layout in `analytics.tsx` with the new Tabbed components
     - [x] Pass correct props to each tab component
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: Frontend UI Refactoring' (Protocol in workflow.md)
+- [~] Task: Fix Overview Summary Cards Visibility
+    - [ ] Investigate and fix rendering of "Cash on Hand", "Net Worth", and "7-Day Revenue" cards in `OverviewTab`
+    - [ ] Verify prop passing from parent component
+- [ ] Task: Debug & Fix Inventory/Location Data
+    - [ ] Debug backend data retrieval for `getInventoryTrends` (check for empty history)
+    - [ ] Debug backend data retrieval for `getLocationComparison`
+    - [ ] Verify frontend chart mapping in `OverviewTab`
+- [ ] Task: Implement Collapsible UI Sections
+    - [ ] Create `CollapsibleSection` component (using Radix UI or similar)
+    - [ ] Wrap "Inventory Trends" and "Location Comparison" in `OverviewTab`
+    - [ ] Wrap "Storage Utilization" and "Spike Impact Analysis" in `LogisticsTab`
+- [ ] Task: Conductor - User Manual Verification 'Phase 4: Frontend UI Refactoring & Fixes' (Protocol in workflow.md)
