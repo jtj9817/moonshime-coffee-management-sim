@@ -15,8 +15,8 @@ A high-stakes, professional tycoon-style game where players build a coffee empir
 - **Brand Reputation:** Cultivate trust through consistent quality and reliable vendor relationships.
 
 ## Core Features
-- **Interactive Command Center:** A comprehensive real-time dashboard for monitoring financial health, inventory trends, and active simulation events.
-- **No-Map Logistics Dashboard:** A specialized UI that communicates network health and supply chain disruptions through analytical widgets and intelligent alternative pathfinding, rather than spatial maps.
+- **Interactive Command Center:** A comprehensive real-time dashboard for monitoring financial health, inventory trends, and active simulation events, featuring a historical inventory tracking system.
+- **No-Map Logistics Dashboard:** A specialized tabbed UI that communicates network health (Storage Utilization), financial performance (Spending by Category), and supply chain disruptions (Spike Impact Analysis) through analytical widgets.
 - **Intelligent Supply Chain Engine:** A high-performance, graph-based logistics engine that simulates physical routes and complex causal event chains, featuring optimized pathfinding and realistic disruption recovery.
 - **Chaos Engine (Spike Events):** A dynamic event system that introduces random disruptions—such as heatwaves or delivery strikes—requiring rapid tactical adaptation.
 - **Mission & Progression System:** Structured challenges and contracts that unlock new locations, advanced upgrades, and higher-tier logistics capabilities.
