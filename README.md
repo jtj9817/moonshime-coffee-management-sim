@@ -57,11 +57,25 @@ Players must balance inventory across locations, place orders from multiple supp
 - Supplier selection assistance
 
 ### Analytics & Reporting
-- Dashboard with KPIs and key metrics
-- Inventory position reports
-- Vendor performance analytics
+- **Analytics Dashboard** with tabbed interface (Overview, Logistics, Financials)
+- Real-time inventory position reports with historical trends
+- Vendor performance analytics and supplier comparisons
 - Waste tracking and cost analysis
-- Historical spike event logs
+- Storage utilization metrics across locations
+- Fulfillment rate tracking and spike impact analysis
+- Historical inventory snapshots via `inventory_history` table
+- Daily aggregated metrics via `daily_reports` table
+- Collapsible sections for detailed drill-down
+
+### Notification & Alert System
+- **Custom Alert System** (non-standard Laravel notifications)
+- Event-driven alert generation for orders, transfers, spikes, and stock issues
+- "Comms Log" HUD panel with military/tactical aesthetic
+- Severity indicators (critical, warning, info)
+- Smart navigation - click alerts to jump to relevant pages
+- Alert types: order placed, transfer completed, spike occurred, low stock, location isolation
+- Alerts shared globally via Inertia middleware
+- Unread badge with animation
 
 ## Architecture
 
@@ -91,19 +105,34 @@ The application follows strict architectural patterns for maintainability and sc
 ```
 moonshine-coffee-management-sim/
 ├── app/
-│   ├── Models/           # Eloquent models (Location, Product, Vendor, Inventory, Order, etc.)
-│   ├── Services/         # Business logic services (InventoryManagement, Simulation, AI, etc.)
+│   ├── Models/           # Eloquent models (GameState, Location, Product, Inventory, Order, Alert, etc.)
+│   ├── Services/         # Business logic (Simulation, Order, Logistics, Spike, Pricing, etc.)
+│   ├── Listeners/        # Event listeners (ProcessDeliveries, SnapshotInventory, GenerateAlert, etc.)
 │   └── Http/Controllers/ # Request handlers with Inertia responses
 ├── resources/js/
 │   ├── components/       # Reusable React UI components
-│   ├── pages/            # Inertia pages (Dashboard, Inventory, Orders, etc.)
-│   ├── layouts/          # Persistent layouts (GameLayout)
-│   ├── services/         # Frontend services (cockpit, inventory, spike services)
+│   │   ├── analytics/    # Analytics tab components (OverviewTab, LogisticsTab, FinancialsTab)
+│   │   └── ui/           # Radix UI components (tabs, collapsible, dialogs, etc.)
+│   ├── pages/game/       # Game pages (dashboard, inventory, analytics, spike-history, etc.)
+│   ├── layouts/          # Persistent layouts (GameLayout with HUD and Comms Log)
+│   ├── contexts/         # React contexts (game-context for state and alerts)
+│   ├── services/         # Frontend services (cockpit, inventory, transfer, vendor, etc.)
 │   ├── constants.ts      # Game constants (LOCATIONS, ITEMS, SUPPLIERS)
 │   └── types.ts          # TypeScript type definitions
-├── routes/               # Laravel routes
-├── database/             # Migrations, factories, seeders
-└── tests/                # PHPUnit feature and unit tests
+├── database/
+│   ├── migrations/       # Schema migrations (including inventory_history, daily_reports, alerts)
+│   ├── factories/        # Model factories for testing
+│   └── seeders/          # Database seeders
+├── tests/
+│   ├── Feature/          # Feature tests (Analytics/, Spike/, Order, etc.)
+│   └── Unit/             # Unit tests for services and models
+├── docs/                 # Comprehensive documentation
+│   ├── backend/          # Backend architecture docs
+│   ├── domain/           # Game mechanics and business logic
+│   ├── frontend/         # Frontend architecture
+│   ├── notification-system.md    # Alert system documentation
+│   └── analytics-page-audit.md   # Analytics feature mapping
+└── routes/               # Laravel routes (web.php with game routes)
 ```
 
 ## Game Entities
@@ -292,12 +321,23 @@ Transfer: Requested -> Approved -> InTransit -> Completed -> Cancelled
 
 ### Event System
 
-The simulation fires events that trigger listeners:
+The simulation uses Laravel events for decoupled game logic:
 
-- `TimeAdvanced`: Triggers perishable decay, delivery processing, spike generation
-- `OrderPlaced`: Deducts cash, notifies warehouse, updates vendor metrics
-- `LowStockDetected`: Creates alerts, suggests restock actions
-- `SpikeOccurred`: Records spike event, generates resolution strategies
+- `TimeAdvanced`: Triggers delivery processing, perishable decay, spike generation, inventory snapshots, daily reports, storage costs
+- `OrderPlaced`: Deducts cash, updates metrics, generates alerts
+- `TransferCompleted`: Updates inventory, generates alerts
+- `SpikeOccurred`: Applies spike effects, generates alerts
+- `SpikeEnded`: Rolls back spike effects, updates state
+
+Event listeners handle side effects:
+- `ProcessDeliveries` - Processes order arrivals
+- `DecayPerishables` - Handles item expiration
+- `GenerateAlert` - Creates notifications for game events
+- `SnapshotInventoryLevels` - Records inventory history for analytics
+- `CreateDailyReport` - Generates daily aggregated metrics
+- `ApplySpikeEffect` - Applies spike effects (demand, delay, breakdown, etc.)
+- `RollbackSpikeEffect` - Removes spike effects when expired
+- `ApplyStorageCosts` - Deducts storage costs
 
 ## Code Quality
 

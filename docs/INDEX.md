@@ -28,6 +28,7 @@ Business rules, game mechanics, and simulation logic that drive the gameplay exp
 
 - **[Domain README](./domain/README.md)** - Overview and navigation
 - [Game Mechanics](./domain/01-game-mechanics.md) - Core gameplay loop and rules
+- [Spike Events](./domain/05-spike-events.md) - Chaos event system and spike lifecycle
 
 #### ⚛️ Frontend (React)
 Modern React application with TypeScript, Inertia.js, and TailwindCSS.
@@ -55,16 +56,19 @@ docs/
 ├── frontend/                         # Frontend (React) documentation
 │   └── README.md                     # Frontend overview
 │
+├── analytics-page-audit.md                   # Analytics feature mapping and data sources
 ├── daily-reporting-infrastructure-analysis.md
 ├── daily-simulation-logic-plan.md
 ├── dashboard-ux-test-gap-analysis.md
 ├── data-seeding-synchronization-analysis.md  # ✅ Resolved (2026-01-21)
 ├── gameplay-loop-mechanics-analysis.md
 ├── game-state-persistence-brainstorm.md
+├── initialization-and-seeding-analysis.md
 ├── logistics-integration-post-completion-cleanup.md
 ├── moonshine-laravel-integration-plan.md
 ├── multi-hop-implementation-summary.md
 ├── multi_hop_proposal.md
+├── notification-system.md                    # Alert/notification system architecture
 ├── ordering-dialog-fix-session-20260119.md
 ├── route-routing-review.md
 ├── technical-design-document.md
@@ -101,28 +105,35 @@ docs/
 ### ✅ Implemented
 - [x] Multi-location inventory management
 - [x] Vendor ordering with pricing tiers
-- [x] Internal transfer system
+- [x] Internal transfer system with state machines
 - [x] Multi-hop routing and logistics
 - [x] Dynamic spike events (demand, delay, price, breakdown, blizzard)
-- [x] Alert system with severity levels
-- [x] Turn-based time advancement
+- [x] Custom alert/notification system with "Comms Log" UI
+- [x] Turn-based time advancement with event processing
 - [x] Storage capacity management
-- [x] Perishable item tracking
+- [x] Perishable item tracking with expiration
 - [x] Cash and reputation management
 - [x] AI-powered inventory recommendations (Prism AI)
-- [x] Comprehensive dashboard with KPIs
-- [x] Responsive UI with dark mode
+- [x] Comprehensive dashboard with real-time KPIs
+- [x] Analytics page with tabbed interface (Overview, Logistics, Financials)
+- [x] Historical inventory tracking via inventory_history table
+- [x] Daily aggregated metrics via daily_reports table
+- [x] Spike War Room for event management
+- [x] Demand simulation service
+- [x] Pricing service with tiered volume discounts
+- [x] Responsive UI with dark mode and Radix UI components
 
 ### 🚧 Planned Enhancements
-- [ ] Daily demand simulation (actual consumption)
-- [ ] Revenue generation system
-- [ ] Staff management
-- [ ] Location expansion
+- [ ] Revenue generation system (sales tracking)
+- [ ] Staff management and hiring
+- [ ] Location expansion mechanics
 - [ ] Advanced vendor negotiations
 - [ ] Tutorial/onboarding flow
 - [ ] Leaderboards and scoring
-- [ ] Save/load game states
+- [ ] Save/load game states (currently single session)
 - [ ] Multiple difficulty levels
+- [ ] Real-time updates via Laravel Reverb (currently page-based)
+- [ ] More spike event types and resolution mechanics
 
 ## Development Workflow
 
@@ -435,6 +446,26 @@ See [CHANGELOG.md](../CHANGELOG.md) for version history.
 
 ---
 
-**Last Updated**: 2026-01-20
+## Recent Updates
+
+**January 23-24, 2026**:
+- Added comprehensive notification system documentation (`notification-system.md`)
+- Completed analytics refactor with tabbed UI and historical data tracking
+- Added `inventory_history` and `daily_reports` tables for analytics
+- Implemented `SnapshotInventoryLevels` and `CreateDailyReport` listeners
+- Created analytics components: `OverviewTab`, `LogisticsTab`, `FinancialsTab`
+- Added collapsible UI components for better UX
+- Enhanced spike event documentation
+
+**January 16-22, 2026**:
+- Implemented Spike War Room with resolution mechanics
+- Added demand simulation service
+- Enhanced pricing service with volume discounts
+- Improved alert generation and display
+- Added comprehensive testing for analytics and spike systems
+
+---
+
+**Last Updated**: 2026-01-24
 
 For detailed information on specific topics, navigate to the respective documentation sections using the links above.
