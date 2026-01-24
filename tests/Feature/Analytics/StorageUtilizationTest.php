@@ -14,6 +14,7 @@ class StorageUtilizationTest extends TestCase
     public function test_analytics_page_provides_storage_utilization_metrics()
     {
         $user = User::factory()->create();
+        \App\Models\GameState::factory()->create(['user_id' => $user->id]);
         
         $location1 = \App\Models\Location::factory()->create(['name' => 'Warehouse A', 'max_storage' => 1000]);
         $location2 = \App\Models\Location::factory()->create(['name' => 'Store B', 'max_storage' => 500]);
@@ -38,6 +39,7 @@ class StorageUtilizationTest extends TestCase
         
         // Other user data (should be ignored)
         $otherUser = User::factory()->create();
+        \App\Models\GameState::factory()->create(['user_id' => $otherUser->id]);
         \App\Models\Inventory::factory()->create([
             'user_id' => $otherUser->id,
             'location_id' => $location1->id,

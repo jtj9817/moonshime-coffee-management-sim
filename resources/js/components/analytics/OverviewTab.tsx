@@ -1,5 +1,6 @@
-import { BarChart3, PieChart, TrendingUp } from 'lucide-react';
+import { BarChart3, DollarSign, TrendingUp } from 'lucide-react';
 
+import { CollapsibleSection } from '@/components/ui/collapsible-section';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCurrency } from '@/lib/formatCurrency';
 
@@ -16,19 +17,19 @@ interface LocationComparisonItem {
 }
 
 interface OverviewTabProps {
+    overviewMetrics: {
+        cash: number;
+        netWorth: number;
+        revenue7Day: number;
+    };
     inventoryTrends: InventoryTrendPoint[];
     locationComparison: LocationComparisonItem[];
-    totalInventoryValue: number;
-    totalSpending: number;
-    categoriesCount: number;
 }
 
 export function OverviewTab({
+    overviewMetrics,
     inventoryTrends,
     locationComparison,
-    totalInventoryValue,
-    totalSpending,
-    categoriesCount,
 }: OverviewTabProps) {
     const maxTrendValue = Math.max(...inventoryTrends.map((p) => p.value), 1);
 
@@ -39,34 +40,34 @@ export function OverviewTab({
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium text-stone-500">
-                            Total Inventory Value
+                            Cash on Hand
                         </CardTitle>
-                        <TrendingUp className="h-4 w-4 text-emerald-500" />
+                        <DollarSign className="h-4 w-4 text-emerald-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">${formatCurrency(totalInventoryValue)}</div>
+                        <div className="text-2xl font-bold">${formatCurrency(overviewMetrics.cash)}</div>
                     </CardContent>
                 </Card>
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium text-stone-500">
-                            Total Spending
+                            Net Worth
                         </CardTitle>
-                        <BarChart3 className="h-4 w-4 text-amber-500" />
+                        <TrendingUp className="h-4 w-4 text-amber-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">${formatCurrency(totalSpending)}</div>
+                        <div className="text-2xl font-bold">${formatCurrency(overviewMetrics.netWorth)}</div>
                     </CardContent>
                 </Card>
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium text-stone-500">
-                            Categories Tracked
+                            7-Day Revenue
                         </CardTitle>
-                        <PieChart className="h-4 w-4 text-blue-500" />
+                        <BarChart3 className="h-4 w-4 text-blue-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{categoriesCount}</div>
+                        <div className="text-2xl font-bold">${formatCurrency(overviewMetrics.revenue7Day)}</div>
                     </CardContent>
                 </Card>
             </div>
@@ -74,79 +75,77 @@ export function OverviewTab({
             {/* Charts Grid */}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 {/* Inventory Trends */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Inventory Trends</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        {inventoryTrends.length > 0 ? (
-                            <>
-                                <div className="flex h-64 items-end gap-2">
-                                    {inventoryTrends.map((point, i) => (
-                                        <div
-                                            key={i}
-                                            className="flex-1 rounded-t bg-amber-500 transition-all hover:bg-amber-600"
-                                            style={{
-                                                height: `${(point.value / maxTrendValue) * 100}%`,
-                                                minHeight: '20px',
-                                            }}
-                                            title={`Day ${point.day}: ${point.value} units`}
-                                        />
-                                    ))}
+                <CollapsibleSection title="Inventory Trends">
+                    <Card>
+                        <CardContent className="pt-6">
+                            {inventoryTrends.length > 0 ? (
+                                <>
+                                    <div className="flex h-64 items-end gap-2">
+                                        {inventoryTrends.map((point, i) => (
+                                            <div
+                                                key={i}
+                                                className="flex-1 rounded-t bg-amber-500 transition-all hover:bg-amber-600"
+                                                style={{
+                                                    height: `${(point.value / maxTrendValue) * 100}%`,
+                                                    minHeight: '20px',
+                                                }}
+                                                title={`Day ${point.day}: ${point.value} units`}
+                                            />
+                                        ))}
+                                    </div>
+                                    <div className="mt-2 flex justify-between text-xs text-stone-500">
+                                        {inventoryTrends.map((point, i) => (
+                                            <span key={i}>Day {point.day}</span>
+                                        ))}
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="flex h-64 items-center justify-center text-stone-500">
+                                    No inventory history data yet. Advance a few days to see trends.
                                 </div>
-                                <div className="mt-2 flex justify-between text-xs text-stone-500">
-                                    {inventoryTrends.map((point, i) => (
-                                        <span key={i}>Day {point.day}</span>
-                                    ))}
-                                </div>
-                            </>
-                        ) : (
-                            <div className="flex h-64 items-center justify-center text-stone-500">
-                                No inventory history data yet. Advance a few days to see trends.
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
+                            )}
+                        </CardContent>
+                    </Card>
+                </CollapsibleSection>
 
                 {/* Location Comparison */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Location Comparison</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-4">
-                            {locationComparison.map((loc, i) => (
-                                <div
-                                    key={i}
-                                    className="rounded-xl border border-stone-200 p-4 dark:border-stone-700"
-                                >
-                                    <div className="flex items-center justify-between">
-                                        <h4 className="font-semibold text-stone-900 dark:text-white">
-                                            {loc.name}
-                                        </h4>
-                                        <span className="text-sm text-stone-500">
-                                            {loc.itemCount} items
-                                        </span>
-                                    </div>
-                                    <p className="mt-1 text-2xl font-bold text-amber-600">
-                                        ${formatCurrency(loc.inventoryValue)}
-                                    </p>
-                                    <div className="mt-2 flex items-center gap-2">
-                                        <div className="h-2 flex-1 overflow-hidden rounded-full bg-stone-200 dark:bg-stone-700">
-                                            <div
-                                                className="h-full bg-emerald-500"
-                                                style={{ width: `${Math.min(loc.utilization, 100)}%` }}
-                                            />
+                <CollapsibleSection title="Location Comparison">
+                    <Card>
+                        <CardContent className="pt-6">
+                            <div className="space-y-4">
+                                {locationComparison.map((loc, i) => (
+                                    <div
+                                        key={i}
+                                        className="rounded-xl border border-stone-200 p-4 dark:border-stone-700"
+                                    >
+                                        <div className="flex items-center justify-between">
+                                            <h4 className="font-semibold text-stone-900 dark:text-white">
+                                                {loc.name}
+                                            </h4>
+                                            <span className="text-sm text-stone-500">
+                                                {loc.itemCount} items
+                                            </span>
                                         </div>
-                                        <span className="text-xs text-stone-500">
-                                            {loc.utilization}% utilized
-                                        </span>
+                                        <p className="mt-1 text-2xl font-bold text-amber-600">
+                                            ${formatCurrency(loc.inventoryValue)}
+                                        </p>
+                                        <div className="mt-2 flex items-center gap-2">
+                                            <div className="h-2 flex-1 overflow-hidden rounded-full bg-stone-200 dark:bg-stone-700">
+                                                <div
+                                                    className="h-full bg-emerald-500"
+                                                    style={{ width: `${Math.min(loc.utilization, 100)}%` }}
+                                                />
+                                            </div>
+                                            <span className="text-xs text-stone-500">
+                                                {loc.utilization}% utilized
+                                            </span>
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
-                        </div>
-                    </CardContent>
-                </Card>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+                </CollapsibleSection>
             </div>
         </div>
     );

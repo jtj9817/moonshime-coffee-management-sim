@@ -15,6 +15,7 @@ class AnalyticsPageTest extends TestCase
     public function test_analytics_page_displays_inventory_trends_from_history()
     {
         $user = User::factory()->create();
+        \App\Models\GameState::factory()->create(['user_id' => $user->id]);
         $location1 = \App\Models\Location::factory()->create();
         $location2 = \App\Models\Location::factory()->create();
         $product1 = \App\Models\Product::factory()->create();
@@ -35,6 +36,7 @@ class AnalyticsPageTest extends TestCase
 
         // Another user's data (should be ignored)
         $otherUser = User::factory()->create();
+        \App\Models\GameState::factory()->create(['user_id' => $otherUser->id]);
         DB::table('inventory_history')->insert([
             ['user_id' => $otherUser->id, 'location_id' => $location1->id, 'product_id' => $product1->id, 'day' => 1, 'quantity' => 500, 'created_at' => now(), 'updated_at' => now()],
         ]);
@@ -57,6 +59,7 @@ class AnalyticsPageTest extends TestCase
     public function test_analytics_page_displays_spending_by_category()
     {
         $user = User::factory()->create();
+        \App\Models\GameState::factory()->create(['user_id' => $user->id]);
         
         $beans = \App\Models\Product::factory()->create(['category' => 'Beans', 'name' => 'Beans A']);
         $milk = \App\Models\Product::factory()->create(['category' => 'Milk', 'name' => 'Milk B']);
@@ -85,6 +88,7 @@ class AnalyticsPageTest extends TestCase
         
         // Another user
         $otherUser = User::factory()->create();
+        \App\Models\GameState::factory()->create(['user_id' => $otherUser->id]);
         $otherOrder = \App\Models\Order::factory()->create(['user_id' => $otherUser->id]);
         \App\Models\OrderItem::factory()->create([
             'order_id' => $otherOrder->id,
@@ -113,6 +117,7 @@ class AnalyticsPageTest extends TestCase
     public function test_analytics_page_displays_enhanced_location_comparison()
     {
         $user = User::factory()->create();
+        $gameState = \App\Models\GameState::factory()->create(['user_id' => $user->id, 'cash' => 1000]);
         
         $location = \App\Models\Location::factory()->create(['name' => 'Central', 'max_storage' => 100]);
         $productA = \App\Models\Product::factory()->create(['unit_price' => 10]);
@@ -129,6 +134,7 @@ class AnalyticsPageTest extends TestCase
         // Other User Inventory: 20 units. Should be ignored.
         // Must use different product to avoid unique(location_id, product_id) if user_id is not in unique
         $otherUser = User::factory()->create();
+        \App\Models\GameState::factory()->create(['user_id' => $otherUser->id]);
         \App\Models\Inventory::factory()->create([
             'user_id' => $otherUser->id,
             'location_id' => $location->id,
@@ -153,6 +159,9 @@ class AnalyticsPageTest extends TestCase
                     && $target['utilization'] == 50
                     && $target['itemCount'] == 1;
             })
+            ->has('overviewMetrics')
+            ->where('overviewMetrics.cash', 1000)
+            ->where('overviewMetrics.netWorth', 1500) // 1000 cash + 500 inventory
         );
     }
 }

@@ -16,6 +16,7 @@ class SpikeImpactTest extends TestCase
     public function test_analytics_page_provides_spike_impact_analysis()
     {
         $user = User::factory()->create();
+        \App\Models\GameState::factory()->create(['user_id' => $user->id]);
         $location = \App\Models\Location::factory()->create(['name' => 'Affected Cafe']);
         $product = \App\Models\Product::factory()->create(['name' => 'Espresso']);
         

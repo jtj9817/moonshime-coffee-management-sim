@@ -17,6 +17,7 @@ class FulfillmentMetricsTest extends TestCase
     public function test_analytics_page_provides_fulfillment_metrics()
     {
         $user = User::factory()->create();
+        \App\Models\GameState::factory()->create(['user_id' => $user->id]);
         
         // Order 1: Delivered, took 2 days (1 to 3)
         \App\Models\Order::factory()->create([
@@ -50,6 +51,7 @@ class FulfillmentMetricsTest extends TestCase
         
         // Other user's order (should be ignored)
         $otherUser = User::factory()->create();
+        \App\Models\GameState::factory()->create(['user_id' => $otherUser->id]);
         \App\Models\Order::factory()->create([
             'user_id' => $otherUser->id,
             'status' => Delivered::class,

@@ -63,6 +63,11 @@ interface SpikeImpactItem {
  */
 interface EnhancedAnalyticsProps {
     // Phase 2: Existing metrics (refactored)
+    overviewMetrics: {
+        cash: number;
+        netWorth: number;
+        revenue7Day: number;
+    };
     inventoryTrends: InventoryTrendPoint[];
     spendingByCategory: SpendingByCategoryItem[];
     locationComparison: LocationComparisonItem[];
@@ -82,6 +87,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 // ==================== Main Component ====================
 
 export default function Analytics({
+    overviewMetrics,
     inventoryTrends,
     spendingByCategory,
     locationComparison,
@@ -130,6 +136,7 @@ export default function Analytics({
 
                     <TabsContent value="overview">
                         <OverviewTab
+                            overviewMetrics={overviewMetrics}
                             inventoryTrends={inventoryTrends}
                             locationComparison={locationComparison}
                             totalInventoryValue={totalInventoryValue}

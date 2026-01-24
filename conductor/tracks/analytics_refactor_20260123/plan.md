@@ -61,15 +61,15 @@
 - [x] Task: Integrate Tabs into Main Analytics Page
     - [x] Replace single-page layout in `analytics.tsx` with the new Tabbed components
     - [x] Pass correct props to each tab component
-- [~] Task: Fix Overview Summary Cards Visibility
-    - [ ] Investigate and fix rendering of "Cash on Hand", "Net Worth", and "7-Day Revenue" cards in `OverviewTab`
-    - [ ] Verify prop passing from parent component
-- [ ] Task: Debug & Fix Inventory/Location Data
-    - [ ] Debug backend data retrieval for `getInventoryTrends` (check for empty history)
-    - [ ] Debug backend data retrieval for `getLocationComparison`
-    - [ ] Verify frontend chart mapping in `OverviewTab`
-- [ ] Task: Implement Collapsible UI Sections
-    - [ ] Create `CollapsibleSection` component (using Radix UI or similar)
-    - [ ] Wrap "Inventory Trends" and "Location Comparison" in `OverviewTab`
-    - [ ] Wrap "Storage Utilization" and "Spike Impact Analysis" in `LogisticsTab`
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: Frontend UI Refactoring & Fixes' (Protocol in workflow.md)
+- [x] Task: Fix Overview Summary Cards Visibility
+    - [x] Investigate and fix rendering of "Cash on Hand", "Net Worth", and "7-Day Revenue" cards in `OverviewTab`
+    - [x] Verify prop passing from parent component
+- [x] Task: Debug & Fix Inventory/Location Data
+    - [x] Debug backend data retrieval for `getInventoryTrends` (check for empty history)
+    - [x] Debug backend data retrieval for `getLocationComparison`
+    - [x] Verify frontend chart mapping in `OverviewTab`
+- [x] Task: Implement Collapsible UI Sections
+    - [x] Create `CollapsibleSection` component (using Radix UI or similar)
+    - [x] Wrap "Inventory Trends" and "Location Comparison" in `OverviewTab`
+    - [x] Wrap "Storage Utilization" and "Spike Impact Analysis" in `LogisticsTab`
+- [~] Task: Conductor - User Manual Verification 'Phase 4: Frontend UI Refactoring & Fixes' (Protocol in workflow.md)

@@ -191,7 +191,20 @@ class GameController extends Controller
      */
     public function analytics(): Response
     {
+        $userId = auth()->id();
+        $gameState = GameState::where('user_id', $userId)->firstOrFail();
+
+        $totalInventoryValue = Inventory::where('user_id', $userId)
+            ->with('product')
+            ->get()
+            ->sum(fn ($inv) => $inv->quantity * ($inv->product->unit_price ?? 0));
+
         return Inertia::render('game/analytics', [
+            'overviewMetrics' => [
+                'cash' => (float) $gameState->cash,
+                'netWorth' => (float) ($gameState->cash + $totalInventoryValue),
+                'revenue7Day' => 0, // Placeholder until revenue logic is implemented
+            ],
             'inventoryTrends' => $this->getInventoryTrends(),
             'spendingByCategory' => $this->getSpendingByCategory(),
             'locationComparison' => $this->getLocationComparison(),
