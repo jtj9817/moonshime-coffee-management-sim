@@ -6,13 +6,13 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 # Active Tracks
 
-- [x] **Track: Refactor the Analytics page UI to use real backend data and APIs, integrating necessary backend changes for historical trends and enhanced metrics.**
-    - **ID:** `analytics_refactor_20260123`
-    - **Link:** [./tracks/analytics_refactor_20260123/](./tracks/analytics_refactor_20260123/)
-
 ---
 
 # Archived Tracks
+
+- [x] **Track: Refactor the Analytics page UI to use real backend data and APIs, integrating necessary backend changes for historical trends and enhanced metrics.**
+    - **ID:** `analytics_refactor_20260123`
+    - **Link:** [./archive/analytics_refactor_20260123/](./archive/analytics_refactor_20260123/)
 
 - [x] **Track: War Room UX for Spike Events, including Resolve Early mechanics and backend simulation integration.**
     - **ID:** `spike_war_room_20260122`
