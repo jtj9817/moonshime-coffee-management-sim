@@ -1,27 +1,95 @@
 import { Head } from '@inertiajs/react';
-import { BarChart3, PieChart, TrendingUp } from 'lucide-react';
+import { BarChart3, Boxes, DollarSign } from 'lucide-react';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { FinancialsTab } from '@/components/analytics/FinancialsTab';
+import { LogisticsTab } from '@/components/analytics/LogisticsTab';
+import { OverviewTab } from '@/components/analytics/OverviewTab';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import GameLayout from '@/layouts/game-layout';
-import { formatCurrency } from '@/lib/formatCurrency';
 import { type BreadcrumbItem } from '@/types';
 
-interface AnalyticsProps {
-    inventoryTrends: Array<{ day: number; value: number }>;
-    spendingByCategory: Array<{ category: string; amount: number }>;
-    locationComparison: Array<{ name: string; inventoryValue: number }>;
+// ==================== Type Definitions ====================
+
+interface InventoryTrendPoint {
+    day: number;
+    value: number;
 }
+
+interface SpendingByCategoryItem {
+    category: string;
+    amount: number;
+}
+
+interface LocationComparisonItem {
+    name: string;
+    inventoryValue: number;
+    utilization: number;
+    itemCount: number;
+}
+
+interface StorageUtilizationItem {
+    location_id: string;
+    name: string;
+    capacity: number;
+    used: number;
+    percentage: number;
+}
+
+interface FulfillmentMetrics {
+    totalOrders: number;
+    deliveredOrders: number;
+    fulfillmentRate: number;
+    averageDeliveryTime: number;
+}
+
+interface SpikeImpact {
+    min_inventory: number;
+    avg_inventory: number;
+}
+
+interface SpikeImpactItem {
+    id: string;
+    type: string;
+    name: string;
+    start_day: number;
+    end_day: number;
+    product_name: string;
+    location_name: string;
+    impact: SpikeImpact | null;
+}
+
+/**
+ * Enhanced Analytics Props - includes all data from Phase 2 & 3 backend methods
+ */
+interface EnhancedAnalyticsProps {
+    // Phase 2: Existing metrics (refactored)
+    inventoryTrends: InventoryTrendPoint[];
+    spendingByCategory: SpendingByCategoryItem[];
+    locationComparison: LocationComparisonItem[];
+    // Phase 3: Extended analytics
+    storageUtilization: StorageUtilizationItem[];
+    fulfillmentMetrics: FulfillmentMetrics;
+    spikeImpactAnalysis: SpikeImpactItem[];
+}
+
+// ==================== Constants ====================
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Mission Control', href: '/game/dashboard' },
     { title: 'Analytics', href: '/game/analytics' },
 ];
 
+// ==================== Main Component ====================
+
 export default function Analytics({
     inventoryTrends,
     spendingByCategory,
     locationComparison,
-}: AnalyticsProps) {
+    storageUtilization,
+    fulfillmentMetrics,
+    spikeImpactAnalysis,
+}: EnhancedAnalyticsProps) {
+    // Computed values for Overview tab
     const totalInventoryValue = locationComparison.reduce(
         (sum, loc) => sum + loc.inventoryValue,
         0,
@@ -39,133 +107,51 @@ export default function Analytics({
                         Analytics Dashboard
                     </h1>
                     <p className="text-stone-500 dark:text-stone-400">
-                        Insights and performance metrics
+                        Insights and performance metrics across your supply chain
                     </p>
                 </div>
 
-                {/* Summary Cards */}
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium text-stone-500">
-                                Total Inventory Value
-                            </CardTitle>
-                            <TrendingUp className="h-4 w-4 text-emerald-500" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">
-                                ${formatCurrency(totalInventoryValue)}
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium text-stone-500">
-                                Total Spending
-                            </CardTitle>
-                            <BarChart3 className="h-4 w-4 text-amber-500" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">
-                                ${formatCurrency(totalSpending)}
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium text-stone-500">
-                                Categories Tracked
-                            </CardTitle>
-                            <PieChart className="h-4 w-4 text-blue-500" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{spendingByCategory.length}</div>
-                        </CardContent>
-                    </Card>
-                </div>
+                {/* Tabbed Interface */}
+                <Tabs defaultValue="overview" className="w-full">
+                    <TabsList className="grid w-full grid-cols-3 lg:w-auto lg:grid-cols-none lg:inline-flex">
+                        <TabsTrigger value="overview" className="flex items-center gap-2">
+                            <BarChart3 className="h-4 w-4" />
+                            <span>Overview</span>
+                        </TabsTrigger>
+                        <TabsTrigger value="logistics" className="flex items-center gap-2">
+                            <Boxes className="h-4 w-4" />
+                            <span>Logistics</span>
+                        </TabsTrigger>
+                        <TabsTrigger value="financials" className="flex items-center gap-2">
+                            <DollarSign className="h-4 w-4" />
+                            <span>Financials</span>
+                        </TabsTrigger>
+                    </TabsList>
 
-                {/* Charts Grid */}
-                <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                    {/* Inventory Trends */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Inventory Trends</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="flex h-64 items-end gap-2">
-                                {inventoryTrends.map((point, i) => (
-                                    <div
-                                        key={i}
-                                        className="flex-1 rounded-t bg-amber-500"
-                                        style={{
-                                            height: `${(point.value / Math.max(...inventoryTrends.map((p) => p.value))) * 100}%`,
-                                            minHeight: '20px',
-                                        }}
-                                    />
-                                ))}
-                            </div>
-                            <div className="mt-2 flex justify-between text-xs text-stone-500">
-                                {inventoryTrends.map((point, i) => (
-                                    <span key={i}>Day {point.day}</span>
-                                ))}
-                            </div>
-                        </CardContent>
-                    </Card>
+                    <TabsContent value="overview">
+                        <OverviewTab
+                            inventoryTrends={inventoryTrends}
+                            locationComparison={locationComparison}
+                            totalInventoryValue={totalInventoryValue}
+                            totalSpending={totalSpending}
+                            categoriesCount={spendingByCategory.length}
+                        />
+                    </TabsContent>
 
-                    {/* Spending by Category */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Spending by Category</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-4">
-                                {spendingByCategory.map((cat, i) => (
-                                    <div key={i}>
-                                        <div className="mb-1 flex items-center justify-between text-sm">
-                                            <span className="font-medium">{cat.category}</span>
-                                            <span className="text-stone-500">
-                                                ${formatCurrency(cat.amount)}
-                                            </span>
-                                        </div>
-                                        <div className="h-2 w-full overflow-hidden rounded-full bg-stone-200 dark:bg-stone-700">
-                                            <div
-                                                className="h-full bg-amber-500"
-                                                style={{
-                                                    width: `${(cat.amount / totalSpending) * 100}%`,
-                                                }}
-                                            />
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </CardContent>
-                    </Card>
+                    <TabsContent value="logistics">
+                        <LogisticsTab
+                            storageUtilization={storageUtilization}
+                            spikeImpactAnalysis={spikeImpactAnalysis}
+                        />
+                    </TabsContent>
 
-                    {/* Location Comparison */}
-                    <Card className="lg:col-span-2">
-                        <CardHeader>
-                            <CardTitle>Location Comparison</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                                {locationComparison.map((loc, i) => (
-                                    <div
-                                        key={i}
-                                        className="rounded-xl border border-stone-200 p-4 dark:border-stone-700"
-                                    >
-                                        <h4 className="font-semibold text-stone-900 dark:text-white">
-                                            {loc.name}
-                                        </h4>
-                                        <p className="mt-1 text-2xl font-bold text-amber-600">
-                                            ${formatCurrency(loc.inventoryValue)}
-                                        </p>
-                                        <p className="text-xs text-stone-500">Inventory Value</p>
-                                    </div>
-                                ))}
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
+                    <TabsContent value="financials">
+                        <FinancialsTab
+                            spendingByCategory={spendingByCategory}
+                            fulfillmentMetrics={fulfillmentMetrics}
+                        />
+                    </TabsContent>
+                </Tabs>
             </div>
         </GameLayout>
     );
