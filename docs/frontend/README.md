@@ -258,20 +258,67 @@ export function calculateReorderPoint(
 
 ### Context for Global State
 
-Game state is managed via React Context:
+Game state is managed via React Context in `contexts/game-context.tsx`.
 
-```tsx
-// contexts/game-context.tsx
-export const GameContext = createContext<GameContextType | null>(null);
+**File**: `resources/js/contexts/game-context.tsx`
 
-export function useGame() {
-  const context = useContext(GameContext);
-  if (!context) throw new Error('useGame must be used within GameProvider');
-  return context;
+**Context Type**:
+```typescript
+interface GameContextType {
+  // Shared game data (from Inertia props)
+  gameState: GameStateShared;       // Current day, cash, reputation, XP
+  locations: LocationModel[];       // All game locations
+  products: ProductModel[];         // All SKUs/products
+  vendors: VendorModel[];           // All suppliers
+  alerts: AlertModel[];             // Unread alerts from Comms Log
+  activeSpikes: SpikeEventModel[];  // All active spike events (multi-spike support)
+  currentSpike: SpikeEventModel | null; // First active spike (backwards compatible)
+
+  // Local UI state
+  currentLocationId: string;        // Selected location filter
+  setCurrentLocationId: (id: string) => void;
+
+  // Actions (Inertia route calls)
+  advanceDay: () => void;           // Advance game day by 1
+  refreshData: () => void;          // Reload game data
+  markAlertRead: (alertId: string) => void; // Mark alert as read
 }
 ```
 
-Components access game state via `useGame()` hook.
+**Key Features**:
+- **Multi-Spike Support**: `activeSpikes` array supports multiple concurrent spikes (up to 2)
+- **Backwards Compatibility**: `currentSpike` returns first active spike for legacy code
+- **Alert Management**: Integrated alert system with read/unread tracking
+- **Type Safety**: Fully typed context with TypeScript strict mode
+- **Inertia Integration**: Data sourced from `usePage().props.game` shared props
+
+**Usage**:
+```tsx
+import { useGame } from '@/contexts/game-context';
+
+function Dashboard() {
+  const { gameState, alerts, activeSpikes, markAlertRead } = useGame();
+
+  return (
+    <div>
+      <h1>Day {gameState.day} - ${gameState.cash.toFixed(2)}</h1>
+      {alerts.length > 0 && (
+        <AlertList alerts={alerts} onRead={markAlertRead} />
+      )}
+      {activeSpikes.map(spike => (
+        <SpikeWarning key={spike.id} spike={spike} />
+      ))}
+    </div>
+  );
+}
+```
+
+**Hooks**:
+- `useGame()` - Throws error if used outside GameProvider (recommended)
+- `useOptionalGame()` - Returns `null` if game context unavailable (for shared layouts)
+
+**Migration Note**:
+The context was enhanced to support multiple concurrent spikes. Legacy code using `currentSpike` continues to work, but new code should use `activeSpikes` array for full multi-spike awareness.
 
 ## Development Workflow
 
@@ -370,6 +417,62 @@ router.visit(route('game.inventory'), {
   </Alert>
 )}
 ```
+
+## UI Components
+
+### CollapsibleSection
+
+A reusable collapsible section wrapper component built on Radix UI primitives.
+
+**File**: `resources/js/components/ui/collapsible-section.tsx`
+
+**Props**:
+```typescript
+interface CollapsibleSectionProps {
+  title: string;           // Section title displayed in header
+  children: React.ReactNode; // Content to show/hide
+  defaultOpen?: boolean;   // Initial open state (default: true)
+  className?: string;      // Additional CSS classes
+}
+```
+
+**Features**:
+- Built on Radix UI Collapsible primitives for accessibility
+- Chevron icons indicate open/closed state (ChevronDown/ChevronRight)
+- Accessible keyboard navigation
+- Screen reader support with `sr-only` toggle label
+- Dark mode compatible styling
+- Controlled state management with `useState`
+
+**Usage Example**:
+```tsx
+import { CollapsibleSection } from '@/components/ui/collapsible-section';
+
+function Analytics() {
+  return (
+    <CollapsibleSection title="Inventory Trends" defaultOpen={true}>
+      <div className="space-y-4">
+        {/* Section content */}
+        <Chart data={inventoryData} />
+      </div>
+    </CollapsibleSection>
+  );
+}
+```
+
+**Common Use Cases**:
+- Analytics page sections (Inventory Trends, Storage Utilization, Transfer Patterns)
+- Dashboard widgets that can be collapsed
+- Settings panels with collapsible categories
+- FAQ accordions
+- Expandable data tables
+
+**Dependencies**:
+- `@/components/ui/collapsible` - Radix UI Collapsible primitives
+- `lucide-react` - Chevron icons
+- `@/lib/utils` - `cn()` utility for class merging
+
+---
 
 ## Styling Patterns
 

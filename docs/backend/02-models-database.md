@@ -104,7 +104,7 @@ The database schema is designed to support a multi-location coffee shop simulati
 │ delivery_day │
 └──────────────┘
 
-┌──────────────┐     ┌──────────────┐
+┌──────────────┐     ┌──────────────┐     ┌──────────────┐
 │  SpikeEvent  │────►│    Alert     │
 │──────────────│     │──────────────│
 │ id           │     │ id           │
@@ -116,6 +116,16 @@ The database schema is designed to support a multi-location coffee shop simulati
 │ end_day      │     └──────────────┘
 │ multiplier   │
 │ meta         │
+└──────────────┘
+
+┌──────────────┐
+│ DailyReport  │
+│──────────────│
+│ id           │
+│ user_id      │
+│ day          │
+│ summary_data │
+│ metrics      │
 └──────────────┘
 ```
 
@@ -646,6 +656,82 @@ protected $casts = [
 ```php
 public function scopeActive(Builder $query): Builder // Not dismissed
 public function scopeBySeverity(Builder $query, string $severity): Builder
+```
+
+---
+
+### DailyReport
+
+Represents a historical snapshot of aggregated daily metrics for analytics.
+
+**File**: `app/Models/DailyReport.php`
+
+**Columns**:
+- `id` - Primary key
+- `user_id` - Foreign key to users
+- `day` - Game day for this report
+- `summary_data` - Summary statistics (JSON)
+- `metrics` - Aggregated metrics (JSON)
+- `created_at`, `updated_at` - Timestamps
+
+**Relationships**:
+- `belongsTo(User)` - User
+
+**Casts**:
+```php
+protected $casts = [
+    'summary_data' => 'array',
+    'metrics' => 'array'
+];
+```
+
+**Purpose**:
+- Created by `CreateDailyReport` listener on `TimeAdvanced` event
+- Stores aggregated daily metrics for analytics reporting
+- Used by Analytics page for historical trend analysis
+- Includes data like total cash spent, orders placed, transfers completed, etc.
+
+---
+
+## Analytics Tables
+
+### inventory_history (Direct DB Table)
+
+**Note**: This table does NOT have an Eloquent model. It uses direct database inserts for performance optimization.
+
+**Table**: `inventory_history`
+
+**Columns**:
+- `id` - Primary key
+- `user_id` - Foreign key to users
+- `location_id` - Foreign key to locations
+- `product_id` - Foreign key to products
+- `day` - Game day for this snapshot
+- `quantity` - Inventory quantity at this day
+- `created_at`, `updated_at` - Timestamps
+
+**Unique Constraint**: `(user_id, location_id, product_id, day)` - Prevents duplicate snapshots
+
+**Usage Pattern**:
+- Populated by `SnapshotInventoryLevels` listener using direct `DB::table()` inserts
+- Queried directly via `DB::table('inventory_history')` in `GameController::getInventoryTrends()`
+- High-volume time-series data optimized for write performance
+- Used by Analytics page for inventory trend charts
+
+**Rationale**:
+Using direct database operations instead of Eloquent for this table provides:
+1. Faster bulk inserts (no model overhead)
+2. Reduced memory usage for high-frequency snapshots
+3. Optimized for write-heavy, read-light analytics workloads
+
+**Example Query**:
+```php
+DB::table('inventory_history')
+    ->where('user_id', $userId)
+    ->where('location_id', $locationId)
+    ->where('product_id', $productId)
+    ->orderBy('day')
+    ->get(['day', 'quantity']);
 ```
 
 ---
