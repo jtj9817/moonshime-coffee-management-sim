@@ -6,6 +6,10 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 # Active Tracks
 
+- [ ] **Track: Fix critical starting cash bug and multi-user data leakage.**
+    - **ID:** `critical_bugs_20260124`
+    - **Link:** [./tracks/critical_bugs_20260124/](./tracks/critical_bugs_20260124/)
+
 ---
 
 # Archived Tracks
