@@ -38,12 +38,12 @@ class InitializeNewGame
             return DB::transaction(function () use ($user, $logger) {
                 $gameState = GameState::firstOrCreate(
                     ['user_id' => $user->id],
-                    ['cash' => 10000.00, 'xp' => 0, 'day' => 1]
+                    ['cash' => 1000000.00, 'xp' => 0, 'day' => 1]
                 );
 
                 $logger->info('InitializeNewGame: GameState created', [
                     'user_id' => $user->id,
-                    'starting_cash' => 10000.00,
+                    'starting_cash' => 1000000.00,
                     'starting_day' => 1,
                     'was_recently_created' => $gameState->wasRecentlyCreated,
                 ]);

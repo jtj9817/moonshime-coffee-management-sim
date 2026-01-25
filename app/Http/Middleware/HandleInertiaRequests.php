@@ -104,7 +104,7 @@ class HandleInertiaRequests extends Middleware
     {
         $gameState = GameState::firstOrCreate(
             ['user_id' => $user->id],
-            ['cash' => 10000.00, 'xp' => 0, 'day' => 1]
+            ['cash' => 1000000.00, 'xp' => 0, 'day' => 1]
         );
 
         return [
