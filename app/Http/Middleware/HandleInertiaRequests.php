@@ -87,7 +87,8 @@ class HandleInertiaRequests extends Middleware
                 ->select('id', 'name', 'category', 'is_perishable', 'storage_cost')
                 ->get(),
             'vendors' => Vendor::select('id', 'name', 'reliability_score', 'metrics')->get(),
-            'alerts' => Alert::where('is_read', false)
+            'alerts' => Alert::where('user_id', $user->id)
+                ->where('is_read', false)
                 ->latest()
                 ->take(10)
                 ->get(),
@@ -113,7 +114,7 @@ class HandleInertiaRequests extends Middleware
             'day' => $gameState->day,
             'level' => $this->calculateLevel($gameState->xp),
             'reputation' => $this->calculateReputation($user),
-            'strikes' => $this->calculateStrikes(),
+            'strikes' => $this->calculateStrikes($user),
             'has_placed_first_order' => Order::where('user_id', $user->id)->exists(),
         ];
     }
@@ -135,7 +136,9 @@ class HandleInertiaRequests extends Middleware
         $reputation = 85;
 
         // Adjust based on alert count (more alerts = lower reputation)
-        $alertCount = Alert::where('is_read', false)->count();
+        $alertCount = Alert::where('user_id', $user->id)
+            ->where('is_read', false)
+            ->count();
         $reputation -= min(15, $alertCount * 3);
 
         // Clamp between 0 and 100
@@ -145,9 +148,10 @@ class HandleInertiaRequests extends Middleware
     /**
      * Calculate number of strikes from critical alerts.
      */
-    protected function calculateStrikes(): int
+    protected function calculateStrikes(User $user): int
     {
-        return Alert::where('is_read', false)
+        return Alert::where('user_id', $user->id)
+            ->where('is_read', false)
             ->where('severity', 'critical')
             ->count();
     }
