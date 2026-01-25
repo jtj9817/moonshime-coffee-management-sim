@@ -1,18 +1,31 @@
 # Gameplay Loop Mechanics Analysis
 
 **Date:** 2026-01-19
-**Version:** 1.0
-**Status:** Analysis Complete
+**Last Updated:** 2026-01-24 (Critical bugs identified)
+**Version:** 1.1
+**Status:** Analysis Complete + Critical Issues Found
+
+---
+
+> ⚠️ **CRITICAL BUGS FOUND (2026-01-24)**
+> This document's original analysis has been updated to reflect **critical bugs discovered in the current implementation**.
+> **See [`docs/CRITICAL-BUGS.md`](./CRITICAL-BUGS.md) for immediate fix instructions.**
+> **See [`docs/gameplay-loop-analysis-and-improvements.md`](./gameplay-loop-analysis-and-improvements.md) for comprehensive analysis and improvement proposals.**
+
+---
 
 ## Executive Summary
 
 This document provides a comprehensive analysis of the gameplay loop mechanics in Moonshine Coffee Management Sim. Key findings:
 
-- **Initial State:** Players start at Day 1 with $10,000 cash, 0 XP, baseline inventory, and seeded pipeline activity
+- **Initial State:** Players SHOULD start at Day 1 with $10,000 cash, 0 XP, baseline inventory, and seeded pipeline activity
+  - ⚠️ **BUG**: Code initializes with $100 instead of $10,000 (see Section 1.2)
 - **Loop Structure:** Player-initiated turn-based system; day increments first, then event/physics/analysis ticks
 - **End Condition:** No hard day limit - designed for indefinite sandbox play
 - **Decision Tracking:** All player actions persisted via PostgreSQL with `user_id` foreign keys
+  - ⚠️ **BUG**: Reputation/strikes/alerts not user-scoped in middleware (multi-user data leakage)
 - **Reset Feasibility:** Low effort (~1-2 hours, 6 files) with no schema blockers
+- **Critical Fixes Required:** ~15 minutes to fix starting cash and user scoping bugs
 
 ---
 
@@ -25,11 +38,23 @@ This document provides a comprehensive analysis of the gameplay loop mechanics i
 When an authenticated user loads the game, the state is created (if missing) and per-user seeding runs for a fresh game:
 
 ```php
+// Schema default (CORRECT):
+$table->bigInteger('cash')->default(1000000); // $10,000.00 in cents
+
+// Code implementation (BUG - AS OF 2026-01-24):
 $gameState = GameState::firstOrCreate(
     ['user_id' => $user->id],
-    ['cash' => 1000000, 'xp' => 0, 'day' => 1]
+    ['cash' => 10000.00, 'xp' => 0, 'day' => 1]  // WRONG: Only $100.00!
+);
+
+// Should be:
+$gameState = GameState::firstOrCreate(
+    ['user_id' => $user->id],
+    ['cash' => 1000000, 'xp' => 0, 'day' => 1]  // Correct: 1M cents = $10,000
 );
 ```
+
+**⚠️ CRITICAL BUG IDENTIFIED**: The code in `app/Actions/InitializeNewGame.php:41` and `app/Http/Middleware/HandleInertiaRequests.php:107` uses `10000.00` instead of `1000000`, resulting in players starting with only **$100.00 instead of $10,000.00**. See `docs/CRITICAL-BUGS.md` for fix instructions.
 
 ### 1.2 Initial Values
 

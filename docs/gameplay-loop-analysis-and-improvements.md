@@ -17,10 +17,13 @@ This document analyzes the current gameplay loop implementation in Moonshine Cof
 ### Day One Initial State
 
 **Starting Conditions:**
-- **Cash:** $10,000 (stored as `10000.00` decimal)
+- **Cash:** **BUG**: Currently $100.00 (should be $10,000.00)
+  - Schema default: `1000000` cents = $10,000.00 (`database/migrations/2026_01_16_055234_create_game_states_table.php:17`)
+  - Code initializes: `10000.00` which stores as `10000` cents = $100.00 ❌
+  - **Files with bug**: `InitializeNewGame.php:41`, `HandleInertiaRequests.php:107`
 - **XP:** 0, **Level:** 1 (computed: `floor(xp / 1000) + 1`)
-- **Reputation:** 85 (base 85 - 3 × unread alerts)
-- **Strikes:** 0 (count of critical unread alerts)
+- **Reputation:** 85 (base 85 - 3 × unread alerts) - **BUG**: Not user-scoped
+- **Strikes:** 0 (count of critical unread alerts) - **BUG**: Not user-scoped
 
 **Pre-Seeded World:**
 - **Locations:** Store graph with warehouse and secondary stores (via `GraphSeeder` + `CoreGameStateSeeder`)
@@ -79,21 +82,59 @@ Actions:
 3. Inventory updates happen via event listeners on delivery transitions
 
 #### Phase 3: Consumption Tick
-**File:** `app/Services/DemandSimulationService.php` (called line 93)
+**File:** `app/Services/DemandSimulationService.php` (invoked from `SimulationService.php:161`)
 
-**NOT DOCUMENTED IN ORIGINAL ANALYSIS** - This phase was added after documentation
+**NOT DOCUMENTED IN ORIGINAL `gameplay-loop-mechanics-analysis.md`** - This phase was added after initial documentation but is critical to gameplay
 
-Actions:
-1. Get all store locations with inventory for current user
-2. For each inventory entry:
-   - Calculate baseline consumption: 5 units ±20% variance
-   - Apply demand spike multipliers (1.5x - 3x if active)
-   - Decrement inventory (cannot go below 0)
-   - Log stockout warnings if demand > available quantity
-3. Demand spike logic checks:
-   - Matches `type = 'demand'` spikes
-   - Filters by `location_id` (or null for global)
-   - Filters by `product_id` (or null for global)
+**Purpose:** Simulates daily customer demand and inventory depletion at store locations.
+
+**Detailed Flow:**
+1. **Query Store Inventories** (lines 31-39)
+   - Get all `Location::where('type', 'store')` with user's inventory
+   - Eager load inventories with `->with(['inventories' => fn($q) => $q->where('user_id', $userId)->with('product')])`
+   - **User-scoped**: Only depletes current user's inventory ✅
+
+2. **Calculate Consumption per Product** (lines 44-68)
+   - **Baseline Demand**: 5 units/day (from `$baselineConsumption['default']`)
+   - **Random Variance**: ±20% (`rand(-20, 20) / 100`)
+   - **Actual Formula**: `consumption = baseline * (1 + variance)`
+   - Example: 5 units × 1.15 = 5.75 → rounds to `5` or `6` units
+
+3. **Apply Demand Spike Multipliers** (lines 57-63)
+   - Checks for active `type = 'demand'` spikes via `getDemandMultiplier()`
+   - Spike matching logic:
+     - Exact location match OR global (null `location_id`)
+     - Exact product match OR global (null `product_id`)
+   - Multiplier range: 1.5x - 3.0x (defined in spike metadata)
+   - Final consumption: `base_consumption * variance * spike_multiplier`
+
+4. **Deplete Inventory** (lines 65-72)
+   - `$actualConsumed = min($consumption, $inventory->quantity)`
+   - `$inventory->decrement('quantity', $actualConsumed)`
+   - Cannot go below 0 (clamped)
+
+5. **Stockout Detection** (lines 69-72)
+   - If `consumption > actualConsumed`: stockout occurred
+   - Logs warning: `"Stockout at {location} for product {id}"`
+   - **Missing**: No event dispatched, no alert generated, no lost sales tracked
+   - **Impact**: Stockouts are invisible to player unless they check inventory manually
+
+**Key Observations:**
+- This is the **primary driver of gameplay urgency**
+- Runs every day after Day 1 (Day 1 has no consumption)
+- Creates natural depletion requiring player to restock
+- Spike system amplifies consumption, creating crisis moments
+
+**Missing Features:**
+- No stockout alerts (only logs)
+- No lost sales tracking (revenue system doesn't exist)
+- No customer satisfaction impact
+- No demand forecasting (players can't predict consumption)
+
+**Configuration Gaps:**
+- Baseline consumption hardcoded (`5 units`) - should be in config or DB
+- No per-product or per-category consumption profiles
+- No time-of-day or seasonal demand variations
 
 #### Phase 4: Analysis Tick
 **File:** `app/Services/SimulationService.php` (lines 106-112)
@@ -127,11 +168,52 @@ After phases complete, `TimeAdvanced` event is dispatched with listeners in `Gam
 
 ---
 
+## Cash Handling Architecture
+
+**Important**: The game uses a **cent-based monetary system** to avoid floating-point arithmetic errors.
+
+### Storage and Display Flow
+
+```
+Database (bigInteger)     Laravel Backend           Frontend Display
+─────────────────────    ───────────────────       ────────────────
+1,000,000 cents    →     (float) 1000000.0    →    formatCurrency()
+                                                    → "1,000,000.00"
+                                                    → Display: $1,000,000.00
+```
+
+### Convention Throughout Codebase
+
+**Storage (Database):**
+- Column type: `bigInteger` (no decimals)
+- Store all monetary values as **cents**
+- Example: $10,000.00 = `1000000` cents
+
+**Backend (PHP):**
+- Use integers when creating/updating cash values
+- Cast to float only when sending to frontend: `(float) $gameState->cash`
+- Example: `['cash' => 1000000]` (NOT `10000.00`)
+
+**Frontend (TypeScript/React):**
+- Receive as float from Inertia props
+- Display using `formatCurrency()` helper
+- Calculation: Divide by 100 to show dollars: `10000.00 / 100 = $100.00`
+
+**Key Files:**
+- Migration: `database/migrations/2026_01_16_055234_create_game_states_table.php:17`
+- Middleware: `app/Http/Middleware/HandleInertiaRequests.php:111`
+- Formatter: `resources/js/lib/formatCurrency.ts`
+
+### Current Bug Status
+
+❌ **Bug**: `InitializeNewGame.php` and `HandleInertiaRequests.php` use `10000.00` instead of `1000000`
+✅ **Correct**: Schema default is `1000000` (but gets overridden by buggy code)
+
 ## Discrepancies Between Documentation and Actual Code
 
 | Area | Documented Behavior | Actual Implementation | Impact |
 |------|-------------------|----------------------|--------|
-| **Initial Cash** | 1,000,000 cents ($10,000) | `10000.00` decimal | Same value, different data type |
+| **Initial Cash** | 1,000,000 cents ($10,000) per schema | **BUG**: Code uses `10000.00` which stores as 10,000 cents = **$100.00** | **CRITICAL**: Players start with 100x less money than intended! |
 | **Phase System** | 3 phases (Event, Physics, Analysis) | 4 phases (Consumption Tick added) | Critical difference - demand simulation now occurs daily |
 | **Spike Initialization** | Hardcoded in `InitializeNewGame` | Uses `SpikeSeeder::seedInitialSpikes()` with constraints | Better implementation with cooldown/type diversity |
 | **Daily Report Timing** | Generated same-day | Generated for **previous day** (day - 1) | Correct - reports on completed day |
@@ -144,16 +226,85 @@ After phases complete, `TimeAdvanced` event is dispatched with listeners in `Gam
 
 ### Critical Bugs Identified
 
-1. **Reputation Calculation Not User-Scoped**
+1. **CRITICAL: Starting Cash Mismatch** ⚠️⚠️⚠️
    ```php
-   // app/Http/Middleware/HandleInertiaRequests.php line 103
+   // database/migrations/2026_01_16_055234_create_game_states_table.php line 17
+   $table->bigInteger('cash')->default(1000000); // $10,000.00 in cents
+
+   // BUT...
+
+   // app/Actions/InitializeNewGame.php line 41
+   ['cash' => 10000.00, 'xp' => 0, 'day' => 1]  // BUG: Only 10,000 cents = $100.00!
+
+   // app/Http/Middleware/HandleInertiaRequests.php line 107
+   ['cash' => 10000.00, 'xp' => 0, 'day' => 1]  // Same bug
+   ```
+
+   **Impact**: Players start with **$100.00 instead of $10,000.00** - makes game nearly unplayable!
+
+   **Root Cause**: Cash is stored as cents (bigInteger) in database, but code initializes with decimal value 10000.00 which becomes 10000 cents when stored.
+
+   **Fix**:
+   ```php
+   // Both files should use:
+   ['cash' => 1000000, 'xp' => 0, 'day' => 1]  // 1,000,000 cents = $10,000.00
+   ```
+
+   **Display Flow**:
+   - Database stores: `10000` (bigInteger)
+   - Middleware casts: `(float) $gameState->cash` → `10000.0`
+   - Frontend displays: `formatCurrency(10000.0)` → `"10,000.00"`
+   - User sees: `$10,000.00` but has actual value of `$100.00` in game logic!
+
+2. **Reputation Calculation Not User-Scoped**
+   ```php
+   // app/Http/Middleware/HandleInertiaRequests.php line 138
    $alertCount = Alert::where('is_read', false)->count();  // BUG: no user_id filter!
    ```
-   Should be:
+
+   **Impact**: In multi-user scenarios, one player's reputation is affected by other players' alerts.
+
+   **Fix**:
    ```php
    $alertCount = Alert::where('user_id', $user->id)
        ->where('is_read', false)
        ->count();
+   ```
+
+3. **Strikes Calculation Not User-Scoped**
+   ```php
+   // app/Http/Middleware/HandleInertiaRequests.php line 150
+   return Alert::where('is_read', false)
+       ->where('severity', 'critical')
+       ->count();  // BUG: no user_id filter!
+   ```
+
+   **Fix**:
+   ```php
+   return Alert::where('user_id', $user->id)
+       ->where('is_read', false)
+       ->where('severity', 'critical')
+       ->count();
+   ```
+
+4. **Global Alerts in Middleware**
+   ```php
+   // app/Http/Middleware/HandleInertiaRequests.php line 90
+   'alerts' => Alert::where('is_read', false)
+       ->latest()
+       ->take(10)
+       ->get(),  // BUG: no user_id filter!
+   ```
+
+   **Impact**: Players see each other's alerts in multi-user environments.
+
+   **Fix**:
+   ```php
+   'alerts' => Alert::where('user_id', $user->id)
+       ->where('is_read', false)
+       ->latest()
+       ->take(10)
+       ->get(),
    ```
 
 ---
@@ -167,8 +318,12 @@ After phases complete, `TimeAdvanced` event is dispatched with listeners in `Gam
 - No time pressure mechanics
 - Consumption hasn't started (only happens when day advances)
 - No visible threat or motivation
+- **Compounded by starting cash bug**: With only $100, players can barely afford one order, but UI doesn't warn them!
 
-**Impact:** Players may click around without understanding core loop.
+**Impact:**
+- Players may click around without understanding core loop
+- With cash bug, players will go broke after first order, creating confusion
+- No indication that Day 1 is "safe" but Day 2+ will deplete inventory
 
 ### 2. Invisible Demand System
 **Problem:** Consumption happens silently in background. Players don't see daily demand until inventory drops unexpectedly.
@@ -238,25 +393,100 @@ After phases complete, `TimeAdvanced` event is dispatched with listeners in `Gam
 
 ## Improvement Proposals
 
-### Priority 1: Fix Critical Bug
+### Priority 1: Fix Critical Bugs (MUST FIX FIRST!)
 
-**Fix Reputation Calculation to be User-Scoped**
+#### 1.1 Fix Starting Cash Bug ⚠️ **GAME-BREAKING**
+
+**Files:**
+- `app/Actions/InitializeNewGame.php`
+- `app/Http/Middleware/HandleInertiaRequests.php`
+
+**Changes:**
+```php
+// app/Actions/InitializeNewGame.php line 41
+// Before:
+$gameState = GameState::firstOrCreate(
+    ['user_id' => $user->id],
+    ['cash' => 10000.00, 'xp' => 0, 'day' => 1]  // BUG: Only $100!
+);
+
+// After:
+$gameState = GameState::firstOrCreate(
+    ['user_id' => $user->id],
+    ['cash' => 1000000, 'xp' => 0, 'day' => 1]  // Correct: 1M cents = $10,000
+);
+
+// app/Http/Middleware/HandleInertiaRequests.php line 107
+// Before:
+$gameState = GameState::firstOrCreate(
+    ['user_id' => $user->id],
+    ['cash' => 10000.00, 'xp' => 0, 'day' => 1]  // BUG: Only $100!
+);
+
+// After:
+$gameState = GameState::firstOrCreate(
+    ['user_id' => $user->id],
+    ['cash' => 1000000, 'xp' => 0, 'day' => 1]  // Correct: 1M cents = $10,000
+);
+```
+
+**Effort:** 2 minutes
+**Impact:** **CRITICAL** - Without this fix, players start with $100 instead of $10,000, making the game unplayable. Orders cost ~$100-500, so players can only place 1 order before going broke.
+
+**Testing:**
+```bash
+# After fix, reset game and verify starting cash
+php artisan tinker
+>>> $user = User::first();
+>>> $user->gameState()->delete();
+>>> app(InitializeNewGame::class)->handle($user);
+>>> $user->gameState->cash; // Should be 1000000 (not 10000)
+```
+
+#### 1.2 Fix User Scoping Bugs in Middleware
 
 **File:** `app/Http/Middleware/HandleInertiaRequests.php`
 
-**Change:**
+**Changes:**
 ```php
-// Before (line 103):
+// Fix 1: Reputation calculation (line 138)
+// Before:
 $alertCount = Alert::where('is_read', false)->count();
 
 // After:
 $alertCount = Alert::where('user_id', $user->id)
     ->where('is_read', false)
     ->count();
+
+// Fix 2: Strikes calculation (line 150)
+// Before:
+return Alert::where('is_read', false)
+    ->where('severity', 'critical')
+    ->count();
+
+// After:
+return Alert::where('user_id', $user->id)
+    ->where('is_read', false)
+    ->where('severity', 'critical')
+    ->count();
+
+// Fix 3: Shared alerts (line 90)
+// Before:
+'alerts' => Alert::where('is_read', false)
+    ->latest()
+    ->take(10)
+    ->get(),
+
+// After:
+'alerts' => Alert::where('user_id', $user->id)
+    ->where('is_read', false)
+    ->latest()
+    ->take(10)
+    ->get(),
 ```
 
 **Effort:** 5 minutes
-**Impact:** Fixes multiplayer data leakage, ensures reputation is accurate per user
+**Impact:** Fixes multiplayer data leakage - ensures each player only sees their own alerts, reputation, and strikes
 
 ---
 
@@ -659,11 +889,15 @@ $alertCount = Alert::where('user_id', $user->id)
 
 ## Implementation Roadmap
 
+### Phase 0: Critical Fixes (IMMEDIATE - 10 minutes)
+- [ ] **Fix starting cash bug** - Change `10000.00` to `1000000` in 2 files
+- [ ] **Fix user scoping bugs** - Add `user_id` filters to alerts/reputation/strikes
+
 ### Phase 1: Quick Wins (1-2 weeks)
-- [x] Fix reputation calculation bug
 - [ ] Add demand forecasting to inventory pages
 - [ ] Implement stockout consequences (lost sales)
 - [ ] Add Day 1 time pressure messaging
+- [ ] Add consumption visibility (daily sold units notification)
 
 ### Phase 2: Core Engagement (2-4 weeks)
 - [ ] Implement tutorial quest system
@@ -687,15 +921,40 @@ $alertCount = Alert::where('user_id', $user->id)
 
 ## Conclusion
 
-Moonshine Coffee Management Sim has excellent technical infrastructure with a robust simulation engine, event system, and multi-hop logistics. However, the current gameplay lacks player motivation, visible stakes, and meaningful progression.
+Moonshine Coffee Management Sim has excellent technical infrastructure with a robust simulation engine, event system, and multi-hop logistics. However, **critical bugs prevent the game from being playable**, and the current gameplay lacks player motivation, visible stakes, and meaningful progression.
 
-The proposed improvements focus on:
+### Immediate Action Required
+
+**BEFORE any feature development**, fix these critical bugs (10 minutes of work):
+
+1. ⚠️ **Starting cash bug**: Players start with $100 instead of $10,000 (100x too little)
+   - Impact: Game is unplayable - orders cost $100-500, so players go broke immediately
+   - Fix: Change `10000.00` → `1000000` in 2 files
+
+2. ⚠️ **User scoping bugs**: Multiplayer data leakage in alerts, reputation, and strikes
+   - Impact: Players see each other's data and affect each other's scores
+   - Fix: Add `->where('user_id', $user->id)` to 4 queries
+
+**Estimated fix time**: 10 minutes
+**Testing time**: 5 minutes
+**Total**: 15 minutes to make game playable
+
+### Long-Term Vision
+
+After critical fixes, the proposed improvements focus on:
 1. **Making the invisible visible** (demand, forecasts, consequences)
 2. **Adding meaningful stakes** (lost sales, reputation impact, bankruptcy risk)
 3. **Providing player agency** (spike resolution, strategic planning, vendor selection)
 4. **Creating progression** (unlockables, prestige, challenges)
 
 Implementing these changes will transform the game from a passive simulation into an engaging strategic management experience with both short-term tactical decisions and long-term strategic goals.
+
+### Priority Order
+
+1. **Phase 0** (CRITICAL - 15 min): Fix bugs that break core gameplay
+2. **Phase 1** (1-2 weeks): Make consumption visible, add stakes
+3. **Phase 2** (2-4 weeks): Add progression and player agency
+4. **Phase 3+** (4-12 weeks): Strategic depth and replayability
 
 ---
 
