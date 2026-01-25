@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Models\Alert;
 use App\Models\GameState;
 use App\Models\Location;
+use App\Models\Order;
 use App\Models\Product;
 use App\Models\SpikeEvent;
 use App\Models\User;
@@ -113,6 +114,7 @@ class HandleInertiaRequests extends Middleware
             'level' => $this->calculateLevel($gameState->xp),
             'reputation' => $this->calculateReputation($user),
             'strikes' => $this->calculateStrikes(),
+            'has_placed_first_order' => Order::where('user_id', $user->id)->exists(),
         ];
     }
 

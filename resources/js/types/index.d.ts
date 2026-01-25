@@ -42,6 +42,7 @@ export interface GameStateShared {
     level: number;
     reputation: number;
     strikes: number;
+    has_placed_first_order: boolean;
 }
 
 export interface LocationModel {

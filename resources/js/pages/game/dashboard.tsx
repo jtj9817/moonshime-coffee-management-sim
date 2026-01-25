@@ -200,8 +200,8 @@ export default function Dashboard({ alerts, kpis, quests, logistics_health, acti
                     <ResetGameButton />
                 </div>
 
-                {/* Day 1 Welcome Banner */}
-                {gameState.day === 1 && (
+                {/* Day 1 Welcome Banner - hidden after first order is placed */}
+                {gameState.day === 1 && !gameState.has_placed_first_order && (
                     <WelcomeBanner />
                 )}
 
