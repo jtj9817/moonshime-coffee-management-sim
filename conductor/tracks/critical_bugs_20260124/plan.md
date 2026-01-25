@@ -11,7 +11,7 @@
     - [x] Run test to confirm pass (Green).
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Fix Starting Cash Initialization' (Protocol in workflow.md)
 
-## Phase 2: Fix Multi-User Data Leakage
+## Phase 2: Fix Multi-User Data Leakage [checkpoint: 7d5dea7]
 - [x] Task: Create reproduction test cases for data leakage.
     - [x] Create `tests/Feature/MultiUserIsolationTest.php`.
     - [x] Write a test with two users (A and B).
