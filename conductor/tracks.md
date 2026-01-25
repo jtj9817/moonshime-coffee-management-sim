@@ -6,13 +6,13 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 # Active Tracks
 
-- [x] **Track: Fix critical starting cash bug and multi-user data leakage.**
-    - **ID:** `critical_bugs_20260124`
-    - **Link:** [./tracks/critical_bugs_20260124/](./tracks/critical_bugs_20260124/)
-
 ---
 
 # Archived Tracks
+
+- [x] **Track: Fix critical starting cash bug and multi-user data leakage.**
+    - **ID:** `critical_bugs_20260124`
+    - **Link:** [./archive/critical_bugs_20260124/](./archive/critical_bugs_20260124/)
 
 - [x] **Track: Refactor the Analytics page UI to use real backend data and APIs, integrating necessary backend changes for historical trends and enhanced metrics.**
     - **ID:** `analytics_refactor_20260123`
