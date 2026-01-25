@@ -1,15 +1,15 @@
 # Implementation Plan - Critical Bug Fixes (Cash & User Scoping)
 
-## Phase 1: Fix Starting Cash Initialization
-- [ ] Task: Create a reproduction test case for incorrect starting cash.
-    - [ ] Create `tests/Feature/GameInitializationTest.php`.
-    - [ ] Write a test that initializes a new game and asserts cash is 1,000,000 cents.
-    - [ ] Run test to confirm failure (Red).
-- [ ] Task: Fix the initialization logic.
-    - [ ] Update `app/Actions/InitializeNewGame.php` to use correct value `1000000`.
-    - [ ] Update `app/Http/Middleware/HandleInertiaRequests.php` fallback creation logic (if applicable).
-    - [ ] Run test to confirm pass (Green).
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Fix Starting Cash Initialization' (Protocol in workflow.md)
+## Phase 1: Fix Starting Cash Initialization [checkpoint: 0d7d0da]
+- [x] Task: Create a reproduction test case for incorrect starting cash.
+    - [x] Create `tests/Feature/GameInitializationTest.php`.
+    - [x] Write a test that initializes a new game and asserts cash is 1,000,000 cents.
+    - [x] Run test to confirm failure (Red).
+- [x] Task: Fix the initialization logic.
+    - [x] Update `app/Actions/InitializeNewGame.php` to use correct value `1000000`.
+    - [x] Update `app/Http/Middleware/HandleInertiaRequests.php` fallback creation logic (if applicable).
+    - [x] Run test to confirm pass (Green).
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Fix Starting Cash Initialization' (Protocol in workflow.md)
 
 ## Phase 2: Fix Multi-User Data Leakage
 - [ ] Task: Create reproduction test cases for data leakage.
