@@ -53,8 +53,8 @@ try {
     
     // === SETUP PHASE ===
     logInfo("Creating test users...");
-    $userA = User::factory()->create(['name' => 'User A (Test)'])
-    $userB = User::factory()->create(['name' => 'User B (Test)'])
+    $userA = User::factory()->create(['name' => 'User A (Test)']);
+    $userB = User::factory()->create(['name' => 'User B (Test)']);
     
     logInfo("Creating data for User B...");
     Alert::factory()->count(5)->create([
