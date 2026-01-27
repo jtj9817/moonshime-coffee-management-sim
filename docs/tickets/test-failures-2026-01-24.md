@@ -506,7 +506,7 @@ Note: this test currently has a single core assertion about shipment count (and 
 ## TICKET-005: Breakdown Spike Resolution Not Deducting Cash
 
 ### Status
-🔴 **HIGH**
+⚪ **OUTDATED**
 
 ### Priority
 **P1 - High**
@@ -533,6 +533,11 @@ at tests/Feature/SpikeResolutionTest.php:45
 ➜  45▕         ->and($this->gameState->cash)->toBe($costBefore - $estimatedCost);
    46▕ })
 ```
+
+### Resolution Notes
+- Money columns were converted to decimal dollars in the 2026-01-21 migration, while `resolution_cost_estimate` remains in cents.
+- `SpikeResolutionService::resolveEarly()` correctly converts cents to dollars before deducting cash.
+- The test expectation compares cents against dollars, so the reported failure is stale. Treat this ticket as invalid and update the test to compare dollar values.
 
 ### Root Cause Analysis
 
