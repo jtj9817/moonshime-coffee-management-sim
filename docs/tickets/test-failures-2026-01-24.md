@@ -682,16 +682,17 @@ $this->post("/game/spikes/{$spike->id}/resolve");
 
 | Priority | Count | Tickets |
 |----------|-------|---------|
-| P0 - Critical | 4 | TICKET-001, TICKET-002, TICKET-003, TICKET-004 |
-| P1 - High | 1 | TICKET-005 |
+| P0 - Critical | 2 | TICKET-001, TICKET-002 |
+| Completed | 2 | TICKET-003, TICKET-004 |
+| Outdated | 1 | TICKET-005 |
 
 ### Failure Breakdown by Component
 
 | Component | Failed Tests | Tickets |
 |-----------|--------------|---------|
-| Spike Events System | 5 | TICKET-001, TICKET-002, TICKET-005 |
-| Order Processing | 1 | TICKET-003 |
-| Multi-Hop Logistics | 1 | TICKET-004 |
+| Spike Events System | 2 | TICKET-001, TICKET-002 (TICKET-005 outdated) |
+| Order Processing | 0 | TICKET-003 completed |
+| Multi-Hop Logistics | 0 | TICKET-004 completed |
 
 ### Recommended Fix Order
 
