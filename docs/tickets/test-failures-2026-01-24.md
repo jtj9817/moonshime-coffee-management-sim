@@ -101,7 +101,7 @@ $order->status->transitionTo(Shipped::class);
 ## TICKET-002: DelaySpike Tests Missing Authentication Context
 
 ### Status
-🔴 **CRITICAL**
+✅ **COMPLETED**
 
 ### Priority
 **P0 - Critical**
@@ -190,10 +190,18 @@ public function transitionToPending(Order $order, User $user)
 ```
 
 ### Acceptance Criteria
-- [ ] DelaySpikeScopingTest sets up proper authentication context
-- [ ] All order transitions work with authenticated user
-- [ ] Tests can verify spike effects on user-specific orders
-- [ ] No authentication-related exceptions in unit tests
+- [x] DelaySpikeScopingTest sets up proper authentication context
+- [x] All order transitions work with authenticated user
+- [x] Tests can verify spike effects on user-specific orders
+- [x] No authentication-related exceptions in unit tests
+
+### Resolution Notes
+
+The `tests/Unit/Services/DelaySpikeScopingTest.php` suite now establishes a consistent auth context in `beforeEach()` by:
+- Creating a user and calling `$this->actingAs($this->user)`
+- Creating a matching `GameState` record for the authenticated user (required by `ToPending`)
+
+This prevents `Auth::user()` from being `null` during the `Draft -> Pending` transition and unblocks the DelaySpike scoping tests.
 
 ### Related Issues
 - See TICKET-001 (State transition issue in same test suite)
