@@ -100,7 +100,7 @@ test('DelaySpike rollback restores original delivery dates', function () {
     $order->status->transitionTo(Shipped::class);
 
     $originalDay = $order->delivery_day;
-    $originalDate = $order->delivery_date->toISOString();
+    $originalDate = $order->delivery_date->copy();
 
     $spike = SpikeEvent::factory()->create([
         'user_id' => $this->user->id,
@@ -115,7 +115,7 @@ test('DelaySpike rollback restores original delivery dates', function () {
     $order->refresh();
 
     expect($order->delivery_day)->toBe(10)
-        ->and($order->delivery_date->diffInDays($originalDate))->toBeGreaterThan(0);
+        ->and($order->delivery_date->diffInDays($originalDate, true))->toBeGreaterThan(0);
 
     // Rollback
     $spike->refresh();
@@ -123,7 +123,7 @@ test('DelaySpike rollback restores original delivery dates', function () {
     $order->refresh();
 
     expect($order->delivery_day)->toBe($originalDay)
-        ->and($order->delivery_date->toISOString())->toBe($originalDate);
+        ->and($order->delivery_date->toISOString())->toBe($originalDate->toISOString());
 });
 
 test('DelaySpike respects product filtering', function () {
@@ -139,7 +139,7 @@ test('DelaySpike respects product filtering', function () {
     $orderA->items()->create([
         'product_id' => $productA->id,
         'quantity' => 10,
-        'unit_price' => 500,
+        'cost_per_unit' => 500,
     ]);
 
     $orderB = Order::factory()->create([
@@ -151,7 +151,7 @@ test('DelaySpike respects product filtering', function () {
     $orderB->items()->create([
         'product_id' => $productB->id,
         'quantity' => 5,
-        'unit_price' => 300,
+        'cost_per_unit' => 300,
     ]);
 
     // Spike targeting only productA
