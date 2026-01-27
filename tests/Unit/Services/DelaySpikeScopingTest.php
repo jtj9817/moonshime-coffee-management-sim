@@ -12,6 +12,7 @@ use App\States\Order\Shipped;
 
 beforeEach(function () {
     $this->user = User::factory()->create();
+    $this->actingAs($this->user);
     $this->gameState = GameState::create([
         'user_id' => $this->user->id,
         'cash' => 10000.00,
@@ -46,6 +47,7 @@ test('DelaySpike only affects orders owned by the spike user', function () {
         'user_id' => $this->user->id,
         'type' => 'delay',
         'magnitude' => 2, // 2 day delay
+        'product_id' => null,
         'is_active' => false,
     ]);
 
@@ -73,6 +75,7 @@ test('DelaySpike stores original delivery data in spike meta for rollback', func
         'user_id' => $this->user->id,
         'type' => 'delay',
         'magnitude' => 3,
+        'product_id' => null,
         'is_active' => false,
     ]);
 
@@ -103,6 +106,7 @@ test('DelaySpike rollback restores original delivery dates', function () {
         'user_id' => $this->user->id,
         'type' => 'delay',
         'magnitude' => 4,
+        'product_id' => null,
         'is_active' => false,
     ]);
 
