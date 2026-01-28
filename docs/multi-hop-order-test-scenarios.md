@@ -34,24 +34,24 @@ Goal: expand `tests/Feature/MultiHopOrderTest.php` into a future-friendly regres
 ## Edge Cases & Negative Scenarios (Regression-Focused)
 
 - **No viable route**: no path from vendor to target location → expect validation failure or specific error response.
-- **Inactive route in the middle**: path exists but includes inactive leg → ensure order is rejected or alternative route chosen.
+- **Inactive route in the middle**: shortest path includes inactive leg → ensure an alternative valid path is chosen or validation fails if none exist.
 - **Zero or negative capacity**: route capacity is 0 or negative → ensure rejection.
 - **Cycle detection**: routes forming a loop (A→B→C→A) → ensure algorithm avoids infinite loops.
-- **Duplicate routes with different costs**: deterministic selection (lowest cost / shortest time) verified.
+- **Duplicate routes with different costs**: deterministic selection based on shortest total transit time.
 - **Missing vendor location**: vendor has no associated location; ensure error handling is explicit.
-- **Source equals target**: ordering from vendor location to same location; ensure either no shipments or defined error.
+- **Source equals target**: ordering from vendor location to same location; expect validation error.
 - **Rounding edge**: unit_price with 3+ decimals; verify rounding rules and exact totals.
 - **Empty items list**: ensure validation fails.
 - **Invalid product or vendor**: non-existent IDs in payload; ensure validation fails.
-- **Quantity exceeds capacity**: verify either rejection or split behavior (if supported).
+- **Quantity exceeds capacity**: expect split into multiple shipments per leg (no rejection if cash is sufficient).
 - **Multiple warehouses**: choose correct hub based on routing rules (shortest path, cost, or explicit preference).
 
 ## Assertions to Add (Behavior Invariants)
 
-- **Shipment count == hops**: number of shipments equals number of route legs used.
-- **Sequence order is contiguous**: `sequence_index` runs 0..n-1 with no gaps.
+- **Shipment count matches splits**: total shipments equals sum of per-leg splits; if quantity <= capacity on all legs, shipments == hops.
+- **Sequence order is contiguous**: `sequence_index` covers 0..n-1; multiple shipments may share a `sequence_index` when split occurs.
 - **All shipments link correctly**: each leg’s target matches next leg’s source.
-- **Totals are consistent**: order total = sum(item totals) + sum(route costs).
+- **Totals are consistent**: order total = sum(item totals) + sum(route cost * shipments per leg).
 - **Cash impact is correct**: game cash reduces by order total when order is accepted.
 - **Status/state**: order starts in expected status (e.g., “pending” / “in_transit”).
 - **Idempotency**: repeated same payload does not double-create shipments if system is expected to be idempotent.
@@ -79,14 +79,34 @@ Goal: expand `tests/Feature/MultiHopOrderTest.php` into a future-friendly regres
 6. **edge_cycle_present**
    - Graph with loop; ensure chosen path is acyclic.
 
-## Open Questions (Clarify Before Implementation)
+## Assumptions + Expected Outcomes (Locked)
 
-- How does routing choose between multiple possible paths (cost vs time vs fixed rules)?
-- Should orders be split across routes when capacity is insufficient?
-- What is the expected behavior when cash is insufficient: reject or allow negative?
-- Are shipments created per order or per product? (affects shipment count assertions)
-- Are route costs fixed or per-unit? (affects total calculations)
+1. **Route selection uses shortest total transit time**  
+   - Expect chosen path to minimize sum of `transit_days`.  
+   - Tie-breakers should be deterministic (define if needed).
+
+2. **Capacity overflow splits into multiple shipments (per leg)**  
+   - If order quantity > leg capacity, expect multiple shipments for that leg.  
+   - Total shipments per order = sum of per-leg splits across the chosen path.
+
+3. **Insufficient cash is a hard reject**  
+   - Expect validation error, no order created, no shipments created.  
+   - Cash remains unchanged.
+
+4. **Shipments are per order (not per product)**  
+   - Multiple products still produce shipments based on route legs (and splits), not per item line.
+
+5. **Route cost is flat per shipment**  
+   - Total logistics cost = sum(route_cost * shipments_per_leg).  
+   - Order total = item total + logistics cost.
+
+6. **Source equals target fails validation**  
+   - Expect validation error, no order created, no shipments.
+
+7. **Inactive leg triggers alternative path search**  
+   - If a shortest-time path includes inactive leg(s), expect the next best valid path.  
+   - If no valid path exists, expect validation error.
 
 ---
 
-If you want, I can draft a test data provider template and helper methods next (no behavior changes yet).
+Next: convert these assumptions into scenario-specific expected values in the data provider.
