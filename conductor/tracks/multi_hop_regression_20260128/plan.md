@@ -13,15 +13,17 @@
 - [ ] Task: Refactor `MultiHopOrderTest.php`.
     - [ ] Import `MultiHopScenarioBuilder` trait.
     - [ ] Create the `scenariosProvider` method.
-    - [ ] Populate `scenariosProvider` with "Best Case" scenarios (from `docs/multi-hop-order-test-scenarios.md`).
-    - [ ] Populate `scenariosProvider` with "Average Case" scenarios.
-    - [ ] Populate `scenariosProvider` with "Worst Case" scenarios.
-    - [ ] Populate `scenariosProvider` with "Edge/Negative" scenarios.
+    - [ ] Populate `scenariosProvider` with "Best Case" scenarios (from `docs/multi-hop-order-test-scenarios.md` concrete data table).
+    - [ ] Populate `scenariosProvider` with "Average Case" scenarios (lowest-cost route must be unambiguous).
+    - [ ] Populate `scenariosProvider` with "Worst Case" scenarios (ensure capacity equals quantity, not exceeding).
+    - [ ] Populate `scenariosProvider` with "Edge/Negative" scenarios (explicit validation field expectations).
 - [ ] Task: Implement the dynamic test method.
     - [ ] Create `test_multihop_scenarios` method consuming the data provider.
     - [ ] Implement setup logic using the builder trait.
     - [ ] Implement execution logic (placing the order).
-    - [ ] Implement assertions (Success vs. Failure, Cost checks, Shipment counts).
+    - [ ] Implement assertions (Success vs. Failure, lowest-cost path selection, per-leg shipment counts).
+    - [ ] Assert validation fields: `location_id`, `items`, `total` per scenario.
+    - [ ] Pass `source_location_id` explicitly in all scenario payloads.
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Data Provider Implementation' (Protocol in workflow.md)
 
 ## Phase 3: Verification & Cleanup
