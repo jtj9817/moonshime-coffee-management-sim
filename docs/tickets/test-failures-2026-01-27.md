@@ -67,7 +67,7 @@ at tests/Feature/MultiHopOrderTest.php:90
 ## TICKET-002: Reset Game Fails When Seed Data Is Missing
 
 ### Status
-🟡 **INVESTIGATING**
+✅ **COMPLETE**
 
 ### Priority
 **P0 - Critical** (blocks reset flow)
@@ -100,15 +100,21 @@ RuntimeException: Cannot initialize game: No stores found. Please ensure GraphSe
 ### Root Cause Analysis (Initial)
 `InitializeNewGame::seedInitialInventory()` requires `Location` records for stores and warehouses. The test does not seed `GraphSeeder` or `CoreGameStateSeeder`, so the `locations` table is empty when the reset route is called. In some runs this passes if data was already present, but it fails in a fresh database run.
 
+### Resolution
+- Seeded `GraphSeeder` and `CoreGameStateSeeder` in `ResetGameTest` to guarantee required world data.
+- Added precondition assertions so the test fails clearly if seed data is missing.
+- Added a manual regression script to deliberately remove seed data and stepwise reintroduce it to isolate the failure cause.
+
+### Manual Regression Script
+- `tests/manual/regress_reset_missing_seed_data.php`
+
 ### Files Involved
 - `tests/Feature/ResetGameTest.php:7-30`
 - `app/Actions/InitializeNewGame.php:97-132`
 - `app/Http/Controllers/GameController.php:390-421`
 
 ### Recommended Next Steps
-- Seed `GraphSeeder` and `CoreGameStateSeeder` in the test
-- Or mock `InitializeNewGame` when testing the reset endpoint
-- Or update the reset flow to handle missing seed data gracefully
+- None. Ticket closed.
 
 ---
 

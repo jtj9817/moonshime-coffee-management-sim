@@ -1,15 +1,30 @@
 <?php
 
+use App\Models\Location;
+use App\Models\Product;
 use App\Models\User;
+use App\Models\Vendor;
+use Database\Seeders\CoreGameStateSeeder;
+use Database\Seeders\GraphSeeder;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\post;
 
 test('authenticated user can reset game', function () {
+    $this->seed([
+        GraphSeeder::class,
+        CoreGameStateSeeder::class,
+    ]);
+
+    expect(Location::where('type', 'store')->count())->toBeGreaterThan(0);
+    expect(Location::where('type', 'warehouse')->count())->toBeGreaterThan(0);
+    expect(Product::count())->toBeGreaterThan(0);
+    expect(Vendor::count())->toBeGreaterThan(0);
+
     $user = User::factory()->create();
 
     // Seed initial state
     $initialState = \App\Models\GameState::factory()->create(['user_id' => $user->id, 'day' => 10, 'cash' => 5.00]);
-    \App\Models\Order::factory()->create(['user_id' => $user->id]);
+    $order = \App\Models\Order::factory()->create(['user_id' => $user->id]);
 
     actingAs($user)
         ->post('/game/reset')
@@ -22,13 +37,10 @@ test('authenticated user can reset game', function () {
         'cash' => 10000.00,
     ]);
 
-    // Check that orders were cleared (except seeded ones, but factory creates random ones usually)
-    // Actually InitializeNewGame might seed some orders.
-    // But the one we created above should be gone.
-    // Since we can't easily distinguish, checking count might be flaky if seeding is dynamic.
-    // But InitializeNewGame seeds specific orders.
-    // Let's just check that GameState is reset for now, and maybe count is low.
-    
+    $this->assertDatabaseMissing('orders', [
+        'id' => $order->id,
+    ]);
+
     $gameState = \App\Models\GameState::where('user_id', $user->id)->first();
     expect($gameState->day)->toBe(1);
     expect($gameState->cash)->toBe(10000.00);
