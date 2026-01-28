@@ -27,6 +27,7 @@
 ## Phase 3: Verification & Cleanup
 - [ ] Task: Execute full regression suite.
     - [ ] Run `php artisan sail --args=pest tests/Feature/MultiHopOrderTest.php`.
+    - [ ] Run `php artisan sail --args=pest`
     - [ ] Verify all scenarios pass.
     - [ ] Fix any logical discrepancies between spec and implementation.
 - [ ] Task: Clean up.
