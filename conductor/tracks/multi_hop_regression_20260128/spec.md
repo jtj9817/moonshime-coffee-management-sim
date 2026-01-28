@@ -1,7 +1,7 @@
 # Specification: Multi-Hop Order Regression Suite
 
 ## Overview
-This track involves refactoring and expanding the `tests/Feature/MultiHopOrderTest.php` file into a comprehensive regression suite. It will leverage the scenarios defined in `docs/multi-hop-order-test-scenarios.md` to ensure the multi-hop ordering logic is robust against various configurations, performance limits, and edge cases.
+This track involves refactoring and expanding the `tests/Feature/MultiHopOrderTest.php` file into a comprehensive regression suite. It will leverage the scenarios defined in `docs/multi-hop-order-test-scenarios.md`, specifically the **Concrete Scenario Data Table (Filled Values)** section, to ensure the multi-hop ordering logic is robust against various configurations, performance limits, and edge cases.
 
 ## Functional Requirements
 - **Comprehensive Scenario Coverage**: Implement test cases for:

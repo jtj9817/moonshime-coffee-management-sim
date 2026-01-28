@@ -13,7 +13,7 @@
 - [ ] Task: Refactor `MultiHopOrderTest.php`.
     - [ ] Import `MultiHopScenarioBuilder` trait.
     - [ ] Create the `scenariosProvider` method.
-    - [ ] Populate `scenariosProvider` with "Best Case" scenarios (from `docs/multi-hop-order-test-scenarios.md` concrete data table).
+    - [ ] Populate `scenariosProvider` with "Best Case" scenarios (from `docs/multi-hop-order-test-scenarios.md` → **Concrete Scenario Data Table (Filled Values)**).
     - [ ] Populate `scenariosProvider` with "Average Case" scenarios (lowest-cost route must be unambiguous).
     - [ ] Populate `scenariosProvider` with "Worst Case" scenarios (ensure capacity equals quantity, not exceeding).
     - [ ] Populate `scenariosProvider` with "Edge/Negative" scenarios (explicit validation field expectations).
