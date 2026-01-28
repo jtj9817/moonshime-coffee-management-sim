@@ -14,7 +14,7 @@ beforeEach(function () {
     $this->user = User::factory()->create();
     $this->gameState = GameState::create([
         'user_id' => $this->user->id,
-        'cash' => 100000, // $1000.00
+        'cash' => 1000.00, // $1,000.00
         'xp' => 0,
         'day' => 5,
     ]);
@@ -74,8 +74,7 @@ describe('Breakdown Spike Resolution', function () {
         $this->service->resolveEarly($spike);
 
         $this->gameState->refresh();
-        // Cost is in cents, cash is in dollars
-        expect($this->gameState->cash)->toBe($cashBefore - round($expectedCost / 100, 2));
+        expect($this->gameState->cash)->toBe($cashBefore - $expectedCost);
     });
 });
 
@@ -176,7 +175,7 @@ describe('HTTP Endpoint', function () {
         $otherUser = User::factory()->create();
         GameState::create([
             'user_id' => $otherUser->id,
-            'cash' => 100000,
+            'cash' => 1000.00,
             'xp' => 0,
             'day' => 5,
         ]);

@@ -174,7 +174,7 @@ function ActiveEventCard({ spike, currentDay, onResolve }: ActiveEventCardProps)
                             >
                                 Resolve
                                 <span className="font-mono">
-                                    ${formatCurrency(spike.playbook.resolutionCost / 100)}
+                                    ${formatCurrency(spike.playbook.resolutionCost)}
                                 </span>
                             </Button>
                         </div>
@@ -369,7 +369,7 @@ export default function SpikeHistory({ spikes, activeSpikes, statistics, current
                                     <TableCell>{getResolutionStatus(spike)}</TableCell>
                                     <TableCell className="text-stone-500">
                                         {spike.resolution_cost
-                                            ? `$${formatCurrency(spike.resolution_cost / 100)}`
+                                            ? `$${formatCurrency(spike.resolution_cost)}`
                                             : '—'}
                                     </TableCell>
                                     <TableCell className="text-stone-500">
@@ -416,7 +416,7 @@ export default function SpikeHistory({ spikes, activeSpikes, statistics, current
                             <div className="flex items-center justify-between">
                                 <span className="text-stone-600 dark:text-stone-400">Resolution Cost</span>
                                 <span className="text-xl font-bold text-stone-900 dark:text-white">
-                                    ${formatCurrency((resolving?.playbook?.resolutionCost ?? 0) / 100)}
+                                    ${formatCurrency(resolving?.playbook?.resolutionCost ?? 0)}
                                 </span>
                             </div>
                         </div>

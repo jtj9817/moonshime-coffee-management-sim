@@ -10,7 +10,7 @@ beforeEach(function () {
     $this->user = User::factory()->create();
     $this->gameState = GameState::create([
         'user_id' => $this->user->id,
-        'cash' => 100000, // $1000.00
+        'cash' => 1000.00, // $1,000.00
         'xp' => 0,
         'day' => 5,
     ]);
