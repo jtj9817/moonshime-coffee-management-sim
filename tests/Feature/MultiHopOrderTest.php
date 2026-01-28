@@ -86,7 +86,13 @@ class MultiHopOrderTest extends TestCase
         ]);
         
         // Assert Shipments Created
-        $order = \App\Models\Order::first();
+        $order = \App\Models\Order::where('user_id', $user->id)
+            ->where('vendor_id', $vendor->id)
+            ->where('location_id', $store->id)
+            ->latest('created_at')
+            ->firstOrFail();
+
+        $order->load('shipments');
         $this->assertCount(2, $order->shipments);
         
         $firstLeg = $order->shipments()->where('sequence_index', 0)->first();
