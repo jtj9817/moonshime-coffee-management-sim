@@ -38,11 +38,12 @@ trait MultiHopScenarioBuilder
             if (is_string($loc)) {
                 $uuid = $this->resolveId($loc, Location::class);
                 if (!Location::find($uuid)) {
+                    $normalized = Str::lower($loc);
                     $l = new Location();
                     $l->id = $uuid;
                     $l->fill([
                         'name' => ucfirst(str_replace('-', ' ', $loc)),
-                        'type' => Str::contains($loc, 'hq') ? 'roastery' : 'warehouse',
+                        'type' => $this->resolveLocationType($normalized),
                         'address' => 'Test Address ' . $loc,
                         'max_storage' => 1000,
                     ]);
@@ -52,6 +53,31 @@ trait MultiHopScenarioBuilder
                 // Assume it's a Model instance
             }
         }
+    }
+
+    protected function resolveLocationType(string $alias): string
+    {
+        if (Str::contains($alias, 'vendor')) {
+            return 'vendor';
+        }
+
+        if (Str::contains($alias, 'store')) {
+            return 'store';
+        }
+
+        if (Str::contains($alias, 'hub')) {
+            return 'hub';
+        }
+
+        if (Str::contains($alias, 'warehouse')) {
+            return 'warehouse';
+        }
+
+        if (Str::contains($alias, 'hq')) {
+            return 'warehouse';
+        }
+
+        return 'warehouse';
     }
 
     protected function createRoutes(array $routeConfigs): void
@@ -126,8 +152,8 @@ trait MultiHopScenarioBuilder
             [
                 'day' => 1,
                 'cash' => $cash,
-                'reputation' => 100,
-                'spike_config' => [],
+                'xp' => 0,
+                'spike_cooldowns' => [],
             ]
         );
     }
