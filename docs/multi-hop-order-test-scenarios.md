@@ -79,6 +79,34 @@ Goal: expand `tests/Feature/MultiHopOrderTest.php` into a future-friendly regres
 6. **edge_cycle_present**
    - Graph with loop; ensure chosen path is acyclic.
 
+## Concrete Scenario Data Table (Filled Values)
+
+All costs are **per leg**. Path selection is **lowest total cost**. Avoid equal-cost ties.
+
+| Scenario | Cash | Locations | Routes (from→to, cost, days, capacity, active) | Items (product, qty, unit_price) | Expected Path | Expected Totals |
+| --- | --- | --- | --- | --- | --- | --- |
+| best_case_two_hop | 100.00 | vendor_loc, hub_a, store | vendor_loc→hub_a, 1.00, 2, 200, true; hub_a→store, 2.00, 1, 200, true | coffee, 100, 0.10 | vendor_loc→hub_a→store | items 10.00, logistics 3.00, total 13.00 |
+| average_case_four_hop_mixed_modes | 100.00 | vendor_loc, hub_a, hub_b, hub_c, store, alt_a, alt_b | vendor_loc→hub_a, 1.00, 2, 200, true; hub_a→hub_b, 1.50, 2, 200, true; hub_b→hub_c, 1.00, 1, 200, true; hub_c→store, 0.50, 1, 200, true; vendor_loc→alt_a, 2.00, 1, 200, true; alt_a→alt_b, 2.00, 1, 200, true; alt_b→store, 1.00, 1, 200, true | coffee, 20, 1.25; tea, 30, 0.50 | vendor_loc→hub_a→hub_b→hub_c→store | items 40.00, logistics 4.00, total 44.00 |
+| worst_case_eight_hop_capacity_edge | 15.00 | vendor_loc, h1, h2, h3, h4, h5, h6, h7, store | vendor_loc→h1, 0.50, 1, 50, true; h1→h2, 0.50, 1, 50, true; h2→h3, 0.50, 1, 50, true; h3→h4, 0.50, 1, 50, true; h4→h5, 0.50, 1, 50, true; h5→h6, 0.50, 1, 50, true; h6→h7, 0.50, 1, 50, true; h7→store, 0.50, 1, 50, true | coffee, 50, 0.20 | vendor_loc→h1→h2→h3→h4→h5→h6→h7→store | items 10.00, logistics 4.00, total 14.00 |
+| edge_no_route | 100.00 | vendor_loc, store | none | coffee, 10, 1.00 | none | validation error on location_id |
+| edge_inactive_route_mid_path | 100.00 | vendor_loc, hub_a, hub_b, store, alt_a | vendor_loc→hub_a, 0.50, 1, 200, true; hub_a→hub_b, 0.50, 1, 200, **false**; hub_b→store, 0.50, 1, 200, true; vendor_loc→alt_a, 1.00, 1, 200, true; alt_a→store, 1.00, 1, 200, true | coffee, 10, 1.00 | vendor_loc→alt_a→store | items 10.00, logistics 2.00, total 12.00 |
+| edge_cycle_present | 100.00 | vendor_loc, hub_a, hub_b, store | vendor_loc→hub_a, 0.20, 1, 200, true; hub_a→hub_b, 0.20, 1, 200, true; hub_b→vendor_loc, 0.20, 1, 200, true; vendor_loc→store, 1.00, 1, 200, true | coffee, 10, 1.00 | vendor_loc→store | items 10.00, logistics 1.00, total 11.00 |
+| edge_capacity_exceeded | 100.00 | vendor_loc, hub_a, store | vendor_loc→hub_a, 1.00, 1, 50, true; hub_a→store, 1.00, 1, 50, true | coffee, 60, 0.50 | none | validation error on items (capacity) |
+| edge_insufficient_cash | 19.99 | vendor_loc, hub_a, store | vendor_loc→hub_a, 1.00, 1, 200, true; hub_a→store, 1.00, 1, 200, true | coffee, 10, 1.80 | vendor_loc→hub_a→store | items 18.00, logistics 2.00, total 20.00 (reject) |
+| edge_source_equals_target | 100.00 | vendor_loc | none | coffee, 10, 1.00 | none | validation error on location_id |
+
+## Assertion Mapping Notes (For MultiHopOrderTest)
+
+- **Route selection**: assert the chosen path is the lowest total cost; avoid equal-cost alternatives in fixtures.  
+- **Totals**: `order.total_cost` = sum(items) + sum(route costs), rounded to 2 decimals.  
+- **Shipments**: exactly one shipment per leg; `sequence_index` is 0..n-1 with no gaps.  
+- **Continuity**: each shipment’s target matches the next shipment’s source.  
+- **Validation failures**: assert session errors and that no `orders` or `shipments` rows were created; cash unchanged.  
+- **Capacity failures**: expect error on `items` when quantity > min capacity along the chosen path.  
+- **Insufficient cash**: expect error on `total` when cash < computed total.  
+- **Inactive legs**: ensure inactive routes are ignored; test asserts fallback to next cheapest active path or failure if none exist.  
+- **Vendor/source mapping**: pass `source_location_id` explicitly in test payload to avoid vendor/location mismatch.  
+
 ## Assumptions + Expected Outcomes (Aligned to Current Implementation)
 
 1. **Route selection uses lowest total cost**  
