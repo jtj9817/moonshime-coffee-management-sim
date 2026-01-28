@@ -1,13 +1,13 @@
 # Implementation Plan - Multi-Hop Order Regression Suite
 
 ## Phase 1: Foundation & Helper Trait
-- [ ] Task: Create `Tests\Traits\MultiHopScenarioBuilder`.
-    - [ ] Create the file `tests/Traits/MultiHopScenarioBuilder.php`.
-    - [ ] Implement `createVendorPath(array $locations)` helper.
-    - [ ] Implement `createRoutes(array $routeConfigs)` helper.
-    - [ ] Implement `createProductBundle(array $products)` helper.
-    - [ ] Implement `createGameState(User $user, float $cash)` helper.
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Foundation & Helper Trait' (Protocol in workflow.md)
+- [x] Task: Create `Tests\Traits\MultiHopScenarioBuilder`.
+    - [x] Create the file `tests/Traits/MultiHopScenarioBuilder.php`.
+    - [x] Implement `createVendorPath(array $locations)` helper.
+    - [x] Implement `createRoutes(array $routeConfigs)` helper.
+    - [x] Implement `createProductBundle(array $products)` helper.
+    - [x] Implement `createGameState(User $user, float $cash)` helper.
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Foundation & Helper Trait' (Protocol in workflow.md)
 
 ## Phase 2: Data Provider Implementation
 - [ ] Task: Refactor `MultiHopOrderTest.php`.
