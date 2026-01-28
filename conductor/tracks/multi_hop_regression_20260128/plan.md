@@ -1,6 +1,6 @@
 # Implementation Plan - Multi-Hop Order Regression Suite
 
-## Phase 1: Foundation & Helper Trait
+## Phase 1: Foundation & Helper Trait [checkpoint: 272889c]
 - [x] Task: Create `Tests\Traits\MultiHopScenarioBuilder`.
     - [x] Create the file `tests/Traits/MultiHopScenarioBuilder.php`.
     - [x] Implement `createVendorPath(array $locations)` helper.
