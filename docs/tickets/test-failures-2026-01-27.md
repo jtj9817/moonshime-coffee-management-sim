@@ -13,7 +13,7 @@
 ## TICKET-001: Multi-Hop Order Shipments Missing In Suite
 
 ### Status
-🟡 **INVESTIGATING**
+✅ **COMPLETE**
 
 ### Priority
 **P1 - High**
@@ -24,7 +24,7 @@
 - **Feature:** Shipment Creation
 
 ### Affected Tests
-- ❌ `Tests\Feature\MultiHopOrderTest::can place multihop order`
+- ✅ `Tests\Feature\MultiHopOrderTest::can place multihop order`
 
 ### Error Details
 
@@ -49,6 +49,9 @@ at tests/Feature/MultiHopOrderTest.php:90
 2. Order lookup returning a different order than the one created by the request
 3. State leakage or cached routing data influencing the resolved path
 
+### Resolution
+- Updated the test to select the order created by the request (scoped by user/vendor/location) before asserting shipments, eliminating suite-order ambiguity.
+
 ### Files Involved
 - `tests/Feature/MultiHopOrderTest.php:90`
 - `app/Http/Controllers/GameController.php:285`
@@ -57,9 +60,7 @@ at tests/Feature/MultiHopOrderTest.php:90
 - `app/Services/LogisticsService.php:73-170`
 
 ### Recommended Next Steps
-- Add temporary logging around `_calculated_path` and `createShipmentsForOrder`
-- Assert against the specific order created in the test (not `Order::first()`)
-- Clear or bypass any cached route graph before computing path
+- None. Ticket closed.
 
 ---
 
