@@ -1,0 +1,8 @@
+{
+  "track_id": "multi_hop_regression_20260128",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-01-28T10:00:00Z",
+  "updated_at": "2026-01-28T10:00:00Z",
+  "description": "TESTING: Modify the @tests/Feature/MultiHopOrderTest.php based on the ideas contained within the @docs/multi-hop-order-test-scenarios.md doc."
+}

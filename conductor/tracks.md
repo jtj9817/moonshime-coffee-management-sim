@@ -6,6 +6,9 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 # Active Tracks
 
+- [ ] **Track: TESTING: Modify the @tests/Feature/MultiHopOrderTest.php based on the ideas contained within the @docs/multi-hop-order-test-scenarios.md doc.**
+*Link: [./tracks/multi_hop_regression_20260128/](./tracks/multi_hop_regression_20260128/)*
+
 ---
 
 # Archived Tracks
