@@ -10,21 +10,19 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Foundation & Helper Trait' (Protocol in workflow.md)
 
 ## Phase 2: Data Provider Implementation
-- [ ] Task: Refactor `MultiHopOrderTest.php`.
-    - [ ] Import `MultiHopScenarioBuilder` trait.
-    - [ ] Create the `scenariosProvider` method.
-    - [ ] Populate `scenariosProvider` with "Best Case" scenarios (from `docs/multi-hop-order-test-scenarios.md` → **Concrete Scenario Data Table (Filled Values)**).
-    - [ ] Populate `scenariosProvider` with "Average Case" scenarios (lowest-cost route must be unambiguous).
-    - [ ] Populate `scenariosProvider` with "Worst Case" scenarios (ensure capacity equals quantity, not exceeding).
-    - [ ] Populate `scenariosProvider` with "Edge/Negative" scenarios (explicit validation field expectations).
-- [ ] Task: Implement the dynamic test method.
-    - [ ] Create `test_multihop_scenarios` method consuming the data provider.
-    - [ ] Implement setup logic using the builder trait.
-    - [ ] Implement execution logic (placing the order).
-    - [ ] Implement assertions (Success vs. Failure, lowest-cost path selection, per-leg shipment counts).
-    - [ ] Assert validation fields: `location_id`, `items`, `total` per scenario.
-    - [ ] Pass `source_location_id` explicitly in all scenario payloads.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Data Provider Implementation' (Protocol in workflow.md)
+## Phase 2: Data Provider Implementation [checkpoint: 03d2b9e]
+- [x] Task: Refactor `MultiHopOrderTest.php`.
+    - [x] Import `Tests\Traits\MultiHopScenarioBuilder`.
+    - [x] Implement `scenariosProvider()`:
+        - [x] Best Case: Direct vs Multi-hop where multi-hop is cheaper.
+        - [x] Average Case: Complex graph with distinct lowest-cost path.
+        - [x] Worst Case: Capacity constraints forcing alternative routes.
+        - [x] Edge Case: Validation failures (e.g., missing location, zero quantity).
+    - [x] Implement `test_multihop_scenarios(array $scenario)`:
+        - [x] Use `$this->createVendorPath()`, `$this->createRoutes()`, etc., to setup.
+        - [x] Execute order placement via `OrderService` (or endpoint if integration test).
+        - [x] Assert results match expected outcomes (Route selection, cost, shipment count).
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Data Provider Implementation' (Protocol in workflow.md)
 
 ## Phase 3: Verification & Cleanup
 - [ ] Task: Execute full regression suite.
