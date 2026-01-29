@@ -6,6 +6,7 @@ use App\Models\Location;
 use App\Models\Vendor;
 use App\Models\Product;
 use App\Models\GameState;
+use App\Models\Shipment;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Traits\MultiHopScenarioBuilder;
 
@@ -264,6 +265,10 @@ it('processes multihop order scenarios', function (array $scenario) {
         ];
     }
 
+    $ordersBefore = Order::where('user_id', $user->id)->count();
+    $orderIdsBefore = Order::where('user_id', $user->id)->pluck('id');
+    $shipmentsBefore = Shipment::whereIn('order_id', $orderIdsBefore)->count();
+
     // 3. Execute Order
     $response = $this->actingAs($user)
         ->post('/game/orders', [
@@ -278,9 +283,17 @@ it('processes multihop order scenarios', function (array $scenario) {
         // Negative Case
         $response->assertSessionHasErrors($scenario['expected']['error_field']);
         
-        // Assert no order was created
-        $this->assertDatabaseCount('orders', 0);
-        $this->assertDatabaseCount('shipments', 0);
+        // Assert no order was created for this user
+        expect(Order::where('user_id', $user->id)->count())->toBe($ordersBefore);
+        $this->assertDatabaseMissing('orders', [
+            'user_id' => $user->id,
+            'vendor_id' => $vendorId,
+            'location_id' => $targetId,
+        ]);
+
+        // Assert no shipments were created for this user's orders
+        $orderIdsAfter = Order::where('user_id', $user->id)->pluck('id');
+        expect(Shipment::whereIn('order_id', $orderIdsAfter)->count())->toBe($shipmentsBefore);
         
         // Assert cash unchanged
         $gameState = GameState::where('user_id', $user->id)->first();
