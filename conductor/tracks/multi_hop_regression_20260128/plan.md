@@ -25,7 +25,7 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Data Provider Implementation' (Protocol in workflow.md)
 
 ## Phase 3: Verification & Cleanup
-- [ ] Task: Execute full regression suite.
+- [~] Task: Execute full regression suite.
     - [ ] Run `php artisan sail --args=pest tests/Feature/MultiHopOrderTest.php`.
     - [ ] Run `php artisan sail --args=pest`
     - [ ] Verify all scenarios pass.

@@ -85,6 +85,8 @@ trait MultiHopScenarioBuilder
         foreach ($routeConfigs as $config) {
             $originId = $this->resolveId($config['origin'], Location::class);
             $destId = $this->resolveId($config['destination'], Location::class);
+            $isActive = $config['active'] ?? $config['is_active'] ?? true;
+            $transportMode = $config['transport_mode'] ?? $config['mode'] ?? 'truck';
 
             // Route ID is auto-generated usually, we don't map it explicitly
             // But we should check if route exists?
@@ -96,9 +98,9 @@ trait MultiHopScenarioBuilder
                 'transit_days' => $config['days'],
                 'cost' => $config['cost'],
                 'capacity' => $config['capacity'] ?? 100,
-                'transport_mode' => 'truck',
+                'transport_mode' => $transportMode,
                 'weather_vulnerability' => false,
-                'is_active' => true,
+                'is_active' => $isActive,
             ]);
         }
     }
