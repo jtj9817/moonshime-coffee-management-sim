@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\GameState;
 use App\Models\Shipment;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Services\LogisticsService;
 use Tests\Traits\MultiHopScenarioBuilder;
 
 uses(RefreshDatabase::class);
@@ -31,6 +32,8 @@ $scenarios = [
                 'user_cash' => 100.00
             ],
             'expected' => [
+                'items_cost' => 10.00,
+                'logistics_cost' => 3.00,
                 'total_cost' => 13.00, // (100 * 0.10) + 1.0 + 2.0 = 13.00
                 'shipment_count' => 2,
                 'transit_days' => 3,
@@ -42,14 +45,14 @@ $scenarios = [
         [
             'locations' => ['vendor_loc', 'hub_a', 'hub_b', 'hub_c', 'store', 'alt_a', 'alt_b'],
             'routes' => [
-                ['origin' => 'vendor_loc', 'destination' => 'hub_a', 'days' => 2, 'cost' => 1.00, 'capacity' => 200, 'active' => true],
-                ['origin' => 'hub_a', 'destination' => 'hub_b', 'days' => 2, 'cost' => 1.50, 'capacity' => 200, 'active' => true],
-                ['origin' => 'hub_b', 'destination' => 'hub_c', 'days' => 1, 'cost' => 1.00, 'capacity' => 200, 'active' => true],
-                ['origin' => 'hub_c', 'destination' => 'store', 'days' => 1, 'cost' => 0.50, 'capacity' => 200, 'active' => true],
+                ['origin' => 'vendor_loc', 'destination' => 'hub_a', 'days' => 2, 'cost' => 1.00, 'capacity' => 200, 'active' => true, 'transport_mode' => 'truck'],
+                ['origin' => 'hub_a', 'destination' => 'hub_b', 'days' => 2, 'cost' => 1.50, 'capacity' => 200, 'active' => true, 'transport_mode' => 'rail'],
+                ['origin' => 'hub_b', 'destination' => 'hub_c', 'days' => 1, 'cost' => 1.00, 'capacity' => 200, 'active' => true, 'transport_mode' => 'van'],
+                ['origin' => 'hub_c', 'destination' => 'store', 'days' => 1, 'cost' => 0.50, 'capacity' => 200, 'active' => true, 'transport_mode' => 'bike'],
                 // Alternative path (more expensive)
-                ['origin' => 'vendor_loc', 'destination' => 'alt_a', 'days' => 1, 'cost' => 2.00, 'capacity' => 200, 'active' => true],
-                ['origin' => 'alt_a', 'destination' => 'alt_b', 'days' => 1, 'cost' => 2.00, 'capacity' => 200, 'active' => true],
-                ['origin' => 'alt_b', 'destination' => 'store', 'days' => 1, 'cost' => 1.00, 'capacity' => 200, 'active' => true],
+                ['origin' => 'vendor_loc', 'destination' => 'alt_a', 'days' => 1, 'cost' => 2.00, 'capacity' => 200, 'active' => true, 'transport_mode' => 'truck'],
+                ['origin' => 'alt_a', 'destination' => 'alt_b', 'days' => 1, 'cost' => 2.00, 'capacity' => 200, 'active' => true, 'transport_mode' => 'van'],
+                ['origin' => 'alt_b', 'destination' => 'store', 'days' => 1, 'cost' => 1.00, 'capacity' => 200, 'active' => true, 'transport_mode' => 'bike'],
             ],
             'products' => [
                 ['id' => 'coffee', 'price' => 1.25, 'vendor' => ['id' => 'vendor_loc']],
@@ -65,6 +68,8 @@ $scenarios = [
                 'user_cash' => 100.00
             ],
             'expected' => [
+                'items_cost' => 40.00,
+                'logistics_cost' => 4.00,
                 'total_cost' => 44.00, // (20 * 1.25) + (30 * 0.50) + 1.0 + 1.5 + 1.0 + 0.5 = 25 + 15 + 4 = 44.00
                 'shipment_count' => 4,
                 'transit_days' => 6,
@@ -95,6 +100,8 @@ $scenarios = [
                 'user_cash' => 15.00
             ],
             'expected' => [
+                'items_cost' => 10.00,
+                'logistics_cost' => 4.00,
                 'total_cost' => 14.00, // (50 * 0.20) + (8 * 0.50) = 10.0 + 4.0 = 14.00
                 'shipment_count' => 8,
                 'transit_days' => 8,
@@ -142,6 +149,8 @@ $scenarios = [
                 'user_cash' => 100.00
             ],
             'expected' => [
+                'items_cost' => 10.00,
+                'logistics_cost' => 2.00,
                 'total_cost' => 12.00, // (10 * 1.00) + 1.0 + 1.0 = 12.00
                 'shipment_count' => 2,
                 'transit_days' => 2,
@@ -170,6 +179,8 @@ $scenarios = [
                 'user_cash' => 100.00
             ],
             'expected' => [
+                'items_cost' => 10.00,
+                'logistics_cost' => 1.00,
                 'total_cost' => 11.00, // (10 * 1.00) + 1.00
                 'shipment_count' => 1,
                 'transit_days' => 1,
@@ -237,6 +248,119 @@ $scenarios = [
             ]
         ]
     ],
+    'edge_empty_items_list' => [
+        [
+            'locations' => ['vendor_loc', 'hub_a', 'store'],
+            'routes' => [
+                ['origin' => 'vendor_loc', 'destination' => 'hub_a', 'days' => 1, 'cost' => 1.0, 'capacity' => 200, 'active' => true],
+                ['origin' => 'hub_a', 'destination' => 'store', 'days' => 1, 'cost' => 1.0, 'capacity' => 200, 'active' => true],
+            ],
+            'products' => [
+                ['id' => 'coffee', 'price' => 1.00, 'vendor' => ['id' => 'vendor_loc']]
+            ],
+            'order' => [
+                'vendor_alias' => 'vendor_loc',
+                'target_alias' => 'store',
+                'items' => [],
+                'user_cash' => 100.00
+            ],
+            'expected' => [
+                'error_field' => 'items',
+            ],
+        ],
+    ],
+    'edge_zero_quantity' => [
+        [
+            'locations' => ['vendor_loc', 'hub_a', 'store'],
+            'routes' => [
+                ['origin' => 'vendor_loc', 'destination' => 'hub_a', 'days' => 1, 'cost' => 1.0, 'capacity' => 200, 'active' => true],
+                ['origin' => 'hub_a', 'destination' => 'store', 'days' => 1, 'cost' => 1.0, 'capacity' => 200, 'active' => true],
+            ],
+            'products' => [
+                ['id' => 'coffee', 'price' => 1.00, 'vendor' => ['id' => 'vendor_loc']]
+            ],
+            'order' => [
+                'vendor_alias' => 'vendor_loc',
+                'target_alias' => 'store',
+                'items' => [['product_alias' => 'coffee', 'qty' => 0]],
+                'user_cash' => 100.00
+            ],
+            'expected' => [
+                'error_field' => 'items.0.quantity',
+            ],
+        ],
+    ],
+    'edge_rounding_unit_price_3dp' => [
+        [
+            'locations' => ['vendor_loc', 'hub_a', 'store'],
+            'routes' => [
+                ['origin' => 'vendor_loc', 'destination' => 'hub_a', 'days' => 1, 'cost' => 0.60, 'capacity' => 200, 'active' => true],
+                ['origin' => 'hub_a', 'destination' => 'store', 'days' => 1, 'cost' => 0.40, 'capacity' => 200, 'active' => true],
+            ],
+            'products' => [
+                // Request rounds unit_price to 2 decimals in StoreOrderRequest::prepareForValidation()
+                ['id' => 'coffee', 'price' => 1.236, 'vendor' => ['id' => 'vendor_loc']]
+            ],
+            'order' => [
+                'vendor_alias' => 'vendor_loc',
+                'target_alias' => 'store',
+                'items' => [['product_alias' => 'coffee', 'qty' => 10]],
+                'user_cash' => 100.00
+            ],
+            'expected' => [
+                'items_cost' => 12.40, // 10 * 1.24 (rounded from 1.236)
+                'logistics_cost' => 1.00,
+                'total_cost' => 13.40,
+                'shipment_count' => 2,
+                'transit_days' => 2,
+                'path' => ['vendor_loc', 'hub_a', 'store'],
+            ],
+        ],
+    ],
+    'edge_invalid_vendor_id' => [
+        [
+            'locations' => ['missing_vendor', 'store'],
+            'routes' => [],
+            'products' => [
+                // Ensure product exists so the failure is scoped to vendor_id.
+                ['id' => 'coffee', 'price' => 1.00, 'vendor' => ['id' => 'vendor_loc']]
+            ],
+            'order' => [
+                'vendor_alias' => 'missing_vendor', // Vendor is never created for this alias.
+                'target_alias' => 'store',
+                'items' => [['product_alias' => 'coffee', 'qty' => 1]],
+                'user_cash' => 100.00
+            ],
+            'expected' => [
+                'error_field' => 'vendor_id',
+            ],
+        ],
+    ],
+    'edge_invalid_product_id' => [
+        [
+            'locations' => ['vendor_loc', 'store'],
+            'routes' => [
+                ['origin' => 'vendor_loc', 'destination' => 'store', 'days' => 1, 'cost' => 1.00, 'capacity' => 200, 'active' => true],
+            ],
+            'products' => [
+                // Ensure vendor exists so the failure is scoped to items.*.product_id.
+                ['id' => 'coffee', 'price' => 1.00, 'vendor' => ['id' => 'vendor_loc']]
+            ],
+            'order' => [
+                'vendor_alias' => 'vendor_loc',
+                'target_alias' => 'store',
+                'items' => [[
+                    'product_id' => '00000000-0000-0000-0000-000000000000',
+                    'unit_price' => 1.00,
+                    'qty' => 1,
+                ]],
+                'user_cash' => 100.00
+            ],
+            'expected' => [
+                'error_field' => 'items.0.product_id',
+            ],
+        ],
+    ],
 ];
 
 it('processes multihop order scenarios', function (array $scenario) {
@@ -256,12 +380,18 @@ it('processes multihop order scenarios', function (array $scenario) {
 
     $items = [];
     foreach ($scenario['order']['items'] as $item) {
-        $prodId = $this->resolveId($item['product_alias'], Product::class);
-        $product = Product::find($prodId);
+        $prodId = $item['product_id'] ?? $this->resolveId($item['product_alias'], Product::class);
+        $unitPrice = $item['unit_price'] ?? Product::find($prodId)?->unit_price;
+
+        // For negative scenarios (e.g. invalid product_id), we want to hit validation rather than fatal here.
+        if ($unitPrice === null) {
+            $unitPrice = 0.0;
+        }
+
         $items[] = [
             'product_id' => $prodId,
             'quantity' => $item['qty'],
-            'unit_price' => $product->unit_price
+            'unit_price' => $unitPrice
         ];
     }
 
@@ -305,6 +435,7 @@ it('processes multihop order scenarios', function (array $scenario) {
         $response->assertRedirect();
 
         $this->assertDatabaseHas('orders', [
+            'user_id' => $user->id,
             'vendor_id' => $vendorId,
             'location_id' => $targetId,
             'total_cost' => $scenario['expected']['total_cost'],
@@ -312,12 +443,32 @@ it('processes multihop order scenarios', function (array $scenario) {
         ]);
 
         $order = Order::where('user_id', $user->id)->latest()->first();
+        expect($order)->not->toBeNull();
+        expect($order->status)->toBeInstanceOf(\App\States\Order\Pending::class);
+        expect($order->vendor_id)->toEqual($vendorId);
+        expect($order->location_id)->toEqual($targetId);
         
         // Check shipments count
-        $shipments = $order->shipments()->orderBy('sequence_index')->get();
+        $shipments = $order->shipments()->with('route')->orderBy('sequence_index')->get();
         $this->assertCount($scenario['expected']['shipment_count'], $shipments);
         $expectedSequence = range(0, $scenario['expected']['shipment_count'] - 1);
         expect($shipments->pluck('sequence_index')->all())->toEqual($expectedSequence);
+
+        // Shipment statuses should follow the creation convention (first leg in_transit, rest pending).
+        if ($shipments->isNotEmpty()) {
+            expect($shipments->first()->status)->toEqual('in_transit');
+            foreach ($shipments->slice(1) as $shipment) {
+                expect($shipment->status)->toEqual('pending');
+            }
+        }
+
+        // Continuity invariant: each shipment leg flows into the next.
+        foreach ($shipments as $idx => $shipment) {
+            $next = $shipments->get($idx + 1);
+            if ($next) {
+                expect($shipment->target_location_id)->toEqual($next->source_location_id);
+            }
+        }
 
         if (isset($scenario['expected']['path'])) {
             $expectedPath = array_map(
@@ -332,6 +483,29 @@ it('processes multihop order scenarios', function (array $scenario) {
                 expect($shipment->target_location_id)->toEqual($expectedPath[$index + 1]);
             }
         }
+
+        // Totals invariant: order.total_cost == items_total + logistics_total (rounded to 2dp).
+        $itemsCost = round($order->items()->get()->sum(fn ($i) => $i->quantity * $i->cost_per_unit), 2);
+        $logistics = app(LogisticsService::class);
+        $logisticsCost = round($shipments->sum(fn ($s) => $s->route ? $logistics->calculateCost($s->route) : 0.0), 2);
+
+        if (isset($scenario['expected']['items_cost'])) {
+            expect($itemsCost)->toEqual($scenario['expected']['items_cost']);
+        }
+        if (isset($scenario['expected']['logistics_cost'])) {
+            expect($logisticsCost)->toEqual($scenario['expected']['logistics_cost']);
+        }
+
+        expect(round($itemsCost + $logisticsCost, 2))->toEqual(round((float) $order->total_cost, 2));
+        expect(round((float) $order->total_cost, 2))->toEqual($scenario['expected']['total_cost']);
+
+        // Transit-days invariant: order.total_transit_days == sum(route.transit_days) across shipments.
+        expect((int) $shipments->sum(fn ($s) => $s->route?->transit_days ?? 0))->toEqual($scenario['expected']['transit_days']);
+
+        // Cash invariant: cash decreases by order total when the order is accepted.
+        $expectedCashAfter = round($cash - $scenario['expected']['total_cost'], 2);
+        $gameStateAfter = GameState::where('user_id', $user->id)->first();
+        expect(round((float) $gameStateAfter->cash, 2))->toEqual($expectedCashAfter);
 
     }
 
