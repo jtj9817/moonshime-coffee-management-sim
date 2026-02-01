@@ -5,13 +5,17 @@ A Laravel 12 + React 19 simulation game for managing coffee shop inventory and s
 ## Technology Stack
 
 - **Backend**: Laravel 12 (PHP 8.2+) with PostgreSQL
+  - Runtime: PHP 8.4.1 (backward compatible with PHP 8.2+)
 - **Frontend**: React 19 + TypeScript via Inertia.js 2.0
+  - Build Tool: Vite 7.0.4
+  - TypeScript: 5.7.2
 - **Styling**: TailwindCSS 4.0 with Radix UI components
 - **Real-time**: Laravel Reverb for dashboard updates (planned)
 - **State Management**: Laravel state machines via `spatie/laravel-model-states`
 - **Routing**: Laravel Wayfinder for type-safe routing
 - **AI Integration**: Echolabs Prism for AI-powered inventory advisories
 - **Package Management**: pnpm for frontend, Composer for backend
+- **Testing**: Pest 4.3 with Laravel plugin
 
 ## Project Overview
 
@@ -113,7 +117,18 @@ moonshine-coffee-management-sim/
 │   ├── components/       # Reusable React UI components
 │   │   ├── analytics/    # Analytics tab components (OverviewTab, LogisticsTab, FinancialsTab)
 │   │   └── ui/           # Radix UI components (tabs, collapsible, dialogs, etc.)
-│   ├── pages/game/       # Game pages (dashboard, inventory, analytics, spike-history, etc.)
+│   ├── pages/game/       # Game pages
+│   │   ├── dashboard.tsx      # Main HUD with KPIs and alerts
+│   │   ├── inventory.tsx      # Inventory levels across locations
+│   │   ├── ordering.tsx       # Order placement with vendor selection
+│   │   ├── transfers.tsx      # Inter-location transfer management
+│   │   ├── vendors.tsx        # Vendor performance and negotiation
+│   │   ├── analytics.tsx      # Analytics dashboard with tabs
+│   │   ├── reports.tsx        # Reporting and historical data
+│   │   ├── spike-history.tsx  # Spike War Room with active/historical spikes
+│   │   ├── sku-detail.tsx     # SKU-level detail view
+│   │   ├── strategy.tsx       # Strategy and policy management
+│   │   └── welcome.tsx        # Welcome/onboarding page
 │   ├── layouts/          # Persistent layouts (GameLayout with HUD and Comms Log)
 │   ├── contexts/         # React contexts (game-context for state and alerts)
 │   ├── services/         # Frontend services (cockpit, inventory, transfer, vendor, etc.)
@@ -124,14 +139,22 @@ moonshine-coffee-management-sim/
 │   ├── factories/        # Model factories for testing
 │   └── seeders/          # Database seeders
 ├── tests/
-│   ├── Feature/          # Feature tests (Analytics/, Spike/, Order, etc.)
-│   └── Unit/             # Unit tests for services and models
+│   ├── Feature/          # Feature tests (Analytics/, Spike/, Order, MultiHopOrderTest, etc.)
+│   ├── Unit/             # Unit tests for services and models
+│   ├── Traits/           # Reusable test traits (MultiHopScenarioBuilder)
+│   └── manual/           # Manual verification scripts for phased development
 ├── docs/                 # Comprehensive documentation
 │   ├── backend/          # Backend architecture docs
 │   ├── domain/           # Game mechanics and business logic
 │   ├── frontend/         # Frontend architecture
-│   ├── notification-system.md    # Alert system documentation
-│   └── analytics-page-audit.md   # Analytics feature mapping
+│   ├── tickets/          # Test failure tickets and resolutions
+│   ├── notification-system.md         # Alert system documentation
+│   ├── analytics-page-audit.md        # Analytics feature mapping
+│   ├── multi-hop-order-test-scenarios.md  # Multi-hop test scenarios
+│   ├── CHANGELOG.md      # Project changelog
+│   └── CRITICAL-BUGS.md  # Critical bug tracking (all resolved)
+├── conductor/            # Development workflow tracking
+│   └── tracks/           # Feature/refactor implementation tracks
 └── routes/               # Laravel routes (web.php with game routes)
 ```
 
