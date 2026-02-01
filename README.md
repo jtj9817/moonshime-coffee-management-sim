@@ -109,41 +109,100 @@ The application follows strict architectural patterns for maintainability and sc
 ```
 moonshine-coffee-management-sim/
 ├── app/
-│   ├── Models/           # Eloquent models (GameState, Location, Product, Inventory, Order, Alert, etc.)
-│   ├── Services/         # Business logic (Simulation, Order, Logistics, Spike, Pricing, etc.)
+│   ├── Actions/          # Fortify actions for authentication
+│   ├── Concerns/         # Reusable traits and concerns
+│   ├── Console/          # Artisan commands
+│   ├── DTOs/             # Data Transfer Objects for type-safe data passing
+│   ├── Events/           # Laravel events (TimeAdvanced, OrderPlaced, SpikeOccurred, etc.)
+│   ├── Http/
+│   │   ├── Controllers/  # Request handlers with Inertia responses
+│   │   ├── Middleware/   # HTTP middleware
+│   │   └── Requests/     # Form request validation classes
+│   ├── Interfaces/       # Service interfaces for dependency injection
 │   ├── Listeners/        # Event listeners (ProcessDeliveries, SnapshotInventory, GenerateAlert, etc.)
-│   └── Http/Controllers/ # Request handlers with Inertia responses
+│   ├── Models/           # Eloquent models (GameState, Location, Product, Inventory, Order, Alert, etc.)
+│   ├── Observers/        # Model observers
+│   ├── Providers/        # Service providers (AppServiceProvider, GameServiceProvider, etc.)
+│   ├── Services/         # Business logic services
+│   │   ├── Spikes/       # Spike-related services (SpikeEventFactory, GuaranteedSpikeGenerator, etc.)
+│   │   ├── Strategies/   # Strategy pattern implementations (restock strategies)
+│   │   └── *Service.php  # Core services (Simulation, Order, Logistics, Pricing, etc.)
+│   └── States/           # State machine definitions
+│       ├── Order/        # Order state transitions
+│       └── Transfer/     # Transfer state transitions
 ├── resources/js/
+│   ├── actions/          # Server actions and mutations
+│   ├── assets/           # Static assets (images, icons)
 │   ├── components/       # Reusable React UI components
 │   │   ├── analytics/    # Analytics tab components (OverviewTab, LogisticsTab, FinancialsTab)
+│   │   ├── game/         # Game-specific components
 │   │   └── ui/           # Radix UI components (tabs, collapsible, dialogs, etc.)
-│   ├── pages/game/       # Game pages
-│   │   ├── dashboard.tsx      # Main HUD with KPIs and alerts
-│   │   ├── inventory.tsx      # Inventory levels across locations
-│   │   ├── ordering.tsx       # Order placement with vendor selection
-│   │   ├── transfers.tsx      # Inter-location transfer management
-│   │   ├── vendors.tsx        # Vendor performance and negotiation
-│   │   ├── analytics.tsx      # Analytics dashboard with tabs
-│   │   ├── reports.tsx        # Reporting and historical data
-│   │   ├── spike-history.tsx  # Spike War Room with active/historical spikes
-│   │   ├── sku-detail.tsx     # SKU-level detail view
-│   │   ├── strategy.tsx       # Strategy and policy management
-│   │   └── welcome.tsx        # Welcome/onboarding page
-│   ├── layouts/          # Persistent layouts (GameLayout with HUD and Comms Log)
 │   ├── contexts/         # React contexts (game-context for state and alerts)
-│   ├── services/         # Frontend services (cockpit, inventory, transfer, vendor, etc.)
+│   ├── hooks/            # Custom React hooks
+│   ├── layouts/          # Persistent layouts
+│   │   ├── app/          # App layout components
+│   │   ├── auth/         # Auth layout components
+│   │   ├── settings/     # Settings layout components
+│   │   └── game-layout.tsx  # Main game layout with HUD and Comms Log
+│   ├── lib/              # Utility libraries and helpers
+│   ├── pages/            # Inertia.js page components
+│   │   ├── auth/         # Authentication pages
+│   │   ├── game/         # Game pages
+│   │   │   ├── dashboard.tsx      # Main HUD with KPIs and alerts
+│   │   │   ├── inventory.tsx      # Inventory levels across locations
+│   │   │   ├── ordering.tsx       # Order placement with vendor selection
+│   │   │   ├── transfers.tsx      # Inter-location transfer management
+│   │   │   ├── vendors.tsx        # Vendor performance and negotiation
+│   │   │   ├── analytics.tsx      # Analytics dashboard with tabs
+│   │   │   ├── reports.tsx        # Reporting and historical data
+│   │   │   ├── spike-history.tsx  # Spike War Room with active/historical spikes
+│   │   │   ├── sku-detail.tsx     # SKU-level detail view
+│   │   │   ├── strategy.tsx       # Strategy and policy management
+│   │   │   └── welcome.tsx        # Welcome/onboarding page
+│   │   └── settings/     # Settings pages
+│   ├── routes/           # Frontend routing definitions
+│   ├── services/         # Frontend services
+│   │   ├── cockpitService.ts      # Dashboard alerts and KPIs
+│   │   ├── inventoryService.ts    # Inventory calculations
+│   │   ├── transferService.ts     # Transfer logistics
+│   │   ├── vendorService.ts       # Supplier scoring
+│   │   ├── wasteService.ts        # Waste tracking
+│   │   ├── policyService.ts       # Inventory policy management
+│   │   ├── orderCalculations.ts   # Order quantity calculations
+│   │   ├── skuMath.ts             # SKU-level math (reorder points, safety stock)
+│   │   └── geminiService.ts       # AI integration helpers
+│   ├── types/            # TypeScript type definitions
+│   │   ├── game.ts       # Game-specific types
+│   │   └── index.d.ts    # Global type declarations
+│   ├── wayfinder/        # Laravel Wayfinder routing integration
 │   ├── constants.ts      # Game constants (LOCATIONS, ITEMS, SUPPLIERS)
-│   └── types.ts          # TypeScript type definitions
+│   ├── app.tsx           # Main application entry point
+│   └── ssr.tsx           # SSR entry point
 ├── database/
 │   ├── migrations/       # Schema migrations (including inventory_history, daily_reports, alerts)
 │   ├── factories/        # Model factories for testing
 │   └── seeders/          # Database seeders
 ├── tests/
-│   ├── Feature/          # Feature tests (Analytics/, Spike/, Order, MultiHopOrderTest, etc.)
-│   ├── Unit/             # Unit tests for services and models
+│   ├── Feature/          # Feature tests
+│   │   ├── Analytics/    # Analytics feature tests
+│   │   ├── Auth/         # Authentication tests
+│   │   ├── Seeder/       # Seeder tests
+│   │   ├── Settings/     # Settings tests
+│   │   └── *.php         # Other feature tests (Order, MultiHopOrderTest, etc.)
+│   ├── Unit/             # Unit tests
+│   │   ├── Actions/      # Action tests
+│   │   ├── DTOs/         # DTO tests
+│   │   ├── Events/       # Event tests
+│   │   ├── Interfaces/   # Interface tests
+│   │   ├── Listeners/    # Listener tests
+│   │   ├── Models/       # Model tests
+│   │   ├── Seeders/      # Seeder unit tests
+│   │   └── Services/     # Service tests
 │   ├── Traits/           # Reusable test traits (MultiHopScenarioBuilder)
 │   └── manual/           # Manual verification scripts for phased development
 ├── docs/                 # Comprehensive documentation
+│   ├── architecture/     # Architecture documentation
+│   ├── archived-plans/   # Archived planning documents
 │   ├── backend/          # Backend architecture docs
 │   ├── domain/           # Game mechanics and business logic
 │   ├── frontend/         # Frontend architecture
@@ -152,10 +211,18 @@ moonshine-coffee-management-sim/
 │   ├── analytics-page-audit.md        # Analytics feature mapping
 │   ├── multi-hop-order-test-scenarios.md  # Multi-hop test scenarios
 │   ├── CHANGELOG.md      # Project changelog
-│   └── CRITICAL-BUGS.md  # Critical bug tracking (all resolved)
+│   ├── CRITICAL-BUGS.md  # Critical bug tracking (all resolved)
+│   ├── INDEX.md          # Central documentation hub
+│   └── *.md              # Additional documentation files
 ├── conductor/            # Development workflow tracking
-│   └── tracks/           # Feature/refactor implementation tracks
-└── routes/               # Laravel routes (web.php with game routes)
+│   ├── archive/          # Archived completed tracks
+│   ├── code_styleguides/ # Code style guides
+│   └── tracks/           # Active feature/refactor implementation tracks
+│       └── multi_hop_regression_20260128/  # Multi-hop test infrastructure
+├── routes/               # Laravel routes (web.php with game routes)
+├── config/               # Laravel configuration files
+├── public/               # Public assets and entry points
+└── bootstrap/            # Laravel bootstrap files
 ```
 
 ## Game Entities
