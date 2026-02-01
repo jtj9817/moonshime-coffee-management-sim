@@ -7,6 +7,69 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [January 27-30, 2026] - Multi-Hop Test Infrastructure & Regression Suite
+
+### Added
+- **Multi-Hop Test Infrastructure**:
+  - `MultiHopScenarioBuilder` trait in `tests/Traits/` for reusable test scenario construction
+  - Helper methods: `createVendorPath()`, `createRoutes()`, `createProductBundle()`, `createGameState()`
+  - Manual verification script: `tests/manual/verify_multihop_traits.php`
+  - Manual verification script: `tests/manual/verify_multi_hop_regression.php`
+  - Manual verification script: `tests/manual/regress_reset_missing_seed_data.php`
+
+- **Conductor Track System**:
+  - `conductor/tracks/multi_hop_regression_20260128/` track for multi-hop test refactoring
+  - Phase-based implementation plan with checkpoints
+  - Track metadata and specifications (`plan.md`, `spec.md`, `index.md`, `metadata.json`)
+  - Conductor tracks index (`conductor/tracks.md`)
+
+- **Test Scenarios Documentation**:
+  - `docs/multi-hop-order-test-scenarios.md` with comprehensive scenario table
+  - Best case, average case, worst case, and edge case scenarios
+  - Cost routing assumptions and invariants
+  - Negative test cases (inactive routes, validation failures)
+
+- **Test Tickets**:
+  - `docs/tickets/test-failures-2026-01-27.md` tracking test failures and resolutions
+  - TICKET-001: Multi-hop order shipments missing in suite (RESOLVED)
+  - TICKET-002: Reset game fails when seed data missing (RESOLVED)
+  - TICKET-003: Breakdown spike resolution cash deduction mismatch (under investigation)
+
+### Changed
+- **Multi-Hop Test Refactoring**:
+  - Refactored `MultiHopOrderTest.php` to use Pest data providers
+  - Converted PHPUnit-style tests to Pest format
+  - Enhanced test isolation and scenario-based testing
+  - Aligned test scenarios to specification invariants
+  - Improved negative test scoping (inactive routes, user isolation)
+
+- **Test Stability Improvements**:
+  - Fixed multi-hop test suite execution order dependency
+  - Enhanced order lookup in tests to avoid ambiguous `Order::first()` queries
+  - Added seed data preconditions to `ResetGameTest`
+  - Improved test data setup with `GraphSeeder` and `CoreGameStateSeeder`
+
+### Fixed
+- **Bug Fixes**:
+  - Fixed multi-hop order shipment creation in full test suite execution
+  - Fixed reset game failure when seed data is missing
+  - Fixed spike resolution cost units (cents to decimal conversion)
+  - Honored inactive routes in multi-hop routing tests
+  - Scoped multi-hop negative test cases to prevent false positives
+
+- **Test Fixes**:
+  - Aligned scenario builders to handle inactive routes correctly
+  - Fixed user scoping in multi-hop test scenarios
+  - Enhanced conductor track plan verification protocols
+
+### Documentation
+- Enhanced `docs/multi-hop-order-test-scenarios.md` with scenario data tables
+- Added conductor track documentation for multi-hop regression suite
+- Updated test failure tickets with root cause analysis
+- Documented test infrastructure patterns and helper traits
+
+---
+
 ## [January 24, 2026] - Documentation Synchronization
 
 ### Changed
