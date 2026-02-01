@@ -56,20 +56,29 @@ docs/
 ├── frontend/                         # Frontend (React) documentation
 │   └── README.md                     # Frontend overview
 │
+├── tickets/                                  # Test failure tracking
+│   ├── test-failures-2026-01-24.md
+│   └── test-failures-2026-01-27.md
+│
 ├── analytics-page-audit.md                   # Analytics feature mapping and data sources
+├── CHANGELOG.md                              # Project changelog
+├── CRITICAL-BUGS.md                          # Critical bug tracking (all resolved)
 ├── daily-reporting-infrastructure-analysis.md
 ├── daily-simulation-logic-plan.md
 ├── dashboard-ux-test-gap-analysis.md
 ├── data-seeding-synchronization-analysis.md  # ✅ Resolved (2026-01-21)
+├── gameplay-loop-analysis-and-improvements.md
 ├── gameplay-loop-mechanics-analysis.md
 ├── game-state-persistence-brainstorm.md
 ├── initialization-and-seeding-analysis.md
 ├── logistics-integration-post-completion-cleanup.md
 ├── moonshine-laravel-integration-plan.md
 ├── multi-hop-implementation-summary.md
+├── multi-hop-order-test-scenarios.md         # Multi-hop test scenarios
 ├── multi_hop_proposal.md
 ├── notification-system.md                    # Alert/notification system architecture
 ├── ordering-dialog-fix-session-20260119.md
+├── README-GAMEPLAY.md                        # Gameplay loop documentation
 ├── route-routing-review.md
 ├── technical-design-document.md
 └── test-execution-report-20260117.md
@@ -79,25 +88,25 @@ docs/
 
 ### Backend
 - **Framework**: Laravel 12
-- **Language**: PHP 8.2+
+- **Language**: PHP 8.2+ (runtime: 8.4.1)
 - **Database**: PostgreSQL
 - **Authentication**: Laravel Fortify
 - **API Bridge**: Inertia.js 2.0
 - **Routing**: Laravel Wayfinder
 
 ### Frontend
-- **Framework**: React 19
-- **Language**: TypeScript 5.x (strict mode)
+- **Framework**: React 19.2.0
+- **Language**: TypeScript 5.7.2 (strict mode)
 - **Styling**: TailwindCSS 4.0
 - **UI Components**: Radix UI
 - **Icons**: Lucide React
-- **Build Tool**: Vite 5.x
+- **Build Tool**: Vite 7.0.4
 - **SSR**: Inertia SSR
 
 ### Development Tools
 - **Linting**: ESLint (frontend), Pint (backend)
 - **Formatting**: Prettier
-- **Testing**: PHPUnit/Pest (backend), Vitest (frontend)
+- **Testing**: Pest 4.3 (backend), Vitest (frontend)
 - **Git Hooks**: Pre-commit linting
 
 ## Key Features
@@ -354,7 +363,17 @@ php artisan test --filter=OrderTest
 
 # With coverage
 php artisan test --coverage
+
+# Manual verification (for phased development)
+php tests/manual/verify_multihop_traits.php
+php tests/manual/verify_multi_hop_regression.php
 ```
+
+### Test Infrastructure
+- **Test Traits**: `tests/Traits/MultiHopScenarioBuilder.php` - Reusable helpers for complex scenarios
+- **Manual Verification**: `tests/manual/` - Scripts for phased development and regression testing
+- **Conductor Tracks**: `conductor/tracks/` - Structured implementation plans with checkpoints
+- **Test Tickets**: `docs/tickets/` - Test failure tracking and root cause analysis
 
 ### Frontend Tests
 ```bash
@@ -448,6 +467,16 @@ See [CHANGELOG.md](../CHANGELOG.md) for version history.
 
 ## Recent Updates
 
+**January 27-30, 2026**:
+- **Multi-Hop Test Infrastructure**: Added `MultiHopScenarioBuilder` trait with reusable test helpers
+- **Conductor Tracks**: Implemented phased development tracking system (`conductor/tracks/`)
+- **Test Documentation**: Created comprehensive multi-hop test scenarios documentation
+- **Test Tickets**: Added test failure tracking system (`docs/tickets/`)
+- **Manual Verification**: Added manual verification scripts for phased development
+- **Bug Resolution**: Verified and documented fixes for critical bugs (starting cash, user scoping)
+- **Test Stability**: Improved test suite stability and scenario-based testing
+- **Tech Stack Updates**: Upgraded to Vite 7.0.4, PHP 8.4.1 runtime
+
 **January 23-24, 2026**:
 - Added comprehensive notification system documentation (`notification-system.md`)
 - Completed analytics refactor with tabbed UI and historical data tracking
@@ -466,6 +495,6 @@ See [CHANGELOG.md](../CHANGELOG.md) for version history.
 
 ---
 
-**Last Updated**: 2026-01-24
+**Last Updated**: 2026-01-30
 
 For detailed information on specific topics, navigate to the respective documentation sections using the links above.
