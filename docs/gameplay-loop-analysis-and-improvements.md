@@ -20,10 +20,10 @@ This document analyzes the current gameplay loop implementation in Moonshine Cof
 - **Cash:** **BUG**: Currently $100.00 (should be $10,000.00)
   - Schema default: `1000000` cents = $10,000.00 (`database/migrations/2026_01_16_055234_create_game_states_table.php:17`)
   - Code initializes: `10000.00` which stores as `10000` cents = $100.00 ❌
-  - **Files with bug**: `InitializeNewGame.php:41`, `HandleInertiaRequests.php:107`
+- ~~**Files with bug**: `InitializeNewGame.php:41`, `HandleInertiaRequests.php:107`~~
 - **XP:** 0, **Level:** 1 (computed: `floor(xp / 1000) + 1`)
-- **Reputation:** 85 (base 85 - 3 × unread alerts) - **BUG**: Not user-scoped
-- **Strikes:** 0 (count of critical unread alerts) - **BUG**: Not user-scoped
+- ~~**Reputation:** 85 (base 85 - 3 × unread alerts) - **BUG**: Not user-scoped~~
+- ~~**Strikes:** 0 (count of critical unread alerts) - **BUG**: Not user-scoped~~
 
 **Pre-Seeded World:**
 - **Locations:** Store graph with warehouse and secondary stores (via `GraphSeeder` + `CoreGameStateSeeder`)
@@ -206,7 +206,7 @@ Database (bigInteger)     Laravel Backend           Frontend Display
 
 ### Current Bug Status
 
-❌ **Bug**: `InitializeNewGame.php` and `HandleInertiaRequests.php` use `10000.00` instead of `1000000`
+~~❌ **Bug**: `InitializeNewGame.php` and `HandleInertiaRequests.php` use `10000.00` instead of `1000000`~~
 ✅ **Correct**: Schema default is `1000000` (but gets overridden by buggy code)
 
 ## Discrepancies Between Documentation and Actual Code
@@ -221,7 +221,7 @@ Database (bigInteger)     Laravel Backend           Frontend Display
 | **Isolation Alert Logic** | Generated for all isolated stores | Generated **only** for isolated stores with low stock (< 10 units) | Reduces noise - more focused alerts |
 | **Welcome Banner** | Not mentioned | Shown on Day 1 when `!has_placed_first_order` | Good UX - guides first-time players |
 | **Game Initialization** | Single pass | Includes idempotency check to prevent reseeding | Robust - handles refreshes gracefully |
-| **Reputation Calculation** | Global unread alerts | Global (not user-scoped) | **BUG** - should be user-scoped |
+| ~~**Reputation Calculation**~~ | ~~Global unread alerts~~ | ~~Global (not user-scoped)~~ | ~~**BUG** - should be user-scoped~~ |
 | **End Condition** | Sandbox model only | Truly infinite sandbox - no end conditions | Aligns with design |
 
 ### Critical Bugs Identified
@@ -256,7 +256,7 @@ Database (bigInteger)     Laravel Backend           Frontend Display
    - Frontend displays: `formatCurrency(10000.0)` → `"10,000.00"`
    - User sees: `$10,000.00` but has actual value of `$100.00` in game logic!
 
-2. **Reputation Calculation Not User-Scoped**
+2. ~~**Reputation Calculation Not User-Scoped**~~
    ```php
    // app/Http/Middleware/HandleInertiaRequests.php line 138
    $alertCount = Alert::where('is_read', false)->count();  // BUG: no user_id filter!
@@ -271,7 +271,7 @@ Database (bigInteger)     Laravel Backend           Frontend Display
        ->count();
    ```
 
-3. **Strikes Calculation Not User-Scoped**
+3. ~~**Strikes Calculation Not User-Scoped**~~
    ```php
    // app/Http/Middleware/HandleInertiaRequests.php line 150
    return Alert::where('is_read', false)
@@ -287,7 +287,7 @@ Database (bigInteger)     Laravel Backend           Frontend Display
        ->count();
    ```
 
-4. **Global Alerts in Middleware**
+4. ~~**Global Alerts in Middleware**~~
    ```php
    // app/Http/Middleware/HandleInertiaRequests.php line 90
    'alerts' => Alert::where('is_read', false)
@@ -443,11 +443,11 @@ php artisan tinker
 >>> $user->gameState->cash; // Should be 1000000 (not 10000)
 ```
 
-#### 1.2 Fix User Scoping Bugs in Middleware
+#### ~~1.2 Fix User Scoping Bugs in Middleware~~
 
-**File:** `app/Http/Middleware/HandleInertiaRequests.php`
+~~**File:** `app/Http/Middleware/HandleInertiaRequests.php`~~
 
-**Changes:**
+~~**Changes:**~~
 ```php
 // Fix 1: Reputation calculation (line 138)
 // Before:
@@ -485,8 +485,8 @@ return Alert::where('user_id', $user->id)
     ->get(),
 ```
 
-**Effort:** 5 minutes
-**Impact:** Fixes multiplayer data leakage - ensures each player only sees their own alerts, reputation, and strikes
+~~**Effort:** 5 minutes~~
+~~**Impact:** Fixes multiplayer data leakage - ensures each player only sees their own alerts, reputation, and strikes~~
 
 ---
 
@@ -891,7 +891,7 @@ return Alert::where('user_id', $user->id)
 
 ### Phase 0: Critical Fixes (IMMEDIATE - 10 minutes)
 - [ ] **Fix starting cash bug** - Change `10000.00` to `1000000` in 2 files
-- [ ] **Fix user scoping bugs** - Add `user_id` filters to alerts/reputation/strikes
+- [ ] ~~**Fix user scoping bugs** - Add `user_id` filters to alerts/reputation/strikes~~
 
 ### Phase 1: Quick Wins (1-2 weeks)
 - [ ] Add demand forecasting to inventory pages
@@ -931,7 +931,7 @@ Moonshine Coffee Management Sim has excellent technical infrastructure with a ro
    - Impact: Game is unplayable - orders cost $100-500, so players go broke immediately
    - Fix: Change `10000.00` → `1000000` in 2 files
 
-2. ⚠️ **User scoping bugs**: Multiplayer data leakage in alerts, reputation, and strikes
+2. ~~⚠️ **User scoping bugs**: Multiplayer data leakage in alerts, reputation, and strikes~~
    - Impact: Players see each other's data and affect each other's scores
    - Fix: Add `->where('user_id', $user->id)` to 4 queries
 
