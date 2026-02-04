@@ -68,6 +68,7 @@ class DelaySpike implements SpikeTypeInterface
         // Store affected orders in meta for rollback
         $meta = $event->meta ?? [];
         $meta['affected_orders'] = $affectedOrders;
+        $meta['delay_days'] = $delayDays;
 
         $event->update([
             'is_active' => true,
