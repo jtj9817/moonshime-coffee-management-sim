@@ -60,9 +60,18 @@ class OrderService
         }
 
         return DB::transaction(function () use ($user, $vendor, $targetLocation, $items, $path) {
+            $pricing = app(\App\Services\PricingService::class);
+
+            $pricedItems = collect($items)->map(function ($item) use ($pricing, $user, $vendor) {
+                $multiplier = $pricing->getPriceMultiplierFor($user, $item['product_id'], $vendor->id);
+                $item['cost_per_unit'] = round(((float) $item['cost_per_unit']) * $multiplier, 2);
+
+                return $item;
+            })->all();
+
             // 2. Calculate totals
             $totalCost = 0.0;
-            foreach ($items as $item) {
+            foreach ($pricedItems as $item) {
                 $totalCost += $item['quantity'] * (float) $item['cost_per_unit'];
             }
             
@@ -93,7 +102,7 @@ class OrderService
             ]);
 
             // 4. Create Items
-            foreach ($items as $item) {
+            foreach ($pricedItems as $item) {
                 $order->items()->create([
                     'product_id' => $item['product_id'],
                     'quantity' => $item['quantity'],

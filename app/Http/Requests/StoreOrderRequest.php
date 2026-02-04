@@ -163,7 +163,18 @@ class StoreOrderRequest extends FormRequest
 
             // 3. Validate Funds
             $shippingCost = $path->sum(fn($r) => $logistics->calculateCost($r));
-            $itemsCost = $items->sum(fn($item) => ($item['quantity'] ?? 0) * ($item['unit_price'] ?? 0));
+            $pricing = app(\App\Services\PricingService::class);
+            $user = $this->user();
+            $vendorId = $this->input('vendor_id');
+            $itemsCost = $items->sum(function ($item) use ($pricing, $user, $vendorId) {
+                $quantity = (int) ($item['quantity'] ?? 0);
+                $unitPrice = (float) ($item['unit_price'] ?? 0);
+                $multiplier = $user
+                    ? $pricing->getPriceMultiplierFor($user, $item['product_id'], $vendorId)
+                    : 1.0;
+
+                return $quantity * ($unitPrice * $multiplier);
+            });
             $totalCost = round($itemsCost + $shippingCost, 2);
 
             $cash = (float) GameState::where('user_id', auth()->id())->value('cash');
