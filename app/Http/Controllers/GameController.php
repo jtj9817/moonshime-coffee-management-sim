@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Alert;
+use App\Models\DemandEvent;
 use App\Models\Inventory;
 use App\Models\Location;
 use App\Models\Order;
@@ -18,6 +19,7 @@ use App\States\Order\Shipped;
 use App\Models\Transfer;
 use App\Models\Vendor;
 use App\Events\OrderPlaced;
+use App\Services\QuestService;
 use App\Services\SimulationService;
 use App\Actions\InitializeNewGame;
 use App\Models\GameState;
@@ -35,12 +37,15 @@ class GameController extends Controller
      */
     public function dashboard(\App\Services\LogisticsService $logisticsService): Response
     {
-        $alerts = Alert::where('is_read', false)
+        $user = auth()->user();
+        $userId = $user?->id;
+
+        $alerts = Alert::where('user_id', $userId)
+            ->where('is_read', false)
             ->orderBy('severity', 'desc')
             ->orderBy('created_at', 'desc')
             ->get();
 
-        $userId = auth()->id();
         $gameState = GameState::where('user_id', $userId)->first();
         $previousDay = $gameState ? $gameState->day - 1 : 0;
         
@@ -53,10 +58,10 @@ class GameController extends Controller
 
         return Inertia::render('game/dashboard', [
             'alerts' => $alerts,
-            'kpis' => $this->calculateKPIs(),
-            'quests' => $this->getActiveQuests(),
+            'kpis' => $this->calculateKPIs($userId),
+            'quests' => $this->getActiveQuests($user),
             'logistics_health' => $logisticsService->getLogisticsHealth(),
-            'active_spikes_count' => SpikeEvent::forUser(auth()->id())->active()->count(),
+            'active_spikes_count' => $userId ? SpikeEvent::forUser($userId)->active()->count() : 0,
             'dailyReport' => $dailyReport,
         ]);
     }
@@ -193,6 +198,11 @@ class GameController extends Controller
     {
         $userId = auth()->id();
         $gameState = GameState::where('user_id', $userId)->firstOrFail();
+        $currentDay = $gameState->day;
+        $startDay = max(1, $currentDay - 6);
+        $revenue7Day = (float) DemandEvent::where('user_id', $userId)
+            ->whereBetween('day', [$startDay, $currentDay])
+            ->sum('revenue');
 
         $totalInventoryValue = Inventory::where('user_id', $userId)
             ->with('product')
@@ -203,7 +213,7 @@ class GameController extends Controller
             'overviewMetrics' => [
                 'cash' => (float) $gameState->cash,
                 'netWorth' => (float) ($gameState->cash + $totalInventoryValue),
-                'revenue7Day' => 0, // Placeholder until revenue logic is implemented
+                'revenue7Day' => $revenue7Day,
             ],
             'inventoryTrends' => $this->getInventoryTrends(),
             'spendingByCategory' => $this->getSpendingByCategory(),
@@ -422,41 +432,50 @@ class GameController extends Controller
     /**
      * Calculate dashboard KPIs.
      */
-    protected function calculateKPIs(): array
+    protected function calculateKPIs(?int $userId = null): array
     {
-        $totalInventoryValue = Inventory::with('product')
+        if (!$userId) {
+            return [
+                ['label' => 'Inventory Value', 'value' => 0],
+                ['label' => 'Low Stock Items', 'value' => 0, 'trend' => 'neutral'],
+                ['label' => 'Pending Orders', 'value' => 0],
+                ['label' => 'Locations', 'value' => 0],
+            ];
+        }
+
+        $totalInventoryValue = Inventory::where('user_id', $userId)
+            ->with('product')
             ->get()
             ->sum(fn ($inv) => $inv->quantity * ($inv->product->storage_cost ?? 0));
 
-        $lowStockCount = Inventory::where('quantity', '<', 50)->count();
-        $pendingOrders = Order::where('status', 'pending')->count();
+        $lowStockCount = Inventory::where('user_id', $userId)
+            ->where('quantity', '<', 50)
+            ->count();
+        $pendingOrders = Order::where('user_id', $userId)
+            ->where('status', 'pending')
+            ->count();
+        $locationCount = Inventory::where('user_id', $userId)
+            ->distinct('location_id')
+            ->count('location_id');
 
         return [
             ['label' => 'Inventory Value', 'value' => round($totalInventoryValue, 2)],
             ['label' => 'Low Stock Items', 'value' => $lowStockCount, 'trend' => $lowStockCount > 5 ? 'down' : 'up'],
             ['label' => 'Pending Orders', 'value' => $pendingOrders],
-            ['label' => 'Locations', 'value' => Location::count()],
+            ['label' => 'Locations', 'value' => $locationCount],
         ];
     }
 
     /**
      * Get active quests.
      */
-    protected function getActiveQuests(): array
+    protected function getActiveQuests(?\App\Models\User $user = null): array
     {
-        // Placeholder quests - would be fetched from database
-        return [
-            [
-                'id' => '1',
-                'type' => 'inventory',
-                'title' => 'Stock Champion',
-                'description' => 'Maintain at least 100 units of each product',
-                'reward' => ['xp' => 100, 'cash' => 5.00],
-                'targetValue' => 100,
-                'currentValue' => 75,
-                'isCompleted' => false,
-            ],
-        ];
+        if (!$user) {
+            return [];
+        }
+
+        return app(QuestService::class)->getActiveQuestsForUser($user);
     }
 
     /**

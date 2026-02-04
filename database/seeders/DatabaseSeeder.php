@@ -37,6 +37,9 @@ class DatabaseSeeder extends Seeder
             $logger->info('DatabaseSeeder: Running InventorySeeder');
             $this->call(InventorySeeder::class);
 
+            $logger->info('DatabaseSeeder: Running QuestSeeder');
+            $this->call(QuestSeeder::class);
+
             // Initialize per-user game state (inventory, pipeline, spikes)
             $logger->info('DatabaseSeeder: Running InitializeNewGame for test user');
             app(InitializeNewGame::class)->handle($user);
