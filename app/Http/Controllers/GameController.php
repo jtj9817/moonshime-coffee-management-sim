@@ -404,7 +404,7 @@ class GameController extends Controller
             if ($gameState) {
                 $gameState->update([
                     'day' => 1,
-                    'cash' => 10000.00,
+                    'cash' => 1000000,
                     'xp' => 0,
                     // Reset other fields?
                 ]);

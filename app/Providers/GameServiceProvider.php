@@ -48,11 +48,11 @@ class GameServiceProvider extends ServiceProvider
             $user = auth()->user();
             if (!$user) {
                 // Fallback for tests or console if needed
-                return new GameState(['day' => 1, 'cash' => 10000.00, 'xp' => 0]);
+                return new GameState(['day' => 1, 'cash' => 1000000, 'xp' => 0]);
             }
             return GameState::firstOrCreate(
                 ['user_id' => $user->id],
-                ['cash' => 10000.00, 'xp' => 0, 'day' => 1]
+                ['cash' => 1000000, 'xp' => 0, 'day' => 1]
             );
         });
 
