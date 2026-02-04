@@ -8,6 +8,7 @@ use App\Events\OrderCancelled;
 use App\Events\SpikeOccurred;
 use App\Events\TimeAdvanced;
 use App\Events\TransferCompleted;
+use App\Events\StockoutOccurred;
 use App\Interfaces\AiProviderInterface;
 use App\Interfaces\RestockStrategyInterface;
 use App\Listeners\DeductCash;
@@ -18,6 +19,7 @@ use App\Listeners\DecayPerishables;
 use App\Listeners\ProcessDeliveries;
 use App\Listeners\GenerateSpike;
 use App\Listeners\CreateDailyReport;
+use App\Listeners\GenerateStockoutAlert;
 use App\Services\InventoryManagementService;
 use App\Services\InventoryMathService;
 use App\Services\PrismAiService;
@@ -124,6 +126,9 @@ class GameServiceProvider extends ServiceProvider
         // DAG Chain for SpikeOccurred
         Event::listen(SpikeOccurred::class, GenerateAlert::class);
         Event::listen(SpikeOccurred::class, ApplySpikeEffect::class);
+
+        // Stockout alerts
+        Event::listen(StockoutOccurred::class, GenerateStockoutAlert::class);
 
         // DAG Chain for SpikeEnded
         Event::listen(SpikeEnded::class, RollbackSpikeEffect::class);

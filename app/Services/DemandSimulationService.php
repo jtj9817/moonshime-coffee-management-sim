@@ -3,9 +3,11 @@
 namespace App\Services;
 
 use App\Models\GameState;
+use App\Models\DemandEvent;
 use App\Models\Inventory;
 use App\Models\Location;
 use App\Models\SpikeEvent;
+use App\Events\StockoutOccurred;
 use Illuminate\Support\Facades\Log;
 
 class DemandSimulationService
@@ -43,10 +45,6 @@ class DemandSimulationService
             $inventories = $store->inventories;
 
             foreach ($inventories as $inventory) {
-                if ($inventory->quantity <= 0) {
-                    continue; // Already empty
-                }
-
                 // Calculate baseline consumption
                 $baseline = $this->getBaselineConsumption($inventory->product);
 
@@ -62,13 +60,39 @@ class DemandSimulationService
                     Log::info("Demand spike active: product {$inventory->product_id} at {$store->name}, multiplier: {$demandMultiplier}x");
                 }
 
-                // Decrement inventory (cannot go below 0)
-                $actualConsumed = min($consumption, $inventory->quantity);
-                $inventory->decrement('quantity', $actualConsumed);
+                $requestedQuantity = max(0, (int) $consumption);
+                if ($requestedQuantity <= 0) {
+                    continue;
+                }
 
-                // TODO: Record stockout event if demand > available quantity
-                if ($consumption > $actualConsumed) {
+                // Decrement inventory (cannot go below 0)
+                $availableQuantity = max(0, (int) $inventory->quantity);
+                $actualConsumed = min($requestedQuantity, $availableQuantity);
+                if ($actualConsumed > 0) {
+                    $inventory->decrement('quantity', $actualConsumed);
+                }
+
+                $lostQuantity = $requestedQuantity - $actualConsumed;
+                $unitPrice = (float) ($inventory->product->unit_price ?? 0);
+                $revenue = round($actualConsumed * $unitPrice, 2);
+                $lostRevenue = round($lostQuantity * $unitPrice, 2);
+
+                $demandEvent = DemandEvent::create([
+                    'user_id' => $userId,
+                    'day' => $day,
+                    'location_id' => $store->id,
+                    'product_id' => $inventory->product_id,
+                    'requested_quantity' => $requestedQuantity,
+                    'fulfilled_quantity' => $actualConsumed,
+                    'lost_quantity' => $lostQuantity,
+                    'unit_price' => $unitPrice,
+                    'revenue' => $revenue,
+                    'lost_revenue' => $lostRevenue,
+                ]);
+
+                if ($lostQuantity > 0) {
                     Log::warning("Stockout at {$store->name} for product {$inventory->product_id}");
+                    event(new StockoutOccurred($demandEvent));
                 }
             }
         }
