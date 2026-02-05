@@ -4,12 +4,16 @@ import {
     AlertOctagon,
     AlertTriangle,
     ArrowRight,
+    Building2,
     CheckCircle2,
+    Coffee,
     DollarSign,
     MapPin,
     Package,
     Target,
     TrendingUp,
+    Truck,
+    Warehouse,
     Zap,
 } from 'lucide-react';
 import { type ReactNode } from 'react';
@@ -24,7 +28,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useGame } from '@/contexts/game-context';
 import GameLayout from '@/layouts/game-layout';
-import { AlertModel, DashboardKPI, QuestModel, type BreadcrumbItem } from '@/types/index';
+import { AlertModel, DashboardKPI, LocationModel, QuestModel, type BreadcrumbItem } from '@/types/index';
 
 interface DashboardProps {
     alerts: AlertModel[];
@@ -53,6 +57,40 @@ interface DashboardProps {
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Mission Control', href: '/game/dashboard' },
 ];
+
+const LOCATION_CATEGORIES = [
+    {
+        types: ['store'],
+        label: 'Coffee Shops',
+        Icon: Coffee,
+        iconBg: 'bg-amber-100 dark:bg-amber-900/30',
+        iconColor: 'text-amber-600 dark:text-amber-400',
+        countBadge: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
+    },
+    {
+        types: ['vendor'],
+        label: 'Vendors',
+        Icon: Truck,
+        iconBg: 'bg-blue-100 dark:bg-blue-900/30',
+        iconColor: 'text-blue-600 dark:text-blue-400',
+        countBadge: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
+    },
+    {
+        types: ['hub', 'warehouse'],
+        label: 'Distribution Hubs',
+        Icon: Building2,
+        iconBg: 'bg-purple-100 dark:bg-purple-900/30',
+        iconColor: 'text-purple-600 dark:text-purple-400',
+        countBadge: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
+    },
+];
+
+const LOCATION_TYPE_ICONS: Record<string, typeof Coffee> = {
+    store: Coffee,
+    vendor: Truck,
+    hub: Building2,
+    warehouse: Warehouse,
+};
 
 function QuestCard({ quest }: { quest: QuestModel }) {
     const progress = Math.min(100, (quest.currentValue / quest.targetValue) * 100);
@@ -103,10 +141,11 @@ function QuestCard({ quest }: { quest: QuestModel }) {
     );
 }
 
-function LocationCard({ location, alerts }: { location: { id: string; name: string; address: string }; alerts: AlertModel[] }) {
+function LocationCard({ location, alerts }: { location: LocationModel; alerts: AlertModel[] }) {
     const locationAlerts = alerts.filter((a) => a.location_id === location.id);
     const critical = locationAlerts.filter((a) => a.severity === 'critical').length;
     const warning = locationAlerts.filter((a) => a.severity === 'warning').length;
+    const TypeIcon = LOCATION_TYPE_ICONS[location.type] || MapPin;
 
     let statusColor = 'bg-emerald-500';
     let borderColor = 'border-emerald-200 dark:border-emerald-800';
@@ -132,9 +171,9 @@ function LocationCard({ location, alerts }: { location: { id: string; name: stri
 
             <div className="mb-4 flex items-center gap-3">
                 <div
-                    className={`flex h-10 w-10 items-center justify-center rounded-lg font-bold text-white shadow-md ${statusColor}`}
+                    className={`flex h-10 w-10 items-center justify-center rounded-lg text-white shadow-md ${statusColor}`}
                 >
-                    {location.name.substring(0, 1)}
+                    <TypeIcon size={20} />
                 </div>
                 <div>
                     <h3 className="font-bold text-stone-900 transition-colors group-hover:text-amber-600 dark:text-white">
@@ -272,14 +311,46 @@ export default function Dashboard({ alerts, kpis, quests, logistics_health, acti
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                     {/* Locations */}
                     <div className="lg:col-span-2">
-                        <h2 className="mb-4 flex items-center gap-2 text-lg font-bold text-stone-900 dark:text-white">
+                        <h2 className="mb-6 flex items-center gap-2 text-lg font-bold text-stone-900 dark:text-white">
                             <MapPin className="h-5 w-5 text-amber-600" />
                             Location Status
                         </h2>
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                            {locations.map((location) => (
-                                <LocationCard key={location.id} location={location} alerts={alerts} />
-                            ))}
+                        <div className="space-y-8">
+                            {LOCATION_CATEGORIES.map((category) => {
+                                const categoryLocations = locations.filter((l) =>
+                                    category.types.includes(l.type),
+                                );
+                                if (categoryLocations.length === 0) return null;
+                                return (
+                                    <div key={category.label}>
+                                        <div className="mb-3 flex items-center gap-3">
+                                            <div
+                                                className={`flex h-7 w-7 items-center justify-center rounded-md ${category.iconBg}`}
+                                            >
+                                                <category.Icon className={`h-3.5 w-3.5 ${category.iconColor}`} />
+                                            </div>
+                                            <span className="text-sm font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400">
+                                                {category.label}
+                                            </span>
+                                            <div className="h-px flex-1 bg-stone-200 dark:bg-stone-700" />
+                                            <span
+                                                className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${category.countBadge}`}
+                                            >
+                                                {categoryLocations.length}
+                                            </span>
+                                        </div>
+                                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                            {categoryLocations.map((location) => (
+                                                <LocationCard
+                                                    key={location.id}
+                                                    location={location}
+                                                    alerts={alerts}
+                                                />
+                                            ))}
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
 
