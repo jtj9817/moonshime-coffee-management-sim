@@ -74,7 +74,7 @@ This plan implements Phase 0 from `docs/gameplay-features-implementation-spec.md
 - [x] Confirm no dashboard/list/analytics query returns another user's data.
 - [x] Run feature test suite to ensure scoping changes do not regress valid flows (282 tests pass).
 
-## Phase 3: Phase 0 Exit Validation
+## Phase 3: Phase 0 Exit Validation [checkpoint: fa8079e]
 
 ### Verification Matrix (Must Pass)
 - [x] **Money**
