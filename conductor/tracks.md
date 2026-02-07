@@ -14,7 +14,8 @@ This file tracks all major tracks for the project. Each track has its own detail
 # Archived Tracks
 
 - [x] **Track: TESTING: Modify the @tests/Feature/MultiHopOrderTest.php based on the ideas contained within the @docs/multi-hop-order-test-scenarios.md doc.**
-*Link: [./tracks/multi_hop_regression_20260128/](./tracks/multi_hop_regression_20260128/)*
+    - **ID:** `multi_hop_regression_20260128`
+    - **Link:** [./archive/multi_hop_regression_20260128/](./archive/multi_hop_regression_20260128/)
 
 - [x] **Track: Fix critical starting cash bug and multi-user data leakage.**
     - **ID:** `critical_bugs_20260124`
