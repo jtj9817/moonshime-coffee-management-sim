@@ -3,6 +3,12 @@
 ## Overview
 This track focuses on securing the core architecture of the Moonshine Coffee Management Sim by enforcing two critical invariants: integer-based monetary calculations (cents) and strict user isolation across all gameplay systems. This ensures data integrity and prevents multi-user data leakage before new gameplay features are introduced.
 
+## Current State Snapshot
+- **Verified:** Startup cash initialization uses `1000000` in the primary new-game and middleware fallback paths.
+- **Verified:** Middleware shared props scope alerts/reputation/strikes by authenticated user.
+- **Pending:** Monetary logic still mixes cent and float-dollar semantics in several backend paths.
+- **Pending:** Gameplay controller and aggregate-query user scoping still requires full audit.
+
 ## Functional Requirements
 
 ### 1. Monetary Unit Canonicalization
@@ -22,12 +28,13 @@ This track focuses on securing the core architecture of the Moonshine Coffee Man
 - **Safety:** No gameplay endpoint should ever return data belonging to another user.
 
 ## Acceptance Criteria
-- [ ] No monetary calculations in the backend use `float` types for currency.
-- [ ] All database columns representing money are `integer` or `bigInteger`.
+- [ ] No game creation/reset path initializes cash with `10000.00`.
 - [ ] Starting cash is correctly initialized as `1000000` (cents).
-- [ ] Automated tests confirm that User A cannot see User B's orders or inventory.
-- [ ] Dashboard and Analytics responses are strictly filtered by the authenticated user's ID.
-- [ ] Factories and Seeders generate realistic cent-based data.
+- [ ] Monetary casts and domain arithmetic are cent-based in backend logic.
+- [ ] Dashboard/list/analytics responses are strictly filtered by authenticated user ID.
+- [ ] Shared middleware props and page-specific props both enforce user isolation.
+- [ ] Automated tests confirm multi-user isolation for dashboard and gameplay aggregates.
+- [ ] Factories and seeders generate cent-consistent financial values.
 
 ## Out of Scope
 - Implementation of new gameplay features (Demand forecasting, Quest system, etc.).

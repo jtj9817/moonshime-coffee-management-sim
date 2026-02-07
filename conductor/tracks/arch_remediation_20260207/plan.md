@@ -1,55 +1,92 @@
 # Implementation Plan: Phase 0 - Critical Architecture Remediation
 
-This plan outlines the steps to standardize monetary units to integer cents and enforce strict user isolation across the application.
+This plan implements Phase 0 from `docs/gameplay-features-implementation-spec.md` and is limited to architecture invariants: monetary unit canonicalization and global user isolation.
 
 ## Phase 1: Monetary Unit Canonicalization (Cents)
 
-### Task 1: Audit and Migration
-- [ ] Task: Audit database migrations for currency columns (cents vs dollars).
-- [ ] Task: Create migration to standardize any `decimal` or `float` currency columns to `bigInteger`.
-    - [ ] Target: `game_states.cash`
-    - [ ] Target: `orders.total_price`, `orders.unit_price`
-    - [ ] Target: `products.base_price`
-    - [ ] Target: `vendors.base_cost`
-- [ ] Task: Update `GameState` model to cast `cash` as `integer`.
+### Current State (Verified)
+- [x] `InitializeNewGame` uses `1000000` starting cash.
+- [x] `HandleInertiaRequests` fallback game-state creation uses `1000000`.
+- [ ] Monetary semantics are still mixed between cent-style and float-dollar usage in models and domain logic.
 
-### Task 2: Domain Logic Standardization
-- [ ] Task: Audit `app/Services/SimulationService.php` for cent-based arithmetic.
-- [ ] Task: Audit `app/Listeners/DeductCash.php` and financial listeners.
-- [ ] Task: Standardize `app/Actions/InitializeNewGame.php` starting cash to `1000000`.
+### Task 1: Audit Monetary Columns and Casts
+- [ ] Audit current money columns and units in schema and model casts.
+- [ ] Verify/standardize casts for:
+  - [ ] `game_states.cash`
+  - [ ] `orders.total_cost`
+  - [ ] `products.unit_price`
+  - [ ] `demand_events.unit_price`
+- [ ] Update `app/Models/GameState.php` cast for `cash` to integer cents.
 
-### Task 3: Test Data and Frontend Boundaries
-- [ ] Task: Update all Model Factories to use integer cents for financial fields.
-- [ ] Task: Update Seeders to align with cent-based defaults.
-- [ ] Task: Verify `resources/js/lib/formatCurrency.ts` correctly handles cents-to-dollars conversion.
+### Task 2: Domain Arithmetic Standardization
+- [ ] Audit and standardize cent-based arithmetic in:
+  - [ ] `app/Listeners/DeductCash.php`
+  - [ ] `app/Listeners/ApplyStorageCosts.php`
+  - [ ] `app/States/Order/Transitions/ToPending.php`
+  - [ ] `app/Http/Requests/StoreOrderRequest.php`
+  - [ ] `app/Services/DemandSimulationService.php`
+- [ ] Remove float-based currency math from backend domain logic.
 
-### Task 4: Verification (Money)
-- [ ] Task: Write unit tests to ensure `SimulationService` calculations are precise (no floats).
-- [ ] Task: Run `php artisan sail --args=pest` to check for regressions in financial flows.
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Monetary Canonicalization' (Protocol in workflow.md)
+### Task 3: Boundary Conversion Contract
+- [ ] Document and enforce a single conversion boundary:
+  - [ ] Persistence/business logic = integer cents.
+  - [ ] Backend serialization/frontend formatting = display dollars.
+- [ ] Verify `resources/js/lib/formatCurrency.ts` is only used for display formatting, not business logic conversion.
+
+### Task 4: Seed/Test Data Consistency
+- [ ] Audit factories and seeders for cent-consistent money values.
+- [ ] Ensure no create/reset path initializes cash with `10000.00`.
+
+### Task 5: Verification (Money Invariants)
+- [ ] Keep/verify `tests/Feature/GameInitializationTest.php`.
+- [ ] Add targeted assertions that new game cash remains `1000000` cents.
+- [ ] Run regression suite for financial flow integrity.
 
 ## Phase 2: Global User Isolation Audit
 
-### Task 1: Controller and Query Audit
-- [ ] Task: Audit `app/Http/Controllers/GameController.php` for missing `user_id` scopes.
-- [ ] Task: Audit `app/Http/Controllers/OrderController.php` and `TransferController.php`.
-- [ ] Task: Ensure all aggregate queries (analytics/reports) include `where('user_id', auth()->id())`.
+### Current State (Verified)
+- [x] Middleware shared props are user-scoped for alerts, reputation, and strikes.
+- [ ] Gameplay controllers and derived aggregates still require a full scoping audit.
 
-### Task 2: Automated Isolation Testing
-- [ ] Task: Create a Feature Test `tests/Feature/UserIsolationTest.php`.
-    - [ ] Test: User A cannot access User B's GameState.
-    - [ ] Test: User A cannot list User B's Orders.
-    - [ ] Test: User A cannot view User B's Inventory.
-- [ ] Task: Verify Middleware shared props in `app/Http/Middleware/HandleInertiaRequests.php`.
+### Task 1: Controller and Aggregate Query Audit
+- [ ] Audit `app/Http/Controllers/GameController.php` for per-user table queries.
+- [ ] Enforce explicit scoping for all per-user entities:
+  - [ ] `alerts`
+  - [ ] `orders`
+  - [ ] `transfers`
+  - [ ] `inventory`
+  - [ ] `spike_events`
+  - [ ] `demand_events`
+  - [ ] `daily_reports`
+  - [ ] `game_states`
+- [ ] Ensure analytics/reporting aggregates are scoped by authenticated user.
 
-### Task 3: Verification (Isolation)
-- [ ] Task: Run full test suite to ensure scoping doesn't break existing functionality.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: User Isolation' (Protocol in workflow.md)
+### Task 2: Automated Isolation Tests
+- [ ] Add or update feature tests for multi-user isolation:
+  - [ ] User A cannot read User B dashboard data.
+  - [ ] User A cannot list User B orders/transfers/inventory.
+  - [ ] Analytics endpoints/props do not include other users' rows.
+- [ ] Maintain middleware-shared-prop isolation checks.
 
-## Phase 3: Final Integration & Cleanup
+### Task 3: Verification (Isolation Invariants)
+- [ ] Confirm no dashboard/list/analytics query returns another user's data.
+- [ ] Run feature test suite to ensure scoping changes do not regress valid flows.
 
-### Task 1: Quality Assurance
-- [ ] Task: Run `php artisan sail --args=pint` for PHP linting.
-- [ ] Task: Run `php artisan sail --args=pnpm --args=lint` for JS linting.
-- [ ] Task: Final regression test run.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Final Integration' (Protocol in workflow.md)
+## Phase 3: Phase 0 Exit Validation
+
+### Verification Matrix (Must Pass)
+- [ ] **Money**
+  - [ ] No game creation/reset path initializes cash with `10000.00`.
+  - [ ] Starting cash invariant remains `1000000` cents.
+  - [ ] Monetary casts and arithmetic are cent-based in backend domain logic.
+- [ ] **Isolation**
+  - [ ] Dashboard/list/analytics responses are user-scoped.
+  - [ ] Shared middleware props and page-specific props both enforce user isolation.
+- [ ] **Regression Coverage**
+  - [ ] `tests/Feature/GameInitializationTest.php` remains green.
+  - [ ] Multi-user isolation feature coverage is present and green.
+
+### Final Quality Checks
+- [ ] Run `php artisan sail --args=pest`.
+- [ ] Run `php artisan sail --args=pint`.
+- [ ] Run `php artisan sail --args=pnpm --args=lint`.
