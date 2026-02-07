@@ -42,7 +42,7 @@ This plan implements Phase 0 from `docs/gameplay-features-implementation-spec.md
 - [x] Add targeted assertions that new game cash remains `1000000` cents.
 - [x] Run regression suite for financial flow integrity.
 
-## Phase 2: Global User Isolation Audit
+## Phase 2: Global User Isolation Audit [checkpoint: 4073f50]
 
 ### Current State (Verified)
 - [x] Middleware shared props are user-scoped for alerts, reputation, and strikes.
