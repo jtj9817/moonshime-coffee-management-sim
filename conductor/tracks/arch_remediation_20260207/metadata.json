@@ -1,0 +1,8 @@
+{
+  "track_id": "arch_remediation_20260207",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-02-07T12:00:00Z",
+  "updated_at": "2026-02-07T12:00:00Z",
+  "description": "Phase 0: Critical Architecture Remediation - Standardize monetary units to cents and enforce user isolation."
+}

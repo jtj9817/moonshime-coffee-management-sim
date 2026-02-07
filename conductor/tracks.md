@@ -6,6 +6,9 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 # Active Tracks
 
+- [ ] **Track: Phase 0: Critical Architecture Remediation**
+*Link: [./tracks/arch_remediation_20260207/](./tracks/arch_remediation_20260207/)*
+
 ---
 
 # Archived Tracks
@@ -56,5 +59,3 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: UI Integration ("The No-Map Dashboard")**
     - **ID:** `ui_integration_20260116`
     - **Link:** [./archive/ui_integration_20260116/](./archive/ui_integration_20260116/)
-
----
