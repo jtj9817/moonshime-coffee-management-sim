@@ -2,7 +2,7 @@
 
 This plan implements Phase 0 from `docs/gameplay-features-implementation-spec.md` and is limited to architecture invariants: monetary unit canonicalization and global user isolation.
 
-## Phase 1: Monetary Unit Canonicalization (Cents)
+## Phase 1: Monetary Unit Canonicalization (Cents) [checkpoint: 6f4a23c]
 
 ### Current State (Verified)
 - [x] `InitializeNewGame` uses `1000000` starting cash.
