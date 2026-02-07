@@ -2,28 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\InitializeNewGame;
+use App\Events\OrderPlaced;
 use App\Models\Alert;
+use App\Models\DailyReport;
 use App\Models\DemandEvent;
+use App\Models\GameState;
 use App\Models\Inventory;
 use App\Models\Location;
 use App\Models\Order;
-use App\Models\Product;
-use App\Models\SpikeEvent;
 use App\Models\OrderItem;
+use App\Models\Product;
 use App\Models\Route;
-use App\States\Order\Cancelled;
-use App\States\Order\Delivered;
-use App\States\Order\Draft;
-use App\States\Order\Pending;
-use App\States\Order\Shipped;
+use App\Models\SpikeEvent;
 use App\Models\Transfer;
 use App\Models\Vendor;
-use App\Events\OrderPlaced;
 use App\Services\QuestService;
 use App\Services\SimulationService;
-use App\Actions\InitializeNewGame;
-use App\Models\GameState;
-use App\Models\DailyReport;
+use App\States\Order\Cancelled;
+use App\States\Order\Delivered;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -48,7 +45,7 @@ class GameController extends Controller
 
         $gameState = GameState::where('user_id', $userId)->first();
         $previousDay = $gameState ? $gameState->day - 1 : 0;
-        
+
         $dailyReport = null;
         if ($previousDay >= 1) {
             $dailyReport = DailyReport::where('user_id', $userId)
@@ -116,11 +113,11 @@ class GameController extends Controller
 
         $route = Route::find($validated['route_id']);
         $totalQuantity = collect($validated['items'])->sum('quantity');
-        
+
         // Logic: if total quantity <= capacity, it's valid.
         // We also want to return the excess if any.
         $excess = max(0, $totalQuantity - $route->capacity);
-        
+
         return response()->json([
             'within_capacity' => $totalQuantity <= $route->capacity,
             'order_quantity' => $totalQuantity,
@@ -237,7 +234,7 @@ class GameController extends Controller
         $userId = auth()->id();
         $gameState = GameState::where('user_id', $userId)->first();
         $currentDay = $gameState ? $gameState->day : 1;
-        
+
         // Get all spikes with enriched playbook data
         $spikes = SpikeEvent::with(['location', 'product', 'affectedRoute'])
             ->where('user_id', $userId)
@@ -250,7 +247,7 @@ class GameController extends Controller
             });
 
         // Separate active spikes for the Active Events section
-        $activeSpikes = $spikes->filter(fn($spike) => $spike['is_active']);
+        $activeSpikes = $spikes->filter(fn ($spike) => $spike['is_active']);
 
         return Inertia::render('game/spike-history', [
             'spikes' => $spikes,
@@ -296,19 +293,18 @@ class GameController extends Controller
     /**
      * Place a new order.
      */
-
     public function placeOrder(\App\Http\Requests\StoreOrderRequest $request): \Illuminate\Http\RedirectResponse
     {
         $validated = $request->validated();
-        
+
         return DB::transaction(function () use ($validated, $request) {
             $path = $request->input('_calculated_path');
             // sourceLocation not strictly needed by createOrder if path is provided
-            
+
             $vendor = Vendor::findOrFail($validated['vendor_id']);
             $targetLocation = Location::findOrFail($validated['location_id']);
-            
-            $items = collect($validated['items'])->map(function($item) {
+
+            $items = collect($validated['items'])->map(function ($item) {
                 return [
                     'product_id' => $item['product_id'],
                     'quantity' => $item['quantity'],
@@ -323,7 +319,7 @@ class GameController extends Controller
                 items: $items,
                 path: $path
             );
-            
+
             event(new OrderPlaced($order));
 
             return back()->with('success', 'Order placed successfully');
@@ -377,15 +373,16 @@ class GameController extends Controller
             return response()->json(['success' => false, 'message' => 'Cannot cancel delivered orders.'], 422);
         }
 
-        if (!$order->status->canTransitionTo(Cancelled::class)) {
+        if (! $order->status->canTransitionTo(Cancelled::class)) {
             return response()->json(['success' => false, 'message' => 'Order cannot be cancelled in its current state.'], 422);
         }
 
         try {
             $order->status->transitionTo(Cancelled::class);
+
             return response()->json(['success' => true, 'message' => 'Order cancelled successfully.']);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Failed to cancel order: ' . $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Failed to cancel order: '.$e->getMessage()], 500);
         }
     }
 
@@ -417,7 +414,7 @@ class GameController extends Controller
             Alert::where('user_id', $user->id)->delete();
             SpikeEvent::where('user_id', $user->id)->delete();
             Inventory::where('user_id', $user->id)->delete();
-            
+
             // Reset GameState
             $gameState = GameState::where('user_id', $user->id)->first();
             if ($gameState) {
@@ -443,7 +440,7 @@ class GameController extends Controller
      */
     protected function calculateKPIs(?int $userId = null): array
     {
-        if (!$userId) {
+        if (! $userId) {
             return [
                 ['label' => 'Inventory Value', 'value' => 0],
                 ['label' => 'Low Stock Items', 'value' => 0, 'trend' => 'neutral'],
@@ -480,7 +477,7 @@ class GameController extends Controller
      */
     protected function getActiveQuests(?\App\Models\User $user = null): array
     {
-        if (!$user) {
+        if (! $user) {
             return [];
         }
 
@@ -536,7 +533,7 @@ class GameController extends Controller
             ->groupBy('day')
             ->orderBy('day')
             ->get()
-            ->map(fn($item) => ['day' => (int) $item->day, 'value' => (int) $item->value])
+            ->map(fn ($item) => ['day' => (int) $item->day, 'value' => (int) $item->value])
             ->toArray();
     }
 
@@ -552,9 +549,9 @@ class GameController extends Controller
             ->select('products.category', DB::raw('SUM(order_items.quantity * order_items.cost_per_unit) as amount'))
             ->groupBy('products.category')
             ->get()
-            ->map(fn($item) => [
+            ->map(fn ($item) => [
                 'category' => $item->category,
-                'amount' => (float) $item->amount
+                'amount' => (float) $item->amount,
             ])
             ->toArray();
     }
@@ -572,10 +569,10 @@ class GameController extends Controller
             $inventories = $loc->inventories;
 
             $inventoryValue = $inventories->sum(fn ($inv) => $inv->quantity * $inv->product->unit_price);
-            
+
             $totalQuantity = $inventories->sum('quantity');
-            $utilization = $loc->max_storage > 0 
-                ? round(($totalQuantity / $loc->max_storage) * 100, 1) 
+            $utilization = $loc->max_storage > 0
+                ? round(($totalQuantity / $loc->max_storage) * 100, 1)
                 : 0;
 
             $itemCount = $inventories->unique('product_id')->count();
@@ -597,19 +594,19 @@ class GameController extends Controller
         return Location::with(['inventories' => function ($query) {
             $query->where('user_id', auth()->id());
         }])->get()
-        ->map(function ($loc) {
-            $used = $loc->inventories->sum('quantity');
-            $capacity = $loc->max_storage;
-            $percentage = $capacity > 0 ? round(($used / $capacity) * 100, 1) : 0;
-            
-            return [
-                'location_id' => $loc->id,
-                'name' => $loc->name,
-                'capacity' => (int) $capacity,
-                'used' => (int) $used,
-                'percentage' => (float) $percentage,
-            ];
-        })->toArray();
+            ->map(function ($loc) {
+                $used = $loc->inventories->sum('quantity');
+                $capacity = $loc->max_storage;
+                $percentage = $capacity > 0 ? round(($used / $capacity) * 100, 1) : 0;
+
+                return [
+                    'location_id' => $loc->id,
+                    'name' => $loc->name,
+                    'capacity' => (int) $capacity,
+                    'used' => (int) $used,
+                    'percentage' => (float) $percentage,
+                ];
+            })->toArray();
     }
 
     /**
@@ -618,24 +615,24 @@ class GameController extends Controller
     protected function getOrderFulfillmentMetrics(): array
     {
         $userId = auth()->id();
-        
+
         $totalOrders = Order::where('user_id', $userId)->count();
         $deliveredOrders = Order::where('user_id', $userId)
             ->whereState('status', Delivered::class)
             ->get();
-            
+
         $deliveredCount = $deliveredOrders->count();
-        
-        $fulfillmentRate = $totalOrders > 0 
-            ? round(($deliveredCount / $totalOrders) * 100, 1) 
+
+        $fulfillmentRate = $totalOrders > 0
+            ? round(($deliveredCount / $totalOrders) * 100, 1)
             : 0;
 
         $totalTransitDays = $deliveredOrders->sum(function ($order) {
             return max(0, $order->delivery_day - $order->created_day);
         });
-        
-        $averageDeliveryTime = $deliveredCount > 0 
-            ? round($totalTransitDays / $deliveredCount, 1) 
+
+        $averageDeliveryTime = $deliveredCount > 0
+            ? round($totalTransitDays / $deliveredCount, 1)
             : 0;
 
         return [
@@ -659,7 +656,7 @@ class GameController extends Controller
 
         return $spikes->map(function ($spike) {
             $impact = null;
-            
+
             if ($spike->product_id && $spike->location_id) {
                 $history = DB::table('inventory_history')
                     ->where('user_id', auth()->id())
@@ -668,18 +665,18 @@ class GameController extends Controller
                     ->where('day', '>=', $spike->starts_at_day)
                     ->where('day', '<=', $spike->ends_at_day)
                     ->get();
-                
+
                 if ($history->isNotEmpty()) {
                     $min = $history->min('quantity');
                     $avg = $history->avg('quantity');
-                    
+
                     $impact = [
                         'min_inventory' => (int) $min,
                         'avg_inventory' => round($avg, 1),
                     ];
                 }
             }
-            
+
             return [
                 'id' => $spike->id,
                 'type' => $spike->type,
@@ -699,11 +696,11 @@ class GameController extends Controller
     protected function getSpikeStatistics(?int $userId = null): array
     {
         $query = SpikeEvent::query();
-        
+
         if ($userId) {
             $query->where('user_id', $userId);
         }
-        
+
         return [
             'totalSpikes' => (clone $query)->count(),
             'activeSpikes' => (clone $query)->where('is_active', true)->count(),

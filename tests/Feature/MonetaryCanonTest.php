@@ -1,11 +1,11 @@
 <?php
 
+use App\Models\DemandEvent;
 use App\Models\GameState;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\Route as RouteModel;
-use App\Models\DemandEvent;
 use App\Models\User;
 use Database\Seeders\CoreGameStateSeeder;
 use Database\Seeders\GraphSeeder;

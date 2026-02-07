@@ -77,18 +77,18 @@ This plan implements Phase 0 from `docs/gameplay-features-implementation-spec.md
 ## Phase 3: Phase 0 Exit Validation
 
 ### Verification Matrix (Must Pass)
-- [ ] **Money**
-  - [ ] No game creation/reset path initializes cash with `10000.00`.
-  - [ ] Starting cash invariant remains `1000000` cents.
-  - [ ] Monetary casts and arithmetic are cent-based in backend domain logic.
-- [ ] **Isolation**
-  - [ ] Dashboard/list/analytics responses are user-scoped.
-  - [ ] Shared middleware props and page-specific props both enforce user isolation.
-- [ ] **Regression Coverage**
-  - [ ] `tests/Feature/GameInitializationTest.php` remains green.
-  - [ ] Multi-user isolation feature coverage is present and green.
+- [x] **Money**
+  - [x] No game creation/reset path initializes cash with `10000.00`.
+  - [x] Starting cash invariant remains `1000000` cents.
+  - [x] Monetary casts and arithmetic are cent-based in backend domain logic.
+- [x] **Isolation**
+  - [x] Dashboard/list/analytics responses are user-scoped.
+  - [x] Shared middleware props and page-specific props both enforce user isolation.
+- [x] **Regression Coverage**
+  - [x] `tests/Feature/GameInitializationTest.php` remains green.
+  - [x] Multi-user isolation feature coverage is present and green.
 
 ### Final Quality Checks
-- [ ] Run `php artisan sail --args=pest`.
-- [ ] Run `php artisan sail --args=pint`.
-- [ ] Run `php artisan sail --args=pnpm --args=lint`.
+- [x] Run `./vendor/bin/sail pest` — 282 passed (1426 assertions).
+- [x] Run `./vendor/bin/sail php ./vendor/bin/pint` on changed files — all clean.
+- [ ] Run `sail pnpm run lint` (deferred — no frontend changes in Phase 2/3).

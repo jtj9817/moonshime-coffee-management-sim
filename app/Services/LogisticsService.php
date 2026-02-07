@@ -28,6 +28,7 @@ class LogisticsService
     {
         $this->userId = $userId;
         $this->graphCache = null; // Invalidate cache when user changes
+
         return $this;
     }
 
@@ -49,8 +50,6 @@ class LogisticsService
 
     /**
      * Get the overall logistics health (percentage of active routes).
-     *
-     * @return float
      */
     public function getLogisticsHealth(): float
     {
@@ -66,10 +65,6 @@ class LogisticsService
 
     /**
      * Get all active routes between two locations.
-     *
-     * @param Location $source
-     * @param Location $target
-     * @return Collection
      */
     public function getValidRoutes(Location $source, Location $target): Collection
     {
@@ -82,7 +77,6 @@ class LogisticsService
     /**
      * Calculate the cost of traversing a route, including spike effects.
      *
-     * @param Route $route
      * @return float
      */
     public function calculateCost(Route $route): int
@@ -108,8 +102,6 @@ class LogisticsService
     /**
      * Build an adjacency list of the graph for efficient traversal.
      * Pre-calculates costs including active spikes.
-     *
-     * @return array
      */
     protected function getAdjacencyList(): array
     {
@@ -147,23 +139,21 @@ class LogisticsService
         }
 
         $this->graphCache = $adj;
+
         return $adj;
     }
 
     /**
      * Check if a location is reachable from any supply source (Warehouse or Vendor) using active routes.
      * Uses Reverse-BFS.
-     *
-     * @param Location $target
-     * @return bool
      */
     public function checkReachability(Location $target): bool
     {
         // For reverse BFS, we need an adjacency list of INCOMING routes
-        // Since getAdjacencyList is optimized for outgoing (Dijkstra), 
+        // Since getAdjacencyList is optimized for outgoing (Dijkstra),
         // we'll do a quick specialized version here or keep existing logic if it's not a hotspot.
         // Given we want performance, let's optimize it too.
-        
+
         $allActiveRoutes = Route::where('is_active', true)->with('source')->get();
         $incomingAdj = [];
         foreach ($allActiveRoutes as $route) {
@@ -173,7 +163,7 @@ class LogisticsService
         $queue = [$target];
         $visited = [$target->id => true];
 
-        while (!empty($queue)) {
+        while (! empty($queue)) {
             $current = array_shift($queue);
 
             // Check if we found a supply source
@@ -183,7 +173,7 @@ class LogisticsService
 
             $sources = $incomingAdj[$current->id] ?? [];
             foreach ($sources as $source) {
-                if ($source && !isset($visited[$source->id])) {
+                if ($source && ! isset($visited[$source->id])) {
                     $visited[$source->id] = true;
                     $queue[] = $source;
                 }
@@ -196,23 +186,21 @@ class LogisticsService
     /**
      * Find the best route (cheapest path) between two locations using Dijkstra's algorithm.
      *
-     * @param Location $source
-     * @param Location $target
      * @return Collection|null Collection of Route objects or null if no path
      */
     public function findBestRoute(Location $source, Location $target): ?Collection
     {
         $adj = $this->getAdjacencyList();
-        
+
         $distances = [];
         $previous = [];
-        $routeUsed = []; 
-        $queue = new \SplPriorityQueue();
+        $routeUsed = [];
+        $queue = new \SplPriorityQueue;
 
         $distances[$source->id] = 0;
         $queue->insert($source, 0);
 
-        while (!$queue->isEmpty()) {
+        while (! $queue->isEmpty()) {
             $current = $queue->extract();
 
             if ($current->id === $target->id) {
@@ -225,12 +213,14 @@ class LogisticsService
             foreach ($outgoing as $edge) {
                 $neighbor = $edge['target'];
                 $cost = $edge['cost'];
-                
-                if (!$neighbor) continue;
+
+                if (! $neighbor) {
+                    continue;
+                }
 
                 $alt = $distances[$current->id] + $cost;
 
-                if (!isset($distances[$neighbor->id]) || $alt < $distances[$neighbor->id]) {
+                if (! isset($distances[$neighbor->id]) || $alt < $distances[$neighbor->id]) {
                     $distances[$neighbor->id] = $alt;
                     $previous[$neighbor->id] = $current;
                     $routeUsed[$neighbor->id] = $edge['route'];
@@ -239,7 +229,7 @@ class LogisticsService
             }
         }
 
-        if (!isset($distances[$target->id])) {
+        if (! isset($distances[$target->id])) {
             return null; // unreachable
         }
 
@@ -248,15 +238,10 @@ class LogisticsService
 
     /**
      * Reconstruct path
-     *
-     * @param array $previous
-     * @param array $routeUsed
-     * @param string $targetId
-     * @return Collection
      */
     protected function reconstructPath(array $previous, array $routeUsed, string $targetId): Collection
     {
-        $path = new Collection();
+        $path = new Collection;
         $currId = $targetId;
 
         while (isset($previous[$currId])) {
@@ -270,9 +255,6 @@ class LogisticsService
 
     /**
      * Determine if a route is considered "premium" (e.g., an expensive alternative).
-     *
-     * @param Route $route
-     * @return bool
      */
     public function isPremiumRoute(Route $route): bool
     {
