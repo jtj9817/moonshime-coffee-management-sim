@@ -15,37 +15,76 @@ It is organized by the phases defined in the analysis roadmap, prioritizing crit
 
 ---
 
-## 2. Phase 0: Critical Architecture Fixes
+## 2. Phase 0: Critical Architecture Remediation
 
-**Objective:** Stabilize the economy and data isolation before adding new features.
+**Objective:** Lock core architecture invariants (money units + user isolation) before introducing new gameplay systems.
 
-### 2.1 Starting Cash Correction
-**Problem:** `InitializeNewGame` uses `10000.00` (float) which `GameState` casts to `10000` (int/cents) = $100.
-**Target State:** `1000000` (int/cents) = $10,000.
+### 2.1 Monetary Unit Canonicalization (Cents)
+**Current State (Verified):**
+- `InitializeNewGame` creates starting cash with `1000000`.
+- `HandleInertiaRequests` fallback `firstOrCreate` uses `1000000`.
+- Startup defaults are partially aligned with cent-based storage.
+
+**Remaining Risk:**
+- Monetary fields and calculations are still mixed between integer-cent and float-dollar semantics across models, requests, listeners, and frontend formatting.
+- `GameState` still casts `cash` as `float`, which conflicts with strict cent-based architecture.
+
+**Target State:**
+- All persisted monetary values are integer cents.
+- Business logic performs arithmetic in integer cents only.
+- Conversion to display dollars happens only at frontend rendering boundaries.
 
 **Implementation Details:**
-- **File:** `app/Actions/InitializeNewGame.php`
-- **File:** `app/Http/Middleware/HandleInertiaRequests.php` (fallback creation logic)
-- **Validation:** Create a test case `tests/Feature/GameInitializationTest.php` that asserts `GameState::first()->cash === 1000000`.
+- **Primary Audit Files:**
+  - `app/Models/GameState.php`
+  - `app/Models/Order.php`
+  - `app/Models/Product.php`
+  - `app/Models/DemandEvent.php`
+  - `app/Listeners/DeductCash.php`
+  - `app/Http/Requests/StoreOrderRequest.php`
+  - `resources/js/lib/formatCurrency.ts`
+- **Rules to Enforce:**
+  1. Replace float money casts with integer casts for cent-based columns.
+  2. Keep request validation/storage contracts explicit about units (dollars at input boundary, cents in persistence).
+  3. Require a single, documented conversion boundary when serializing backend values for UI display.
 
-### 2.2 User Scoping Enforcement
-**Problem:** Middleware queries for Alerts/Reputation do not filter by `user_id`.
-**Target State:** All queries strictly scoped to `Auth::id()`.
+### 2.2 Global User Isolation Audit
+**Current State (Verified):**
+- Shared Inertia game props are user-scoped for alerts, reputation, and strikes in middleware.
+
+**Remaining Risk:**
+- Query scoping is inconsistent in gameplay controllers and derived aggregates.
+- Some views can still read global records when `user_id` filters are missing on per-user tables.
+
+**Target State:**
+- Every per-user read/write path is strictly scoped to the authenticated user.
+- No gameplay dashboard/list/analytics endpoint can leak another player's data.
 
 **Implementation Details:**
-- **File:** `app/Http/Middleware/HandleInertiaRequests.php`
-- **Logic:**
-    ```php
-    // Reputation Calc
-    $userId = $request->user()->id;
-    $alertCount = Alert::where('user_id', $userId)->where('is_read', false)->count();
-    
-    // Strikes Calc
-    $strikes = Alert::where('user_id', $userId)
-        ->where('is_read', false)
-        ->where('severity', 'critical')
-        ->count();
-    ```
+- **Primary Audit File:** `app/Http/Controllers/GameController.php`
+- **Scope Rule:** Any query against per-user tables (`alerts`, `orders`, `transfers`, `inventory`, `spike_events`, `demand_events`, `daily_reports`, `game_states`) must include explicit `user_id` scoping (or an equivalent model scope/policy).
+- **Preferred Pattern:**
+  ```php
+  $userId = auth()->id();
+  Alert::where('user_id', $userId)->get();
+  ```
+
+### 2.3 Phase 0 Verification Matrix
+Phase 0 is complete only when all checks pass:
+
+1. **Money Invariants**
+   - No game creation/reset path initializes cash with `10000.00`.
+   - Starting cash invariant remains `1000000` cents for new games.
+   - Monetary casts and arithmetic are integer-cent based in domain logic.
+
+2. **Isolation Invariants**
+   - No dashboard/list/analytics query can return rows owned by another user.
+   - Shared middleware props and page-specific props both enforce user isolation.
+
+3. **Regression Coverage**
+   - Keep and enforce `tests/Feature/GameInitializationTest.php`.
+   - Add/maintain feature tests for multi-user isolation on dashboard and key game pages.
+   - Add targeted assertions for user-scoped aggregates in analytics/reporting responses.
 
 ---
 
@@ -262,7 +301,7 @@ Schema::create('spike_resolutions', function (Blueprint $table) {
 
 ## 6. Implementation Rules & Standards
 
-1.  **Money is Integers:** All new monetary columns MUST be `bigInteger` (cents). Frontend formatting only.
+1.  **Money is Integers:** All monetary columns MUST use integer cents in persistence and business logic. Convert to display dollars only at backend serialization/frontend formatting boundaries.
 2.  **Logic in Services:** Controllers should only parse requests and call Services.
 3.  **Inertia for Everything:** No pure API endpoints unless absolutely necessary for async charting. Use `HandleInertiaRequests` for global state and Page Props for specific data.
 4.  **Testing:** Every new Service method requires a Unit Test. Every Controller action requires a Feature Test.
@@ -271,7 +310,7 @@ Schema::create('spike_resolutions', function (Blueprint $table) {
 
 ## 7. Immediate Next Steps (Day 1)
 
-1.  Create migration to fix `game_states` default (if needed) or just fix the `InitializeNewGame` action.
-2.  Apply Middleware scoping fixes.
-3.  Scaffold `LostSales` migration and model.
-4.  Update `DemandSimulationService` to populate `LostSales`.
+1.  Run full money-unit audit and standardize casts/calculations to integer cents in backend domain logic.
+2.  Run full user-scoping audit for gameplay controllers and analytics aggregates (not middleware only).
+3.  Add/refresh regression tests for money invariants and multi-user isolation.
+4.  After Phase 0 passes verification matrix, scaffold `LostSales` migration/model and wire stockout persistence.
