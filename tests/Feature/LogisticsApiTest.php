@@ -70,8 +70,9 @@ test('getPath reflects cost increases from active spikes', function () {
         'is_active' => true
     ]);
 
-    // Create a spike that affects this route
+    // Create a spike that affects this route (scoped to the acting user)
     SpikeEvent::factory()->create([
+        'user_id' => $user->id,
         'type' => 'blizzard',
         'is_active' => true,
         'affected_route_id' => $route->id,

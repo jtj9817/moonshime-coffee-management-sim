@@ -73,7 +73,8 @@ class GameController extends Controller
     {
         $locationId = $request->get('location', 'all');
 
-        $query = Inventory::with(['product', 'location']);
+        $query = Inventory::with(['product', 'location'])
+            ->where('user_id', auth()->id());
         if ($locationId !== 'all') {
             $query->where('location_id', $locationId);
         }
@@ -90,6 +91,7 @@ class GameController extends Controller
     public function skuDetail(Location $location, Product $sku): Response
     {
         $inventory = Inventory::with(['product', 'location'])
+            ->where('user_id', auth()->id())
             ->where('location_id', $location->id)
             ->where('product_id', $sku->id)
             ->first();
@@ -134,6 +136,7 @@ class GameController extends Controller
     public function ordering(): Response
     {
         $orders = Order::with(['vendor', 'items.product'])
+            ->where('user_id', auth()->id())
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -151,6 +154,7 @@ class GameController extends Controller
     public function transfers(): Response
     {
         $transfers = Transfer::with(['sourceLocation', 'targetLocation'])
+            ->where('user_id', auth()->id())
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -165,10 +169,11 @@ class GameController extends Controller
      */
     public function vendors(): Response
     {
-        $vendors = Vendor::withCount('orders')
+        $userId = auth()->id();
+        $vendors = Vendor::withCount(['orders' => fn ($q) => $q->where('user_id', $userId)])
             ->get()
-            ->map(function ($vendor) {
-                $vendor->orders_avg_total_cost = (float) $vendor->orders()->avg('total_cost');
+            ->map(function ($vendor) use ($userId) {
+                $vendor->orders_avg_total_cost = (float) $vendor->orders()->where('user_id', $userId)->avg('total_cost');
 
                 return $vendor;
             });
@@ -183,7 +188,7 @@ class GameController extends Controller
      */
     public function vendorDetail(Vendor $vendor): Response
     {
-        $vendor->load(['products', 'orders' => fn ($q) => $q->latest()->take(20)]);
+        $vendor->load(['products', 'orders' => fn ($q) => $q->where('user_id', auth()->id())->latest()->take(20)]);
 
         return Inertia::render('game/vendors/detail', [
             'vendor' => $vendor,
@@ -389,6 +394,10 @@ class GameController extends Controller
      */
     public function markAlertRead(Alert $alert): \Illuminate\Http\RedirectResponse
     {
+        if ($alert->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized');
+        }
+
         $alert->update(['is_read' => true]);
 
         return back();
@@ -506,7 +515,7 @@ class GameController extends Controller
      */
     protected function calculateVendorMetrics(Vendor $vendor): array
     {
-        $orders = $vendor->orders;
+        $orders = $vendor->orders()->where('user_id', auth()->id())->get();
 
         return [
             'totalOrders' => $orders->count(),

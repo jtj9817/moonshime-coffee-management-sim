@@ -37,8 +37,9 @@ class LogisticsController extends Controller
 
         $routes = $query->get();
 
-        // Eager load active spikes for these routes to derive blocked_reason
+        // Eager load active spikes for these routes to derive blocked_reason (user-scoped)
         $activeSpikes = \App\Models\SpikeEvent::where('is_active', true)
+            ->where('user_id', auth()->id())
             ->whereIn('affected_route_id', $routes->pluck('id'))
             ->get()
             ->keyBy('affected_route_id');

@@ -16,6 +16,30 @@ class LogisticsService
     protected ?array $graphCache = null;
 
     /**
+     * Optional user ID for scoping spike events.
+     * When set, only spikes belonging to this user affect route costs.
+     */
+    protected ?int $userId = null;
+
+    /**
+     * Set the user context for spike-scoped calculations.
+     */
+    public function forUser(?int $userId): static
+    {
+        $this->userId = $userId;
+        $this->graphCache = null; // Invalidate cache when user changes
+        return $this;
+    }
+
+    /**
+     * Get the current user ID, falling back to auth().
+     */
+    protected function resolveUserId(): ?int
+    {
+        return $this->userId ?? auth()->id();
+    }
+
+    /**
      * Clear the in-memory graph cache.
      */
     public function clearCache(): void
@@ -65,10 +89,14 @@ class LogisticsService
     {
         $baseCost = (int) $route->cost;
 
-        // Check for active spikes affecting this specific route
-        $spikeMultiplier = SpikeEvent::where('affected_route_id', $route->id)
-            ->where('is_active', true)
-            ->sum('magnitude');
+        // Check for active spikes affecting this specific route (user-scoped)
+        $query = SpikeEvent::where('affected_route_id', $route->id)
+            ->where('is_active', true);
+        $userId = $this->resolveUserId();
+        if ($userId !== null) {
+            $query->where('user_id', $userId);
+        }
+        $spikeMultiplier = $query->sum('magnitude');
 
         if ($spikeMultiplier > 0) {
             return (int) round($baseCost * (1 + $spikeMultiplier));
@@ -89,9 +117,14 @@ class LogisticsService
             return $this->graphCache;
         }
 
-        // 1. Get all active spikes affecting routes
-        $routeSpikes = SpikeEvent::where('is_active', true)
-            ->whereNotNull('affected_route_id')
+        // 1. Get all active spikes affecting routes (user-scoped)
+        $spikeQuery = SpikeEvent::where('is_active', true)
+            ->whereNotNull('affected_route_id');
+        $userId = $this->resolveUserId();
+        if ($userId !== null) {
+            $spikeQuery->where('user_id', $userId);
+        }
+        $routeSpikes = $spikeQuery
             ->select('affected_route_id')
             ->selectRaw('SUM(magnitude) as total_magnitude')
             ->groupBy('affected_route_id')

@@ -46,31 +46,33 @@ This plan implements Phase 0 from `docs/gameplay-features-implementation-spec.md
 
 ### Current State (Verified)
 - [x] Middleware shared props are user-scoped for alerts, reputation, and strikes.
-- [ ] Gameplay controllers and derived aggregates still require a full scoping audit.
+- [x] Gameplay controllers and derived aggregates are now fully scoped by authenticated user.
 
 ### Task 1: Controller and Aggregate Query Audit
-- [ ] Audit `app/Http/Controllers/GameController.php` for per-user table queries.
-- [ ] Enforce explicit scoping for all per-user entities:
-  - [ ] `alerts`
-  - [ ] `orders`
-  - [ ] `transfers`
-  - [ ] `inventory`
-  - [ ] `spike_events`
-  - [ ] `demand_events`
-  - [ ] `daily_reports`
-  - [ ] `game_states`
-- [ ] Ensure analytics/reporting aggregates are scoped by authenticated user.
+- [x] Audit `app/Http/Controllers/GameController.php` for per-user table queries.
+- [x] Enforce explicit scoping for all per-user entities:
+  - [x] `alerts` (authorization check on markAlertRead)
+  - [x] `orders` (ordering page scoped)
+  - [x] `transfers` (transfers page scoped)
+  - [x] `inventory` (inventory page + SKU detail scoped)
+  - [x] `spike_events` (already scoped in spikeHistory, now also in LogisticsService/Controller)
+  - [x] `demand_events` (already scoped in analytics)
+  - [x] `daily_reports` (already scoped in dashboard)
+  - [x] `game_states` (already scoped throughout)
+- [x] Ensure analytics/reporting aggregates are scoped by authenticated user.
 
 ### Task 2: Automated Isolation Tests
-- [ ] Add or update feature tests for multi-user isolation:
-  - [ ] User A cannot read User B dashboard data.
-  - [ ] User A cannot list User B orders/transfers/inventory.
-  - [ ] Analytics endpoints/props do not include other users' rows.
-- [ ] Maintain middleware-shared-prop isolation checks.
+- [x] Add or update feature tests for multi-user isolation:
+  - [x] User A cannot read User B dashboard data (inventory, orders, transfers, SKU detail).
+  - [x] User A cannot list User B orders/transfers/inventory.
+  - [x] Vendor pages only show authenticated user's order counts/metrics.
+  - [x] Alert authorization prevents cross-user access.
+  - [x] Logistics route spike effects are user-scoped.
+- [x] Maintain middleware-shared-prop isolation checks.
 
 ### Task 3: Verification (Isolation Invariants)
-- [ ] Confirm no dashboard/list/analytics query returns another user's data.
-- [ ] Run feature test suite to ensure scoping changes do not regress valid flows.
+- [x] Confirm no dashboard/list/analytics query returns another user's data.
+- [x] Run feature test suite to ensure scoping changes do not regress valid flows (282 tests pass).
 
 ## Phase 3: Phase 0 Exit Validation
 

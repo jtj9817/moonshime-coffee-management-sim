@@ -44,6 +44,7 @@ test('getPath marks expensive alternative routes as premium', function () {
 
     // Case 2: Spike hits standard route, making premium route the best choice.
     SpikeEvent::factory()->create([
+        'user_id' => $user->id,
         'type' => 'strike',
         'is_active' => true,
         'affected_route_id' => $standard->id,
