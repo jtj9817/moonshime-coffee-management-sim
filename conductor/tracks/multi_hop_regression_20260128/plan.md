@@ -25,11 +25,11 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Data Provider Implementation' (Protocol in workflow.md)
 
 ## Phase 3: Verification & Cleanup
-- [~] Task: Execute full regression suite.
-    - [ ] Run `php artisan sail --args=pest tests/Feature/MultiHopOrderTest.php`.
-    - [ ] Run `php artisan sail --args=pest`
-    - [ ] Verify all scenarios pass.
-    - [ ] Fix any logical discrepancies between spec and implementation.
-- [ ] Task: Clean up.
-    - [ ] Remove old hardcoded test methods (e.g., `test_can_place_multihop_order`) once covered by the provider.
+- [x] Task: Execute full regression suite.
+    - [x] Run `php artisan sail --args=pest tests/Feature/MultiHopOrderTest.php`.
+    - [x] Run `php artisan sail --args=pest`
+    - [x] Verify all scenarios pass.
+    - [x] Fix any logical discrepancies between spec and implementation.
+- [x] Task: Clean up.
+    - [x] Remove old hardcoded test methods (e.g., `test_can_place_multihop_order`) once covered by the provider. (Already removed — file only contains data-driven test.)
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Verification & Cleanup' (Protocol in workflow.md)

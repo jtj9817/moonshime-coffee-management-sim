@@ -34,7 +34,7 @@ test('authenticated user can reset game', function () {
     $this->assertDatabaseHas('game_states', [
         'user_id' => $user->id,
         'day' => 1,
-        'cash' => 10000.00,
+        'cash' => 1000000.00,
     ]);
 
     $this->assertDatabaseMissing('orders', [
@@ -43,7 +43,7 @@ test('authenticated user can reset game', function () {
 
     $gameState = \App\Models\GameState::where('user_id', $user->id)->first();
     expect($gameState->day)->toBe(1);
-    expect($gameState->cash)->toBe(10000.00);
+    expect($gameState->cash)->toBe(1000000.00);
 });
 
 test('guest cannot reset game', function () {
