@@ -24,7 +24,7 @@
         - [x] Assert results match expected outcomes (Route selection, cost, shipment count).
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Data Provider Implementation' (Protocol in workflow.md)
 
-## Phase 3: Verification & Cleanup
+## Phase 3: Verification & Cleanup [checkpoint: f226fba]
 - [x] Task: Execute full regression suite.
     - [x] Run `php artisan sail --args=pest tests/Feature/MultiHopOrderTest.php`.
     - [x] Run `php artisan sail --args=pest`
