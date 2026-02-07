@@ -20,7 +20,7 @@ class ProductFactory extends Factory
             'name' => $this->faker->word(),
             'category' => $this->faker->randomElement(['Beans', 'Milk', 'Syrup', 'Cups']),
             'is_perishable' => $this->faker->boolean(30),
-            'storage_cost' => $this->faker->randomFloat(2, 0.1, 5.0),
+            'storage_cost' => $this->faker->numberBetween(10, 500), // cents
         ];
     }
 }

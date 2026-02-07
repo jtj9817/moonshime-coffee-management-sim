@@ -10,7 +10,7 @@ beforeEach(function () {
     $this->user = User::factory()->create();
     $this->gameState = GameState::create([
         'user_id' => $this->user->id,
-        'cash' => 1000.00, // $1,000.00
+        'cash' => 100000, // 1000 dollars in cents
         'xp' => 0,
         'day' => 5,
     ]);
@@ -76,7 +76,7 @@ test('cannot resolve non-resolvable spike types', function () {
 })->throws(\InvalidArgumentException::class, 'cannot be resolved early');
 
 test('cannot resolve with insufficient funds', function () {
-    $this->gameState->update(['cash' => 100]); // Very low cash
+    $this->gameState->update(['cash' => 10000]); // Very low cash (100 dollars in cents)
 
     $spike = SpikeEvent::factory()->create([
         'user_id' => $this->user->id,

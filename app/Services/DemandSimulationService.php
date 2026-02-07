@@ -73,9 +73,9 @@ class DemandSimulationService
                 }
 
                 $lostQuantity = $requestedQuantity - $actualConsumed;
-                $unitPrice = (float) ($inventory->product->unit_price ?? 0);
-                $revenue = round($actualConsumed * $unitPrice, 2);
-                $lostRevenue = round($lostQuantity * $unitPrice, 2);
+                $unitPrice = (int) ($inventory->product->unit_price ?? 0);
+                $revenue = $actualConsumed * $unitPrice;
+                $lostRevenue = $lostQuantity * $unitPrice;
 
                 $demandEvent = DemandEvent::create([
                     'user_id' => $userId,

@@ -26,19 +26,19 @@ test('scenario b: "the decision stressor" stress test', function () {
     $gameState = GameState::factory()->create([
         'user_id' => $user->id,
         'day' => 1,
-        'cash' => 1000.00
+        'cash' => 100000
     ]);
     
     $vendorLoc = Location::factory()->create(['type' => 'vendor', 'name' => 'Supplier Hub']);
     $warehouse = Location::factory()->create(['type' => 'warehouse', 'name' => 'Main Warehouse']);
-    $product = Product::factory()->create(['name' => 'Raw Beans', 'storage_cost' => 0.05]);
+    $product = Product::factory()->create(['name' => 'Raw Beans', 'storage_cost' => 5]);
 
     // Path 1: Cheap but vulnerable (Truck)
     $cheapRoute = Route::factory()->create([
         'source_id' => $vendorLoc->id,
         'target_id' => $warehouse->id,
         'transport_mode' => 'Truck',
-        'cost' => 5.00,
+        'cost' => 500,
         'transit_days' => 3,
         'is_active' => true,
         'weather_vulnerability' => true,
@@ -49,7 +49,7 @@ test('scenario b: "the decision stressor" stress test', function () {
         'source_id' => $vendorLoc->id,
         'target_id' => $warehouse->id,
         'transport_mode' => 'Air',
-        'cost' => 25.00,
+        'cost' => 2500,
         'transit_days' => 1,
         'is_active' => true,
         'weather_vulnerability' => false,
@@ -99,7 +99,7 @@ test('scenario b: "the decision stressor" stress test', function () {
         'user_id' => $user->id,
         'vendor_id' => $vendor->id,
         'location_id' => $warehouse->id,
-        'total_cost' => 100.00, 
+        'total_cost' => 10000,
         'status' => 'draft',
     ]);
     
@@ -107,7 +107,7 @@ test('scenario b: "the decision stressor" stress test', function () {
         'order_id' => $order->id,
         'product_id' => $product->id,
         'quantity' => 100,
-        'cost_per_unit' => 1.00,
+        'cost_per_unit' => 100,
     ]);
     Shipment::create([
         'order_id' => $order->id,
@@ -124,6 +124,6 @@ test('scenario b: "the decision stressor" stress test', function () {
     // Verify order is tied to premium route
     expect($order->shipments()->value('route_id'))->toBe($premiumRoute->id);
     
-    // Verify cash impact ($1,000.00 - $100.00 = $900.00)
-    expect($gameState->fresh()->cash)->toBe(900.00);
+    // Verify cash impact (100000 - 10000 = 90000 cents)
+    expect($gameState->fresh()->cash)->toBe(90000);
 });

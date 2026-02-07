@@ -226,7 +226,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <div className="hidden md:flex items-center gap-6">
                 <div className="flex flex-col">
                   <span className="text-[10px] text-stone-500 uppercase font-bold tracking-wider">Budget</span>
-                  <span className={`text-xl font-mono font-bold flex items-center gap-1 ${gameState.cash < 1000 ? 'text-rose-500 animate-pulse' : 'text-emerald-400'}`}>
+                  <span className={`text-xl font-mono font-bold flex items-center gap-1 ${gameState.cash < 100000 ? 'text-rose-500 animate-pulse' : 'text-emerald-400'}`}>
                     <DollarSign size={16} /> {formatCurrency(gameState.cash)}
                   </span>
                 </div>

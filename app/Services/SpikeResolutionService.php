@@ -31,13 +31,13 @@ class SpikeResolutionService
             throw new \InvalidArgumentException('Spike is not currently active.');
         }
 
-        $cost = round((float) $spike->resolution_cost_estimate, 2);
+        $cost = (int) $spike->resolution_cost_estimate;
         $gameState = GameState::where('user_id', $spike->user_id)->firstOrFail();
 
         if ($gameState->cash < $cost) {
             throw new \RuntimeException(
-                "Insufficient funds. Required: $" . number_format($cost, 2) .
-                ", Available: $" . number_format((float) $gameState->cash, 2)
+                "Insufficient funds. Required: $" . number_format($cost / 100, 2) .
+                ", Available: $" . number_format($gameState->cash / 100, 2)
             );
         }
 

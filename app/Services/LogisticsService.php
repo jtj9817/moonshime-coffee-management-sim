@@ -61,9 +61,9 @@ class LogisticsService
      * @param Route $route
      * @return float
      */
-    public function calculateCost(Route $route): float
+    public function calculateCost(Route $route): int
     {
-        $baseCost = (float) $route->cost;
+        $baseCost = (int) $route->cost;
 
         // Check for active spikes affecting this specific route
         $spikeMultiplier = SpikeEvent::where('affected_route_id', $route->id)
@@ -71,10 +71,10 @@ class LogisticsService
             ->sum('magnitude');
 
         if ($spikeMultiplier > 0) {
-            return round($baseCost * (1 + $spikeMultiplier), 2);
+            return (int) round($baseCost * (1 + $spikeMultiplier));
         }
 
-        return round($baseCost, 2);
+        return $baseCost;
     }
 
     /**

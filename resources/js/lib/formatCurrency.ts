@@ -3,7 +3,11 @@ const currencyFormatter = new Intl.NumberFormat('en-US', {
     maximumFractionDigits: 2,
 });
 
-export const formatCurrency = (value: number): string => {
-    const amount = Number.isFinite(value) ? value : 0;
-    return currencyFormatter.format(amount);
+/**
+ * Format an integer cents value as a dollar string (e.g. 150000 → "1,500.00").
+ * All monetary values from the backend are in integer cents.
+ */
+export const formatCurrency = (cents: number): string => {
+    const safeCents = Number.isFinite(cents) ? cents : 0;
+    return currencyFormatter.format(safeCents / 100);
 };

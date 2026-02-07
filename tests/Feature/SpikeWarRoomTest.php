@@ -14,7 +14,7 @@ beforeEach(function () {
     $this->user = User::factory()->create();
     $this->gameState = GameState::create([
         'user_id' => $this->user->id,
-        'cash' => 1000.00, // $1,000.00
+        'cash' => 100000, // 1000 dollars in cents
         'xp' => 0,
         'day' => 5,
     ]);
@@ -175,7 +175,7 @@ describe('HTTP Endpoint', function () {
         $otherUser = User::factory()->create();
         GameState::create([
             'user_id' => $otherUser->id,
-            'cash' => 1000.00,
+            'cash' => 100000,
             'xp' => 0,
             'day' => 5,
         ]);

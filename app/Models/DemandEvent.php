@@ -31,9 +31,9 @@ class DemandEvent extends Model
         'requested_quantity' => 'integer',
         'fulfilled_quantity' => 'integer',
         'lost_quantity' => 'integer',
-        'unit_price' => 'float',
-        'revenue' => 'float',
-        'lost_revenue' => 'float',
+        'unit_price' => 'integer',
+        'revenue' => 'integer',
+        'lost_revenue' => 'integer',
     ];
 
     public function user(): BelongsTo

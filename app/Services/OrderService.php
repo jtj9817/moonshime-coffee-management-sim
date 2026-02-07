@@ -64,20 +64,20 @@ class OrderService
 
             $pricedItems = collect($items)->map(function ($item) use ($pricing, $user, $vendor) {
                 $multiplier = $pricing->getPriceMultiplierFor($user, $item['product_id'], $vendor->id);
-                $item['cost_per_unit'] = round(((float) $item['cost_per_unit']) * $multiplier, 2);
+                $item['cost_per_unit'] = (int) round(((int) $item['cost_per_unit']) * $multiplier);
 
                 return $item;
             })->all();
 
-            // 2. Calculate totals
-            $totalCost = 0.0;
+            // 2. Calculate totals (integer cents)
+            $totalCost = 0;
             foreach ($pricedItems as $item) {
-                $totalCost += $item['quantity'] * (float) $item['cost_per_unit'];
+                $totalCost += $item['quantity'] * (int) $item['cost_per_unit'];
             }
-            
-            // Add Logistics Cost
-            $logisticsCost = $path->sum(fn($route) => $this->logistics->calculateCost($route));
-            $totalCost = round($totalCost + $logisticsCost, 2);
+
+            // Add Logistics Cost (integer cents)
+            $logisticsCost = (int) $path->sum(fn($route) => $this->logistics->calculateCost($route));
+            $totalCost = $totalCost + $logisticsCost;
 
             // Transits
             $totalDays = $path->sum('transit_days'); 
@@ -106,7 +106,7 @@ class OrderService
                 $order->items()->create([
                     'product_id' => $item['product_id'],
                     'quantity' => $item['quantity'],
-                    'cost_per_unit' => round((float) $item['cost_per_unit'], 2),
+                    'cost_per_unit' => (int) $item['cost_per_unit'],
                 ]);
             }
 

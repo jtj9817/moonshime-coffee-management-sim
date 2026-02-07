@@ -19,7 +19,7 @@ class GameState extends Model
     ];
 
     protected $casts = [
-        'cash' => 'float',
+        'cash' => 'integer',
         'spike_cooldowns' => 'array',
     ];
 

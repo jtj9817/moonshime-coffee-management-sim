@@ -30,7 +30,7 @@ test('dijkstra average time is within budget', function () {
                     'source_id' => $nodes[$x][$y]->id,
                     'target_id' => $nodes[$x+1][$y]->id,
                     'is_active' => true,
-                    'cost' => mt_rand(10, 50) / 100,
+                    'cost' => mt_rand(10, 50),
                 ]);
             }
             if ($y < $gridSize - 1) {
@@ -38,7 +38,7 @@ test('dijkstra average time is within budget', function () {
                     'source_id' => $nodes[$x][$y]->id,
                     'target_id' => $nodes[$x][$y+1]->id,
                     'is_active' => true,
-                    'cost' => mt_rand(10, 50) / 100,
+                    'cost' => mt_rand(10, 50),
                 ]);
             }
         }
@@ -70,20 +70,20 @@ test('optimized dijkstra respects active spikes', function () {
     $source = Location::factory()->create(['name' => 'Source', 'address' => 'A']);
     $target = Location::factory()->create(['name' => 'Target', 'address' => 'B']);
 
-    // Route A: Base cost 1.00, no spike
+    // Route A: Base cost 100 cents, no spike
     $routeA = Route::factory()->create([
         'source_id' => $source->id,
         'target_id' => $target->id,
-        'cost' => 1.00,
+        'cost' => 100,
         'transport_mode' => 'truck_A',
         'is_active' => true,
     ]);
 
-    // Route B: Base cost 0.50, but with a 2.0 spike (+200%) -> Effective 1.50
+    // Route B: Base cost 50 cents, but with a 2.0 spike (+200%) -> Effective 150
     $routeB = Route::factory()->create([
         'source_id' => $source->id,
         'target_id' => $target->id,
-        'cost' => 0.50,
+        'cost' => 50,
         'transport_mode' => 'truck_B',
         'is_active' => true,
     ]);
@@ -101,7 +101,7 @@ test('optimized dijkstra respects active spikes', function () {
 
     expect($path)->not->toBeNull();
     expect($path)->toHaveCount(1);
-    // Should choose Route A because 1.00 < 1.50
+    // Should choose Route A because 100 < 150
     expect($path->first()->id)->toBe($routeA->id);
-    expect($path->first()->cost)->toBe(1.00);
+    expect($path->first()->cost)->toBe(100);
 });

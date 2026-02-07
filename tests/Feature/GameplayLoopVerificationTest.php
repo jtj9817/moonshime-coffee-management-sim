@@ -29,7 +29,7 @@ test('comprehensive 5-day gameplay loop simulation with player agency', function
     $gameState = GameState::factory()->create([
         'user_id' => $user->id,
         'day' => 1,
-        'cash' => 10000.00 // Start with $10,000.00
+        'cash' => 1000000 // Start with 10000 dollars in cents
     ]);
     Auth::login($user);
 
@@ -38,7 +38,7 @@ test('comprehensive 5-day gameplay loop simulation with player agency', function
     $warehouse = Location::factory()->create(['type' => 'warehouse', 'name' => 'Central Warehouse']);
     $product = Product::factory()->create([
         'name' => 'Premium Arabica',
-        'storage_cost' => 0.10,
+        'storage_cost' => 10,
         'is_perishable' => false
     ]);
     
@@ -47,7 +47,7 @@ test('comprehensive 5-day gameplay loop simulation with player agency', function
         'source_id' => $vendorLoc->id,
         'target_id' => $warehouse->id,
         'transport_mode' => 'Truck',
-        'cost' => 10.00,
+        'cost' => 1000,
         'transit_days' => 2,
         'is_active' => true,
         'weather_vulnerability' => true,
@@ -58,7 +58,7 @@ test('comprehensive 5-day gameplay loop simulation with player agency', function
         'source_id' => $vendorLoc->id,
         'target_id' => $warehouse->id,
         'transport_mode' => 'Air',
-        'cost' => 50.00,
+        'cost' => 5000,
         'transit_days' => 1,
         'is_active' => true,
         'weather_vulnerability' => false,
@@ -67,14 +67,14 @@ test('comprehensive 5-day gameplay loop simulation with player agency', function
     $service = new SimulationService($gameState);
 
     // --- DAY 1: Initial Order (Player Agency) ---
-    expect($gameState->cash)->toBe(10000.00);
+    expect($gameState->cash)->toBe(1000000);
 
     // Player decides to place an order via the standard route
     $order = Order::create([
         'user_id' => $user->id,
         'vendor_id' => $vendor->id,
         'location_id' => $warehouse->id,
-        'total_cost' => 100.00, 
+        'total_cost' => 10000,
         'status' => 'draft',
     ]);    
     Shipment::create([
@@ -90,7 +90,7 @@ test('comprehensive 5-day gameplay loop simulation with player agency', function
         'order_id' => $order->id,
         'product_id' => $product->id,
         'quantity' => 100,
-        'cost_per_unit' => 0.90,
+        'cost_per_unit' => 90,
     ]);
 
     // Finalize order (Trigger State Transition and Event)
@@ -98,7 +98,7 @@ test('comprehensive 5-day gameplay loop simulation with player agency', function
     event(new OrderPlaced($order));
 
     // Verify Cash Deduction
-    expect($gameState->fresh()->cash)->toBe(9900.00);
+    expect($gameState->fresh()->cash)->toBe(990000);
 
     // Advance to Day 2
     $service->advanceTime();
@@ -134,7 +134,7 @@ test('comprehensive 5-day gameplay loop simulation with player agency', function
         'user_id' => $user->id,
         'vendor_id' => $vendor->id,
         'location_id' => $warehouse->id,
-        'total_cost' => 200.00,
+        'total_cost' => 20000,
         'status' => 'draft',
     ]);
     Shipment::create([
@@ -151,11 +151,11 @@ test('comprehensive 5-day gameplay loop simulation with player agency', function
         'order_id' => $emergencyOrder->id,
         'product_id' => $product->id,
         'quantity' => 50,
-        'cost_per_unit' => 4.00,
+        'cost_per_unit' => 400,
     ]);
     event(new OrderPlaced($emergencyOrder));
 
-    expect($gameState->fresh()->cash)->toBe(9700.00);
+    expect($gameState->fresh()->cash)->toBe(970000);
 
     // Advance to Day 3
     $service->advanceTime();
@@ -198,8 +198,8 @@ test('comprehensive 5-day gameplay loop simulation with player agency', function
     expect($inventory->quantity)->toBe(150, 'Inventory quantity should match both orders (100+50)');
 
     // --- FINAL VERIFICATION ---
-    // Total cash: 10,000.00 - 300.00 - 5.00 - 15.00 = 9,680.00
-    expect($gameState->fresh()->cash)->toBe(9680.00);
+    // Total cash: 1000000 - 30000 - 500 - 1500 = 968000 cents
+    expect($gameState->fresh()->cash)->toBe(968000);
 
     // --- CANCELLATION & REFUNDS ---
     // 1. Cannot cancel Delivered order
@@ -215,7 +215,7 @@ test('comprehensive 5-day gameplay loop simulation with player agency', function
         'user_id' => $user->id,
         'vendor_id' => $vendor->id,
         'location_id' => $warehouse->id,
-        'total_cost' => 50.00,
+        'total_cost' => 5000,
         'status' => 'draft',
     ]);
     Shipment::create([
@@ -228,13 +228,13 @@ test('comprehensive 5-day gameplay loop simulation with player agency', function
     ]);
     $shippedOrder->status->transitionTo(Pending::class);
     event(new OrderPlaced($shippedOrder));
-    expect($gameState->fresh()->cash)->toBe(9630.00); // 9680 - 50
+    expect($gameState->fresh()->cash)->toBe(963000); // 968000 - 5000
 
     $shippedOrder->status->transitionTo(Shipped::class);
     $shippedOrder->status->transitionTo(\App\States\Order\Cancelled::class);
 
-    // Verify refund (9630 + 50 = 9680)
-    expect($gameState->fresh()->cash)->toBe(9680.00);
+    // Verify refund (963000 + 5000 = 968000)
+    expect($gameState->fresh()->cash)->toBe(968000);
     expect($shippedOrder->fresh()->status)->toBeInstanceOf(\App\States\Order\Cancelled::class);
 
     // --- ROUTE CAPACITY ---
@@ -242,7 +242,7 @@ test('comprehensive 5-day gameplay loop simulation with player agency', function
         'user_id' => $user->id,
         'vendor_id' => $vendor->id,
         'location_id' => $warehouse->id,
-        'total_cost' => 10.00,
+        'total_cost' => 1000,
         'status' => 'draft',
     ]);
     Shipment::create([
@@ -257,7 +257,7 @@ test('comprehensive 5-day gameplay loop simulation with player agency', function
         'order_id' => $massiveOrder->id,
         'product_id' => $product->id,
         'quantity' => $standardRoute->capacity + 1,
-        'cost_per_unit' => 0.01,
+        'cost_per_unit' => 1,
     ]);
 
     try {

@@ -22,7 +22,7 @@ class Route extends Model
     ];
 
     protected $casts = [
-        'cost' => 'float',
+        'cost' => 'integer',
         'transit_days' => 'integer',
         'capacity' => 'integer',
         'is_active' => 'boolean',

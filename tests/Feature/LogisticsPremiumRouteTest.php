@@ -18,7 +18,7 @@ test('getPath marks expensive alternative routes as premium', function () {
         'source_id' => $locA->id,
         'target_id' => $locB->id,
         'transport_mode' => 'Truck',
-        'cost' => 1.00,
+        'cost' => 100,
         'is_active' => true
     ]);
 
@@ -27,7 +27,7 @@ test('getPath marks expensive alternative routes as premium', function () {
         'source_id' => $locA->id,
         'target_id' => $locB->id,
         'transport_mode' => 'Air',
-        'cost' => 5.00,
+        'cost' => 500,
         'is_active' => true
     ]);
 

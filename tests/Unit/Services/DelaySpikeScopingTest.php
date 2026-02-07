@@ -15,7 +15,7 @@ beforeEach(function () {
     $this->actingAs($this->user);
     $this->gameState = GameState::create([
         'user_id' => $this->user->id,
-        'cash' => 10000.00,
+        'cash' => 1000000,
         'xp' => 0,
         'day' => 5,
     ]);

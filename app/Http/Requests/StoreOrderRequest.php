@@ -25,7 +25,8 @@ class StoreOrderRequest extends FormRequest
         $items = collect($this->input('items', []))
             ->map(function (array $item) {
                 if (isset($item['unit_price'])) {
-                    $item['unit_price'] = round((float) $item['unit_price'], 2);
+                    // Frontend sends integer cents directly
+                    $item['unit_price'] = (int) $item['unit_price'];
                 }
 
                 return $item;
@@ -45,7 +46,7 @@ class StoreOrderRequest extends FormRequest
             'items' => ['required', 'array', 'min:1'],
             'items.*.product_id' => ['required', 'exists:products,id'],
             'items.*.quantity' => ['required', 'integer', 'min:1'],
-            'items.*.unit_price' => ['required', 'decimal:0,2', 'min:0'],
+            'items.*.unit_price' => ['required', 'integer', 'min:0'],
         ];
     }
 
@@ -162,25 +163,27 @@ class StoreOrderRequest extends FormRequest
             }
 
             // 3. Validate Funds
-            $shippingCost = $path->sum(fn($r) => $logistics->calculateCost($r));
+            $shippingCost = (int) $path->sum(fn($r) => $logistics->calculateCost($r));
             $pricing = app(\App\Services\PricingService::class);
             $user = $this->user();
             $vendorId = $this->input('vendor_id');
-            $itemsCost = $items->sum(function ($item) use ($pricing, $user, $vendorId) {
+            $itemsCost = (int) $items->sum(function ($item) use ($pricing, $user, $vendorId) {
                 $quantity = (int) ($item['quantity'] ?? 0);
-                $unitPrice = (float) ($item['unit_price'] ?? 0);
+                $unitPrice = (int) ($item['unit_price'] ?? 0);
                 $multiplier = $user
                     ? $pricing->getPriceMultiplierFor($user, $item['product_id'], $vendorId)
                     : 1.0;
 
-                return $quantity * ($unitPrice * $multiplier);
+                return (int) round($quantity * $unitPrice * $multiplier);
             });
-            $totalCost = round($itemsCost + $shippingCost, 2);
+            $totalCost = $itemsCost + $shippingCost;
 
-            $cash = (float) GameState::where('user_id', auth()->id())->value('cash');
+            $cash = (int) GameState::where('user_id', auth()->id())->value('cash');
 
             if ($cash < $totalCost) {
-                $validator->errors()->add('total', "Insufficient funds. Order total: \${$totalCost}, Available: \${$cash}.");
+                $totalDisplay = number_format($totalCost / 100, 2);
+                $cashDisplay = number_format($cash / 100, 2);
+                $validator->errors()->add('total', "Insufficient funds. Order total: \${$totalDisplay}, Available: \${$cashDisplay}.");
             }
 
             // Store the path in the request so the Controller doesn't need to recalculate

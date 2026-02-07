@@ -139,7 +139,7 @@ export function NewOrderDialog({
         const newItems = [...data.items, {
             product_id: currentProductId,
             quantity: currentQuantity,
-            unit_price: 2.5, // Placeholder price
+            unit_price: 250, // Placeholder price in cents ($2.50)
         }];
 
         setData('items', newItems);

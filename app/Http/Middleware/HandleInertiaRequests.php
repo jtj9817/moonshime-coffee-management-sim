@@ -109,7 +109,7 @@ class HandleInertiaRequests extends Middleware
         );
 
         return [
-            'cash' => (float) $gameState->cash,
+            'cash' => (int) $gameState->cash,
             'xp' => $gameState->xp,
             'day' => $gameState->day,
             'level' => $this->calculateLevel($gameState->xp),

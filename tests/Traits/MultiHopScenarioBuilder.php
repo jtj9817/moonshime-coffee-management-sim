@@ -118,8 +118,8 @@ trait MultiHopScenarioBuilder
                     'name' => $pData['name'] ?? ucfirst($pData['id']),
                     'category' => $pData['category'] ?? 'beans',
                     'is_perishable' => false,
-                    'storage_cost' => 0.1,
-                    'unit_price' => $pData['price'] ?? 20.0,
+                    'storage_cost' => 10, // cents
+                    'unit_price' => $pData['price'] ?? 2000, // cents
                 ]);
                 $product->save();
             }
@@ -147,7 +147,7 @@ trait MultiHopScenarioBuilder
         }
     }
 
-    protected function createGameState(User $user, float $cash): GameState
+    protected function createGameState(User $user, int $cash): GameState
     {
         return GameState::updateOrCreate(
             ['user_id' => $user->id],

@@ -52,7 +52,7 @@ class SpikeEvent extends Model
         'acknowledged_at' => 'datetime',
         'mitigated_at' => 'datetime',
         'resolved_at' => 'datetime',
-        'resolution_cost' => 'float',
+        'resolution_cost' => 'integer',
         'action_log' => 'array',
     ];
 
@@ -206,20 +206,20 @@ class SpikeEvent extends Model
      * Calculate the estimated cost to resolve this spike early.
      * Cost formula: base cost × magnitude factor
      */
-    public function getResolutionCostEstimateAttribute(): float
+    public function getResolutionCostEstimateAttribute(): int
     {
         if (!$this->isResolvable()) {
-            return 0.0;
+            return 0;
         }
 
         $baseCost = match ($this->type) {
-            'breakdown' => 500.00, // $500 base
-            'blizzard' => 750.00,  // $750 base
-            default => 0.0,
+            'breakdown' => 50000, // $500.00 in cents
+            'blizzard' => 75000,  // $750.00 in cents
+            default => 0,
         };
 
         // Scale by magnitude (higher magnitude = higher cost)
-        return round($baseCost * max(1, (float) $this->magnitude), 2);
+        return (int) round($baseCost * max(1, (float) $this->magnitude));
     }
 
     /**

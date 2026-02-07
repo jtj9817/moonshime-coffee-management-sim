@@ -25,8 +25,8 @@ class Product extends Model
     {
         return [
             'is_perishable' => 'boolean',
-            'storage_cost' => 'float',
-            'unit_price' => 'float',
+            'storage_cost' => 'integer',
+            'unit_price' => 'integer',
         ];
     }
 

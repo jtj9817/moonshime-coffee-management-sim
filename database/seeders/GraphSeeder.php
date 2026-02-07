@@ -70,7 +70,7 @@ class GraphSeeder extends Seeder
                         'source_id' => $vendor->id,
                         'target_id' => $warehouse->id,
                         'transport_mode' => 'Truck',
-                        'cost' => 0.50,
+                        'cost' => 50, // cents
                         'transit_days' => 2,
                         'is_active' => true,
                     ]);
@@ -86,7 +86,7 @@ class GraphSeeder extends Seeder
                         'source_id' => $warehouse->id,
                         'target_id' => $store->id,
                         'transport_mode' => 'Truck',
-                        'cost' => 1.00,
+                        'cost' => 100, // cents
                         'transit_days' => 1,
                         'is_active' => true,
                     ]);
@@ -102,7 +102,7 @@ class GraphSeeder extends Seeder
                     'source_id' => $stores[$i]->id,
                     'target_id' => $stores[$i+1]->id,
                     'transport_mode' => 'Truck',
-                    'cost' => 1.50,
+                    'cost' => 150, // cents
                     'transit_days' => 3,
                     'is_active' => true,
                 ]);
@@ -117,7 +117,7 @@ class GraphSeeder extends Seeder
                         'source_id' => $vendor->id,
                         'target_id' => $hub->id,
                         'transport_mode' => 'Air',
-                        'cost' => 5.00,
+                        'cost' => 500, // cents
                         'transit_days' => 1,
                         'is_active' => true,
                     ]);
@@ -133,7 +133,7 @@ class GraphSeeder extends Seeder
                         'source_id' => $hub->id,
                         'target_id' => $store->id,
                         'transport_mode' => 'Air',
-                        'cost' => 5.00,
+                        'cost' => 500, // cents
                         'transit_days' => 1,
                         'is_active' => true,
                     ]);

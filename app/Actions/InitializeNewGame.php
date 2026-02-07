@@ -254,7 +254,7 @@ class InitializeNewGame
                     items: [[
                         'product_id' => $product->id,
                         'quantity' => 50,
-                        'cost_per_unit' => 1.00,
+                        'cost_per_unit' => 100, // $1.00 in cents
                     ]],
                     path: $path
                 );

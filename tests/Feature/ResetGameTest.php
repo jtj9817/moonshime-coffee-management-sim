@@ -23,7 +23,7 @@ test('authenticated user can reset game', function () {
     $user = User::factory()->create();
 
     // Seed initial state
-    $initialState = \App\Models\GameState::factory()->create(['user_id' => $user->id, 'day' => 10, 'cash' => 5.00]);
+    $initialState = \App\Models\GameState::factory()->create(['user_id' => $user->id, 'day' => 10, 'cash' => 500]);
     $order = \App\Models\Order::factory()->create(['user_id' => $user->id]);
 
     actingAs($user)
@@ -34,7 +34,7 @@ test('authenticated user can reset game', function () {
     $this->assertDatabaseHas('game_states', [
         'user_id' => $user->id,
         'day' => 1,
-        'cash' => 1000000.00,
+        'cash' => 1000000,
     ]);
 
     $this->assertDatabaseMissing('orders', [
@@ -43,7 +43,7 @@ test('authenticated user can reset game', function () {
 
     $gameState = \App\Models\GameState::where('user_id', $user->id)->first();
     expect($gameState->day)->toBe(1);
-    expect($gameState->cash)->toBe(1000000.00);
+    expect($gameState->cash)->toBe(1000000);
 });
 
 test('guest cannot reset game', function () {

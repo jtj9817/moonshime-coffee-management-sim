@@ -33,7 +33,7 @@ class Order extends Model
     {
         return [
             'delivery_date' => 'datetime',
-            'total_cost' => 'float',
+            'total_cost' => 'integer',
             'total_transit_days' => 'integer',
             'status' => OrderState::class,
             'delivery_day' => 'integer',

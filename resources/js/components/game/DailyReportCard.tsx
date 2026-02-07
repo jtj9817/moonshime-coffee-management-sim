@@ -1,6 +1,7 @@
 import { CalendarDays, FileText, Package, TrendingUp, Zap } from 'lucide-react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { formatCurrency } from '@/lib/formatCurrency';
 
 interface DailyReportData {
     id: number;
@@ -90,7 +91,7 @@ export function DailyReportCard({ report }: DailyReportCardProps) {
                     </span>
                     <div className="flex items-center gap-4">
                         <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
-                            ${metrics.cash?.toLocaleString() ?? 0}
+                            ${formatCurrency(metrics.cash ?? 0)}
                         </span>
                         <span className="text-sm font-bold text-amber-600 dark:text-amber-400">
                             {metrics.xp ?? 0} XP

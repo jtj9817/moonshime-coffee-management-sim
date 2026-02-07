@@ -22,7 +22,7 @@ class GameStateFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'cash' => fake()->randomFloat(2, 1000, 20000),
+            'cash' => fake()->numberBetween(100000, 2000000), // cents
             'xp' => 0,
             'day' => 1,
         ];

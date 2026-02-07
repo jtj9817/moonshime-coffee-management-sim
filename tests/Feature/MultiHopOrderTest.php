@@ -19,22 +19,22 @@ $scenarios = [
         [
             'locations' => ['vendor_loc', 'hub_a', 'store'],
             'routes' => [
-                ['origin' => 'vendor_loc', 'destination' => 'hub_a', 'days' => 2, 'cost' => 1.0, 'capacity' => 200, 'active' => true],
-                ['origin' => 'hub_a', 'destination' => 'store', 'days' => 1, 'cost' => 2.0, 'capacity' => 200, 'active' => true],
+                ['origin' => 'vendor_loc', 'destination' => 'hub_a', 'days' => 2, 'cost' => 100, 'capacity' => 200, 'active' => true],
+                ['origin' => 'hub_a', 'destination' => 'store', 'days' => 1, 'cost' => 200, 'capacity' => 200, 'active' => true],
             ],
             'products' => [
-                ['id' => 'coffee', 'price' => 0.10, 'vendor' => ['id' => 'vendor_loc']]
+                ['id' => 'coffee', 'price' => 10, 'vendor' => ['id' => 'vendor_loc']]
             ],
             'order' => [
                 'vendor_alias' => 'vendor_loc',
                 'target_alias' => 'store',
                 'items' => [['product_alias' => 'coffee', 'qty' => 100]],
-                'user_cash' => 100.00
+                'user_cash' => 10000
             ],
             'expected' => [
-                'items_cost' => 10.00,
-                'logistics_cost' => 3.00,
-                'total_cost' => 13.00, // (100 * 0.10) + 1.0 + 2.0 = 13.00
+                'items_cost' => 1000,
+                'logistics_cost' => 300,
+                'total_cost' => 1300, // (100 * 10) + 100 + 200 = 1300
                 'shipment_count' => 2,
                 'transit_days' => 3,
                 'path' => ['vendor_loc', 'hub_a', 'store'],
@@ -45,18 +45,18 @@ $scenarios = [
         [
             'locations' => ['vendor_loc', 'hub_a', 'hub_b', 'hub_c', 'store', 'alt_a', 'alt_b'],
             'routes' => [
-                ['origin' => 'vendor_loc', 'destination' => 'hub_a', 'days' => 2, 'cost' => 1.00, 'capacity' => 200, 'active' => true, 'transport_mode' => 'truck'],
-                ['origin' => 'hub_a', 'destination' => 'hub_b', 'days' => 2, 'cost' => 1.50, 'capacity' => 200, 'active' => true, 'transport_mode' => 'rail'],
-                ['origin' => 'hub_b', 'destination' => 'hub_c', 'days' => 1, 'cost' => 1.00, 'capacity' => 200, 'active' => true, 'transport_mode' => 'van'],
-                ['origin' => 'hub_c', 'destination' => 'store', 'days' => 1, 'cost' => 0.50, 'capacity' => 200, 'active' => true, 'transport_mode' => 'bike'],
+                ['origin' => 'vendor_loc', 'destination' => 'hub_a', 'days' => 2, 'cost' => 100, 'capacity' => 200, 'active' => true, 'transport_mode' => 'truck'],
+                ['origin' => 'hub_a', 'destination' => 'hub_b', 'days' => 2, 'cost' => 150, 'capacity' => 200, 'active' => true, 'transport_mode' => 'rail'],
+                ['origin' => 'hub_b', 'destination' => 'hub_c', 'days' => 1, 'cost' => 100, 'capacity' => 200, 'active' => true, 'transport_mode' => 'van'],
+                ['origin' => 'hub_c', 'destination' => 'store', 'days' => 1, 'cost' => 50, 'capacity' => 200, 'active' => true, 'transport_mode' => 'bike'],
                 // Alternative path (more expensive)
-                ['origin' => 'vendor_loc', 'destination' => 'alt_a', 'days' => 1, 'cost' => 2.00, 'capacity' => 200, 'active' => true, 'transport_mode' => 'truck'],
-                ['origin' => 'alt_a', 'destination' => 'alt_b', 'days' => 1, 'cost' => 2.00, 'capacity' => 200, 'active' => true, 'transport_mode' => 'van'],
-                ['origin' => 'alt_b', 'destination' => 'store', 'days' => 1, 'cost' => 1.00, 'capacity' => 200, 'active' => true, 'transport_mode' => 'bike'],
+                ['origin' => 'vendor_loc', 'destination' => 'alt_a', 'days' => 1, 'cost' => 200, 'capacity' => 200, 'active' => true, 'transport_mode' => 'truck'],
+                ['origin' => 'alt_a', 'destination' => 'alt_b', 'days' => 1, 'cost' => 200, 'capacity' => 200, 'active' => true, 'transport_mode' => 'van'],
+                ['origin' => 'alt_b', 'destination' => 'store', 'days' => 1, 'cost' => 100, 'capacity' => 200, 'active' => true, 'transport_mode' => 'bike'],
             ],
             'products' => [
-                ['id' => 'coffee', 'price' => 1.25, 'vendor' => ['id' => 'vendor_loc']],
-                ['id' => 'tea', 'price' => 0.50, 'vendor' => ['id' => 'vendor_loc']]
+                ['id' => 'coffee', 'price' => 125, 'vendor' => ['id' => 'vendor_loc']],
+                ['id' => 'tea', 'price' => 50, 'vendor' => ['id' => 'vendor_loc']]
             ],
             'order' => [
                 'vendor_alias' => 'vendor_loc',
@@ -65,12 +65,12 @@ $scenarios = [
                     ['product_alias' => 'coffee', 'qty' => 20],
                     ['product_alias' => 'tea', 'qty' => 30]
                 ],
-                'user_cash' => 100.00
+                'user_cash' => 10000
             ],
             'expected' => [
-                'items_cost' => 40.00,
-                'logistics_cost' => 4.00,
-                'total_cost' => 44.00, // (20 * 1.25) + (30 * 0.50) + 1.0 + 1.5 + 1.0 + 0.5 = 25 + 15 + 4 = 44.00
+                'items_cost' => 4000,
+                'logistics_cost' => 400,
+                'total_cost' => 4400, // (20 * 125) + (30 * 50) + 100 + 150 + 100 + 50 = 2500 + 1500 + 400 = 4400
                 'shipment_count' => 4,
                 'transit_days' => 6,
                 'path' => ['vendor_loc', 'hub_a', 'hub_b', 'hub_c', 'store'],
@@ -81,28 +81,28 @@ $scenarios = [
         [
             'locations' => ['vendor_loc', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7', 'store'],
             'routes' => [
-                ['origin' => 'vendor_loc', 'destination' => 'h1', 'days' => 1, 'cost' => 0.50, 'capacity' => 50, 'active' => true],
-                ['origin' => 'h1', 'destination' => 'h2', 'days' => 1, 'cost' => 0.50, 'capacity' => 50, 'active' => true],
-                ['origin' => 'h2', 'destination' => 'h3', 'days' => 1, 'cost' => 0.50, 'capacity' => 50, 'active' => true],
-                ['origin' => 'h3', 'destination' => 'h4', 'days' => 1, 'cost' => 0.50, 'capacity' => 50, 'active' => true],
-                ['origin' => 'h4', 'destination' => 'h5', 'days' => 1, 'cost' => 0.50, 'capacity' => 50, 'active' => true],
-                ['origin' => 'h5', 'destination' => 'h6', 'days' => 1, 'cost' => 0.50, 'capacity' => 50, 'active' => true],
-                ['origin' => 'h6', 'destination' => 'h7', 'days' => 1, 'cost' => 0.50, 'capacity' => 50, 'active' => true],
-                ['origin' => 'h7', 'destination' => 'store', 'days' => 1, 'cost' => 0.50, 'capacity' => 50, 'active' => true],
+                ['origin' => 'vendor_loc', 'destination' => 'h1', 'days' => 1, 'cost' => 50, 'capacity' => 50, 'active' => true],
+                ['origin' => 'h1', 'destination' => 'h2', 'days' => 1, 'cost' => 50, 'capacity' => 50, 'active' => true],
+                ['origin' => 'h2', 'destination' => 'h3', 'days' => 1, 'cost' => 50, 'capacity' => 50, 'active' => true],
+                ['origin' => 'h3', 'destination' => 'h4', 'days' => 1, 'cost' => 50, 'capacity' => 50, 'active' => true],
+                ['origin' => 'h4', 'destination' => 'h5', 'days' => 1, 'cost' => 50, 'capacity' => 50, 'active' => true],
+                ['origin' => 'h5', 'destination' => 'h6', 'days' => 1, 'cost' => 50, 'capacity' => 50, 'active' => true],
+                ['origin' => 'h6', 'destination' => 'h7', 'days' => 1, 'cost' => 50, 'capacity' => 50, 'active' => true],
+                ['origin' => 'h7', 'destination' => 'store', 'days' => 1, 'cost' => 50, 'capacity' => 50, 'active' => true],
             ],
             'products' => [
-                ['id' => 'coffee', 'price' => 0.20, 'vendor' => ['id' => 'vendor_loc']]
+                ['id' => 'coffee', 'price' => 20, 'vendor' => ['id' => 'vendor_loc']]
             ],
             'order' => [
                 'vendor_alias' => 'vendor_loc',
                 'target_alias' => 'store',
                 'items' => [['product_alias' => 'coffee', 'qty' => 50]],
-                'user_cash' => 15.00
+                'user_cash' => 1500
             ],
             'expected' => [
-                'items_cost' => 10.00,
-                'logistics_cost' => 4.00,
-                'total_cost' => 14.00, // (50 * 0.20) + (8 * 0.50) = 10.0 + 4.0 = 14.00
+                'items_cost' => 1000,
+                'logistics_cost' => 400,
+                'total_cost' => 1400, // (50 * 20) + (8 * 50) = 1000 + 400 = 1400
                 'shipment_count' => 8,
                 'transit_days' => 8,
                 'path' => ['vendor_loc', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7', 'store'],
@@ -114,13 +114,13 @@ $scenarios = [
             'locations' => ['vendor_loc', 'store'],
             'routes' => [], // No routes
             'products' => [
-                ['id' => 'coffee', 'price' => 1.00, 'vendor' => ['id' => 'vendor_loc']]
+                ['id' => 'coffee', 'price' => 100, 'vendor' => ['id' => 'vendor_loc']]
             ],
             'order' => [
                 'vendor_alias' => 'vendor_loc',
                 'target_alias' => 'store',
                 'items' => [['product_alias' => 'coffee', 'qty' => 10]],
-                'user_cash' => 100.00
+                'user_cash' => 10000
             ],
             'expected' => [
                 'error_field' => 'location_id'
@@ -132,26 +132,26 @@ $scenarios = [
             'locations' => ['vendor_loc', 'hub_a', 'hub_b', 'store', 'alt_a'],
             'routes' => [
                 // Primary path (broken)
-                ['origin' => 'vendor_loc', 'destination' => 'hub_a', 'days' => 1, 'cost' => 0.50, 'capacity' => 200, 'active' => true],
-                ['origin' => 'hub_a', 'destination' => 'hub_b', 'days' => 1, 'cost' => 0.50, 'capacity' => 200, 'active' => false], // INACTIVE
-                ['origin' => 'hub_b', 'destination' => 'store', 'days' => 1, 'cost' => 0.50, 'capacity' => 200, 'active' => true],
+                ['origin' => 'vendor_loc', 'destination' => 'hub_a', 'days' => 1, 'cost' => 50, 'capacity' => 200, 'active' => true],
+                ['origin' => 'hub_a', 'destination' => 'hub_b', 'days' => 1, 'cost' => 50, 'capacity' => 200, 'active' => false], // INACTIVE
+                ['origin' => 'hub_b', 'destination' => 'store', 'days' => 1, 'cost' => 50, 'capacity' => 200, 'active' => true],
                 // Alternative path (working)
-                ['origin' => 'vendor_loc', 'destination' => 'alt_a', 'days' => 1, 'cost' => 1.00, 'capacity' => 200, 'active' => true],
-                ['origin' => 'alt_a', 'destination' => 'store', 'days' => 1, 'cost' => 1.00, 'capacity' => 200, 'active' => true],
+                ['origin' => 'vendor_loc', 'destination' => 'alt_a', 'days' => 1, 'cost' => 100, 'capacity' => 200, 'active' => true],
+                ['origin' => 'alt_a', 'destination' => 'store', 'days' => 1, 'cost' => 100, 'capacity' => 200, 'active' => true],
             ],
             'products' => [
-                ['id' => 'coffee', 'price' => 1.00, 'vendor' => ['id' => 'vendor_loc']]
+                ['id' => 'coffee', 'price' => 100, 'vendor' => ['id' => 'vendor_loc']]
             ],
             'order' => [
                 'vendor_alias' => 'vendor_loc',
                 'target_alias' => 'store',
                 'items' => [['product_alias' => 'coffee', 'qty' => 10]],
-                'user_cash' => 100.00
+                'user_cash' => 10000
             ],
             'expected' => [
-                'items_cost' => 10.00,
-                'logistics_cost' => 2.00,
-                'total_cost' => 12.00, // (10 * 1.00) + 1.0 + 1.0 = 12.00
+                'items_cost' => 1000,
+                'logistics_cost' => 200,
+                'total_cost' => 1200, // (10 * 100) + 100 + 100 = 1200
                 'shipment_count' => 2,
                 'transit_days' => 2,
                 'path' => ['vendor_loc', 'alt_a', 'store'],
@@ -163,25 +163,25 @@ $scenarios = [
             'locations' => ['vendor_loc', 'hub_a', 'hub_b', 'store'],
             'routes' => [
                 // Cycle: loc -> a -> b -> loc
-                ['origin' => 'vendor_loc', 'destination' => 'hub_a', 'days' => 1, 'cost' => 0.20, 'capacity' => 200, 'active' => true],
-                ['origin' => 'hub_a', 'destination' => 'hub_b', 'days' => 1, 'cost' => 0.20, 'capacity' => 200, 'active' => true],
-                ['origin' => 'hub_b', 'destination' => 'vendor_loc', 'days' => 1, 'cost' => 0.20, 'capacity' => 200, 'active' => true],
+                ['origin' => 'vendor_loc', 'destination' => 'hub_a', 'days' => 1, 'cost' => 20, 'capacity' => 200, 'active' => true],
+                ['origin' => 'hub_a', 'destination' => 'hub_b', 'days' => 1, 'cost' => 20, 'capacity' => 200, 'active' => true],
+                ['origin' => 'hub_b', 'destination' => 'vendor_loc', 'days' => 1, 'cost' => 20, 'capacity' => 200, 'active' => true],
                 // Valid path
-                ['origin' => 'vendor_loc', 'destination' => 'store', 'days' => 1, 'cost' => 1.00, 'capacity' => 200, 'active' => true],
+                ['origin' => 'vendor_loc', 'destination' => 'store', 'days' => 1, 'cost' => 100, 'capacity' => 200, 'active' => true],
             ],
             'products' => [
-                ['id' => 'coffee', 'price' => 1.00, 'vendor' => ['id' => 'vendor_loc']]
+                ['id' => 'coffee', 'price' => 100, 'vendor' => ['id' => 'vendor_loc']]
             ],
             'order' => [
                 'vendor_alias' => 'vendor_loc',
                 'target_alias' => 'store',
                 'items' => [['product_alias' => 'coffee', 'qty' => 10]],
-                'user_cash' => 100.00
+                'user_cash' => 10000
             ],
             'expected' => [
-                'items_cost' => 10.00,
-                'logistics_cost' => 1.00,
-                'total_cost' => 11.00, // (10 * 1.00) + 1.00
+                'items_cost' => 1000,
+                'logistics_cost' => 100,
+                'total_cost' => 1100, // (10 * 100) + 100
                 'shipment_count' => 1,
                 'transit_days' => 1,
                 'path' => ['vendor_loc', 'store'],
@@ -192,17 +192,17 @@ $scenarios = [
         [
             'locations' => ['vendor_loc', 'hub_a', 'store'],
             'routes' => [
-                ['origin' => 'vendor_loc', 'destination' => 'hub_a', 'days' => 1, 'cost' => 1.00, 'capacity' => 50, 'active' => true],
-                ['origin' => 'hub_a', 'destination' => 'store', 'days' => 1, 'cost' => 1.00, 'capacity' => 50, 'active' => true],
+                ['origin' => 'vendor_loc', 'destination' => 'hub_a', 'days' => 1, 'cost' => 100, 'capacity' => 50, 'active' => true],
+                ['origin' => 'hub_a', 'destination' => 'store', 'days' => 1, 'cost' => 100, 'capacity' => 50, 'active' => true],
             ],
             'products' => [
-                ['id' => 'coffee', 'price' => 0.50, 'vendor' => ['id' => 'vendor_loc']]
+                ['id' => 'coffee', 'price' => 50, 'vendor' => ['id' => 'vendor_loc']]
             ],
             'order' => [
                 'vendor_alias' => 'vendor_loc',
                 'target_alias' => 'store',
                 'items' => [['product_alias' => 'coffee', 'qty' => 60]], // Exceeds 50
-                'user_cash' => 100.00
+                'user_cash' => 10000
             ],
             'expected' => [
                 'error_field' => 'items'
@@ -213,17 +213,17 @@ $scenarios = [
         [
             'locations' => ['vendor_loc', 'hub_a', 'store'],
             'routes' => [
-                ['origin' => 'vendor_loc', 'destination' => 'hub_a', 'days' => 1, 'cost' => 1.00, 'capacity' => 200, 'active' => true],
-                ['origin' => 'hub_a', 'destination' => 'store', 'days' => 1, 'cost' => 1.00, 'capacity' => 200, 'active' => true],
+                ['origin' => 'vendor_loc', 'destination' => 'hub_a', 'days' => 1, 'cost' => 100, 'capacity' => 200, 'active' => true],
+                ['origin' => 'hub_a', 'destination' => 'store', 'days' => 1, 'cost' => 100, 'capacity' => 200, 'active' => true],
             ],
             'products' => [
-                ['id' => 'coffee', 'price' => 1.80, 'vendor' => ['id' => 'vendor_loc']]
+                ['id' => 'coffee', 'price' => 180, 'vendor' => ['id' => 'vendor_loc']]
             ],
             'order' => [
                 'vendor_alias' => 'vendor_loc',
                 'target_alias' => 'store',
                 'items' => [['product_alias' => 'coffee', 'qty' => 10]],
-                'user_cash' => 19.99 // Total is (10 * 1.80) + 2.0 = 20.00
+                'user_cash' => 1999 // Total is (10 * 180) + 200 = 2000
             ],
             'expected' => [
                 'error_field' => 'total' // Or whatever field validates cash
@@ -235,13 +235,13 @@ $scenarios = [
             'locations' => ['vendor_loc'],
             'routes' => [],
             'products' => [
-                ['id' => 'coffee', 'price' => 1.00, 'vendor' => ['id' => 'vendor_loc']]
+                ['id' => 'coffee', 'price' => 100, 'vendor' => ['id' => 'vendor_loc']]
             ],
             'order' => [
                 'vendor_alias' => 'vendor_loc',
                 'target_alias' => 'vendor_loc',
                 'items' => [['product_alias' => 'coffee', 'qty' => 10]],
-                'user_cash' => 100.00
+                'user_cash' => 10000
             ],
             'expected' => [
                 'error_field' => 'location_id'
@@ -252,17 +252,17 @@ $scenarios = [
         [
             'locations' => ['vendor_loc', 'hub_a', 'store'],
             'routes' => [
-                ['origin' => 'vendor_loc', 'destination' => 'hub_a', 'days' => 1, 'cost' => 1.0, 'capacity' => 200, 'active' => true],
-                ['origin' => 'hub_a', 'destination' => 'store', 'days' => 1, 'cost' => 1.0, 'capacity' => 200, 'active' => true],
+                ['origin' => 'vendor_loc', 'destination' => 'hub_a', 'days' => 1, 'cost' => 100, 'capacity' => 200, 'active' => true],
+                ['origin' => 'hub_a', 'destination' => 'store', 'days' => 1, 'cost' => 100, 'capacity' => 200, 'active' => true],
             ],
             'products' => [
-                ['id' => 'coffee', 'price' => 1.00, 'vendor' => ['id' => 'vendor_loc']]
+                ['id' => 'coffee', 'price' => 100, 'vendor' => ['id' => 'vendor_loc']]
             ],
             'order' => [
                 'vendor_alias' => 'vendor_loc',
                 'target_alias' => 'store',
                 'items' => [],
-                'user_cash' => 100.00
+                'user_cash' => 10000
             ],
             'expected' => [
                 'error_field' => 'items',
@@ -273,17 +273,17 @@ $scenarios = [
         [
             'locations' => ['vendor_loc', 'hub_a', 'store'],
             'routes' => [
-                ['origin' => 'vendor_loc', 'destination' => 'hub_a', 'days' => 1, 'cost' => 1.0, 'capacity' => 200, 'active' => true],
-                ['origin' => 'hub_a', 'destination' => 'store', 'days' => 1, 'cost' => 1.0, 'capacity' => 200, 'active' => true],
+                ['origin' => 'vendor_loc', 'destination' => 'hub_a', 'days' => 1, 'cost' => 100, 'capacity' => 200, 'active' => true],
+                ['origin' => 'hub_a', 'destination' => 'store', 'days' => 1, 'cost' => 100, 'capacity' => 200, 'active' => true],
             ],
             'products' => [
-                ['id' => 'coffee', 'price' => 1.00, 'vendor' => ['id' => 'vendor_loc']]
+                ['id' => 'coffee', 'price' => 100, 'vendor' => ['id' => 'vendor_loc']]
             ],
             'order' => [
                 'vendor_alias' => 'vendor_loc',
                 'target_alias' => 'store',
                 'items' => [['product_alias' => 'coffee', 'qty' => 0]],
-                'user_cash' => 100.00
+                'user_cash' => 10000
             ],
             'expected' => [
                 'error_field' => 'items.0.quantity',
@@ -294,23 +294,23 @@ $scenarios = [
         [
             'locations' => ['vendor_loc', 'hub_a', 'store'],
             'routes' => [
-                ['origin' => 'vendor_loc', 'destination' => 'hub_a', 'days' => 1, 'cost' => 0.60, 'capacity' => 200, 'active' => true],
-                ['origin' => 'hub_a', 'destination' => 'store', 'days' => 1, 'cost' => 0.40, 'capacity' => 200, 'active' => true],
+                ['origin' => 'vendor_loc', 'destination' => 'hub_a', 'days' => 1, 'cost' => 60, 'capacity' => 200, 'active' => true],
+                ['origin' => 'hub_a', 'destination' => 'store', 'days' => 1, 'cost' => 40, 'capacity' => 200, 'active' => true],
             ],
             'products' => [
-                // Request rounds unit_price to 2 decimals in StoreOrderRequest::prepareForValidation()
-                ['id' => 'coffee', 'price' => 1.236, 'vendor' => ['id' => 'vendor_loc']]
+                // Price in cents; rounding applies at cent level
+                ['id' => 'coffee', 'price' => 124, 'vendor' => ['id' => 'vendor_loc']]
             ],
             'order' => [
                 'vendor_alias' => 'vendor_loc',
                 'target_alias' => 'store',
                 'items' => [['product_alias' => 'coffee', 'qty' => 10]],
-                'user_cash' => 100.00
+                'user_cash' => 10000
             ],
             'expected' => [
-                'items_cost' => 12.40, // 10 * 1.24 (rounded from 1.236)
-                'logistics_cost' => 1.00,
-                'total_cost' => 13.40,
+                'items_cost' => 1240, // 10 * 124
+                'logistics_cost' => 100,
+                'total_cost' => 1340,
                 'shipment_count' => 2,
                 'transit_days' => 2,
                 'path' => ['vendor_loc', 'hub_a', 'store'],
@@ -323,13 +323,13 @@ $scenarios = [
             'routes' => [],
             'products' => [
                 // Ensure product exists so the failure is scoped to vendor_id.
-                ['id' => 'coffee', 'price' => 1.00, 'vendor' => ['id' => 'vendor_loc']]
+                ['id' => 'coffee', 'price' => 100, 'vendor' => ['id' => 'vendor_loc']]
             ],
             'order' => [
                 'vendor_alias' => 'missing_vendor', // Vendor is never created for this alias.
                 'target_alias' => 'store',
                 'items' => [['product_alias' => 'coffee', 'qty' => 1]],
-                'user_cash' => 100.00
+                'user_cash' => 10000
             ],
             'expected' => [
                 'error_field' => 'vendor_id',
@@ -340,21 +340,21 @@ $scenarios = [
         [
             'locations' => ['vendor_loc', 'store'],
             'routes' => [
-                ['origin' => 'vendor_loc', 'destination' => 'store', 'days' => 1, 'cost' => 1.00, 'capacity' => 200, 'active' => true],
+                ['origin' => 'vendor_loc', 'destination' => 'store', 'days' => 1, 'cost' => 100, 'capacity' => 200, 'active' => true],
             ],
             'products' => [
                 // Ensure vendor exists so the failure is scoped to items.*.product_id.
-                ['id' => 'coffee', 'price' => 1.00, 'vendor' => ['id' => 'vendor_loc']]
+                ['id' => 'coffee', 'price' => 100, 'vendor' => ['id' => 'vendor_loc']]
             ],
             'order' => [
                 'vendor_alias' => 'vendor_loc',
                 'target_alias' => 'store',
                 'items' => [[
                     'product_id' => '00000000-0000-0000-0000-000000000000',
-                    'unit_price' => 1.00,
+                    'unit_price' => 100,
                     'qty' => 1,
                 ]],
-                'user_cash' => 100.00
+                'user_cash' => 10000
             ],
             'expected' => [
                 'error_field' => 'items.0.product_id',
@@ -366,7 +366,7 @@ $scenarios = [
 it('processes multihop order scenarios', function (array $scenario) {
     // 1. Setup World
     $user = User::factory()->create();
-    $cash = $scenario['order']['user_cash'] ?? 1000.0;
+    $cash = $scenario['order']['user_cash'] ?? 100000;
     $this->createGameState($user, $cash);
 
     $this->createVendorPath($scenario['locations']);
@@ -385,7 +385,7 @@ it('processes multihop order scenarios', function (array $scenario) {
 
         // For negative scenarios (e.g. invalid product_id), we want to hit validation rather than fatal here.
         if ($unitPrice === null) {
-            $unitPrice = 0.0;
+            $unitPrice = 0;
         }
 
         $items[] = [

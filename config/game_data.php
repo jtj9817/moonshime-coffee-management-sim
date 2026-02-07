@@ -34,7 +34,7 @@ return [
             'unit' => 'kg',
             'is_perishable' => false,
             'bulk_threshold' => 50,
-            'storage_cost' => 0.50,
+            'storage_cost' => 50, // cents
             'estimated_shelf_life' => 180,
         ],
         [
@@ -44,7 +44,7 @@ return [
             'unit' => 'L',
             'is_perishable' => true,
             'bulk_threshold' => 100,
-            'storage_cost' => 0.20,
+            'storage_cost' => 20, // cents
             'estimated_shelf_life' => 21,
         ],
         [
@@ -54,7 +54,7 @@ return [
             'unit' => 'packs (50)',
             'is_perishable' => false,
             'bulk_threshold' => 200,
-            'storage_cost' => 0.10,
+            'storage_cost' => 10, // cents
             'estimated_shelf_life' => 730,
         ],
         [
@@ -64,7 +64,7 @@ return [
             'unit' => 'bottle',
             'is_perishable' => false,
             'bulk_threshold' => 20,
-            'storage_cost' => 0.30,
+            'storage_cost' => 30, // cents
             'estimated_shelf_life' => 365,
         ],
         [
@@ -74,7 +74,7 @@ return [
             'unit' => 'box (50)',
             'is_perishable' => false,
             'bulk_threshold' => 30,
-            'storage_cost' => 0.10,
+            'storage_cost' => 10, // cents
             'estimated_shelf_life' => 365,
         ],
         [
@@ -84,7 +84,7 @@ return [
             'unit' => 'kg',
             'is_perishable' => false,
             'bulk_threshold' => 40,
-            'storage_cost' => 0.20,
+            'storage_cost' => 20, // cents
             'estimated_shelf_life' => 1000,
         ],
         [
@@ -94,7 +94,7 @@ return [
             'unit' => 'bottle',
             'is_perishable' => false,
             'bulk_threshold' => 15,
-            'storage_cost' => 0.40,
+            'storage_cost' => 40, // cents
             'estimated_shelf_life' => 730,
         ],
         [
@@ -104,7 +104,7 @@ return [
             'unit' => 'jug (1.8L)',
             'is_perishable' => true,
             'bulk_threshold' => 20,
-            'storage_cost' => 0.50,
+            'storage_cost' => 50, // cents
             'estimated_shelf_life' => 14,
         ],
         [
@@ -114,7 +114,7 @@ return [
             'unit' => 'case (24)',
             'is_perishable' => true,
             'bulk_threshold' => 10,
-            'storage_cost' => 1.50,
+            'storage_cost' => 150, // cents
             'estimated_shelf_life' => 90,
         ],
         [
@@ -124,7 +124,7 @@ return [
             'unit' => 'jug (1.8L)',
             'is_perishable' => true,
             'bulk_threshold' => 25,
-            'storage_cost' => 0.50,
+            'storage_cost' => 50, // cents
             'estimated_shelf_life' => 30,
         ],
         [
@@ -134,7 +134,7 @@ return [
             'unit' => 'L',
             'is_perishable' => true,
             'bulk_threshold' => 80,
-            'storage_cost' => 0.20,
+            'storage_cost' => 20, // cents
             'estimated_shelf_life' => 30,
         ],
         [
@@ -144,7 +144,7 @@ return [
             'unit' => 'case (12)',
             'is_perishable' => true,
             'bulk_threshold' => 10,
-            'storage_cost' => 1.00,
+            'storage_cost' => 100, // cents
             'estimated_shelf_life' => 3,
         ],
     ],

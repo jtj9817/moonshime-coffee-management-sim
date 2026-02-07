@@ -22,7 +22,7 @@ beforeEach(function () {
     $this->gameState = GameState::factory()->create([
         'user_id' => $user->id,
         'day' => 1,
-        'cash' => 100.00,
+        'cash' => 10000,
     ]);
 
     // We need to act as the user so the singleton works if resolved from container

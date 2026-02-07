@@ -17,7 +17,7 @@ test('getPath returns optimal path and cost', function () {
         'source_id' => $locA->id,
         'target_id' => $locB->id,
         'transport_mode' => 'truck',
-        'cost' => 1.00,
+        'cost' => 100,
         'is_active' => true
     ]);
 
@@ -31,7 +31,7 @@ test('getPath returns optimal path and cost', function () {
         ->assertJson([
             'success' => true,
             'reachable' => true,
-            'total_cost' => 1.00
+            'total_cost' => 100
         ]);
 });
 
@@ -66,7 +66,7 @@ test('getPath reflects cost increases from active spikes', function () {
         'source_id' => $locA->id,
         'target_id' => $locB->id,
         'transport_mode' => 'truck',
-        'cost' => 1.00,
+        'cost' => 100,
         'is_active' => true
     ]);
 
@@ -87,6 +87,6 @@ test('getPath reflects cost increases from active spikes', function () {
     $response->assertOk()
         ->assertJson([
             'success' => true,
-            'total_cost' => 1.50
+            'total_cost' => 150
         ]);
 });

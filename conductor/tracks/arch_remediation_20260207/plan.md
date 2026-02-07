@@ -7,40 +7,40 @@ This plan implements Phase 0 from `docs/gameplay-features-implementation-spec.md
 ### Current State (Verified)
 - [x] `InitializeNewGame` uses `1000000` starting cash.
 - [x] `HandleInertiaRequests` fallback game-state creation uses `1000000`.
-- [ ] Monetary semantics are still mixed between cent-style and float-dollar usage in models and domain logic.
+- [x] Monetary semantics are now fully standardized to integer cents across models and domain logic.
 
 ### Task 1: Audit Monetary Columns and Casts
-- [ ] Audit current money columns and units in schema and model casts.
-- [ ] Verify/standardize casts for:
-  - [ ] `game_states.cash`
-  - [ ] `orders.total_cost`
-  - [ ] `products.unit_price`
-  - [ ] `demand_events.unit_price`
-- [ ] Update `app/Models/GameState.php` cast for `cash` to integer cents.
+- [x] Audit current money columns and units in schema and model casts.
+- [x] Verify/standardize casts for:
+  - [x] `game_states.cash`
+  - [x] `orders.total_cost`
+  - [x] `products.unit_price`
+  - [x] `demand_events.unit_price`
+- [x] Update `app/Models/GameState.php` cast for `cash` to integer cents.
 
 ### Task 2: Domain Arithmetic Standardization
-- [ ] Audit and standardize cent-based arithmetic in:
-  - [ ] `app/Listeners/DeductCash.php`
-  - [ ] `app/Listeners/ApplyStorageCosts.php`
-  - [ ] `app/States/Order/Transitions/ToPending.php`
-  - [ ] `app/Http/Requests/StoreOrderRequest.php`
-  - [ ] `app/Services/DemandSimulationService.php`
-- [ ] Remove float-based currency math from backend domain logic.
+- [x] Audit and standardize cent-based arithmetic in:
+  - [x] `app/Listeners/DeductCash.php`
+  - [x] `app/Listeners/ApplyStorageCosts.php`
+  - [x] `app/States/Order/Transitions/ToPending.php`
+  - [x] `app/Http/Requests/StoreOrderRequest.php`
+  - [x] `app/Services/DemandSimulationService.php`
+- [x] Remove float-based currency math from backend domain logic.
 
 ### Task 3: Boundary Conversion Contract
-- [ ] Document and enforce a single conversion boundary:
-  - [ ] Persistence/business logic = integer cents.
-  - [ ] Backend serialization/frontend formatting = display dollars.
-- [ ] Verify `resources/js/lib/formatCurrency.ts` is only used for display formatting, not business logic conversion.
+- [x] Document and enforce a single conversion boundary:
+  - [x] Persistence/business logic = integer cents.
+  - [x] Backend serialization/frontend formatting = display dollars.
+- [x] Verify `resources/js/lib/formatCurrency.ts` is only used for display formatting, not business logic conversion.
 
 ### Task 4: Seed/Test Data Consistency
-- [ ] Audit factories and seeders for cent-consistent money values.
-- [ ] Ensure no create/reset path initializes cash with `10000.00`.
+- [x] Audit factories and seeders for cent-consistent money values.
+- [x] Ensure no create/reset path initializes cash with `10000.00`.
 
 ### Task 5: Verification (Money Invariants)
-- [ ] Keep/verify `tests/Feature/GameInitializationTest.php`.
-- [ ] Add targeted assertions that new game cash remains `1000000` cents.
-- [ ] Run regression suite for financial flow integrity.
+- [x] Keep/verify `tests/Feature/GameInitializationTest.php`.
+- [x] Add targeted assertions that new game cash remains `1000000` cents.
+- [x] Run regression suite for financial flow integrity.
 
 ## Phase 2: Global User Isolation Audit
 

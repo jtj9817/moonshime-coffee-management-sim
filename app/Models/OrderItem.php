@@ -19,7 +19,7 @@ class OrderItem extends Model
     ];
 
     protected $casts = [
-        'cost_per_unit' => 'float',
+        'cost_per_unit' => 'integer',
     ];
 
     public function order(): BelongsTo

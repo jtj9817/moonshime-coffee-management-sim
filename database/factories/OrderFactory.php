@@ -25,7 +25,7 @@ class OrderFactory extends Factory
             'user_id' => User::factory(),
             'vendor_id' => Vendor::factory(),
             'status' => 'draft',
-            'total_cost' => fake()->randomFloat(2, 10, 100),
+            'total_cost' => fake()->numberBetween(1000, 10000), // cents
             'delivery_date' => now()->addDays(3),
         ];
     }
