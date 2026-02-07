@@ -32,4 +32,4 @@
     - [x] Fix any logical discrepancies between spec and implementation.
 - [x] Task: Clean up.
     - [x] Remove old hardcoded test methods (e.g., `test_can_place_multihop_order`) once covered by the provider. (Already removed — file only contains data-driven test.)
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Verification & Cleanup' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Verification & Cleanup' (Protocol in workflow.md)
