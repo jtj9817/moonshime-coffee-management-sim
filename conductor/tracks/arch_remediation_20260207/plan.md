@@ -74,6 +74,52 @@ This plan implements Phase 0 from `docs/gameplay-features-implementation-spec.md
 - [x] Confirm no dashboard/list/analytics query returns another user's data.
 - [x] Run feature test suite to ensure scoping changes do not regress valid flows (282 tests pass).
 
+## Phase 2.5: Coverage Hardening for Phase 0 Invariants (Additive)
+
+### Current State (Audit Snapshot)
+- [x] **High Finding:** Frontend automated test harness now exists for React/Inertia components (`Vitest`/`RTL` with `*.test.*` files).
+- [x] **Medium Finding:** Targeted direct backend coverage added for:
+  - [x] `app/Listeners/ApplyStorageCosts.php`
+  - [x] `app/Services/LogisticsService.php` (`forUser()` context behavior)
+  - [x] `app/Http/Requests/StoreOrderRequest.php` (request-contract-focused assertions)
+- [x] This phase is additive hardening only and does **not** change completion status of Phases 1, 2, or 3.
+
+### Task 1: Frontend Test Harness Foundation (Addresses High Finding)
+- [x] Add frontend unit test stack for React/Inertia:
+  - [x] Add `vitest` + `@testing-library/react` + `@testing-library/jest-dom` + `jsdom`.
+  - [x] Add test scripts in `package.json` (e.g., `test`, `test:watch`).
+  - [x] Add test config + setup file (global matchers, DOM cleanup).
+- [x] Provide deterministic mocks/helpers for Inertia-specific runtime concerns:
+  - [x] Router/navigation mocks.
+  - [x] Shared prop injection patterns for page-level tests.
+  - [x] Any route helper shims used by page components.
+
+### Task 2: Frontend Regression Tests for Phase 0 Surfaces (Addresses High Finding)
+- [x] Add targeted component/page tests for currency boundary and scoped rendering behavior in:
+  - [x] `resources/js/lib/formatCurrency.ts` (display formatting contract only).
+  - [x] `resources/js/pages/game/dashboard.tsx` (cash/KPI rendering from backend props).
+  - [x] `resources/js/pages/game/vendors.tsx` and `resources/js/pages/game/vendors/detail.tsx` (scoped metrics rendering).
+  - [x] `resources/js/pages/game/analytics.tsx` (overview and scoped aggregate display).
+  - [x] `resources/js/pages/game/inventory.tsx`, `resources/js/pages/game/ordering.tsx`, `resources/js/pages/game/transfers.tsx` (critical UI states fed by scoped backend props).
+- [x] Add assertions that frontend does not perform business-logic money conversion (formatting-only boundary remains intact).
+
+### Task 3: Backend Targeted Gap Closure (Addresses Medium Findings)
+- [x] Add focused tests for `app/Listeners/ApplyStorageCosts.php`:
+  - [x] Confirms storage deduction arithmetic is integer-cent based.
+  - [x] Confirms deductions apply to the correct user scope.
+- [x] Add focused tests for `app/Services/LogisticsService.php`:
+  - [x] Explicitly validate `forUser()` scoping changes cost/path outcomes when spikes belong to different users.
+  - [x] Validate cache invalidation when switching user context.
+- [x] Add focused tests for `app/Http/Requests/StoreOrderRequest.php`:
+  - [x] Validate cents-based input/normalization and totals contract.
+  - [x] Validate route-capacity and insufficient-funds branches with precise assertions.
+  - [x] Validate missing-path/no-route error handling behavior.
+
+### Task 4: Verification and Quality Gates
+- [~] Run backend suite with targeted filters for new tests and full regression pass. (Blocked in this environment: Docker not running and local Postgres host `pgsql` unavailable.)
+- [~] Run frontend lint/types and new test suite in Sail workflow. (`vitest` suite and targeted `eslint` pass locally; `pnpm types` fails on pre-existing project-wide TypeScript errors unrelated to this phase.)
+- [x] Update Phase 0 verification matrix notes to include frontend component-test coverage status once passing.
+
 ## Phase 3: Phase 0 Exit Validation [checkpoint: fa8079e]
 
 ### Verification Matrix (Must Pass)
@@ -87,6 +133,7 @@ This plan implements Phase 0 from `docs/gameplay-features-implementation-spec.md
 - [x] **Regression Coverage**
   - [x] `tests/Feature/GameInitializationTest.php` remains green.
   - [x] Multi-user isolation feature coverage is present and green.
+  - [x] Frontend component-test coverage exists for Phase 0 UI surfaces (currency display boundary + scoped rendering pages).
 
 ### Final Quality Checks
 - [x] Run `./vendor/bin/sail pest` — 282 passed (1426 assertions).
