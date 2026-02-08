@@ -53,6 +53,14 @@ class GameController extends Controller
                 ->first();
         }
 
+        $dailySummary = null;
+        if ($gameState && $gameState->day >= 1) {
+            $dailySummary = Alert::where('user_id', $userId)
+                ->where('type', 'summary')
+                ->orderBy('created_day', 'desc')
+                ->first();
+        }
+
         return Inertia::render('game/dashboard', [
             'alerts' => $alerts,
             'kpis' => $this->calculateKPIs($userId),
@@ -60,6 +68,7 @@ class GameController extends Controller
             'logistics_health' => $logisticsService->getLogisticsHealth(),
             'active_spikes_count' => $userId ? SpikeEvent::forUser($userId)->active()->count() : 0,
             'dailyReport' => $dailyReport,
+            'dailySummary' => $dailySummary,
         ]);
     }
 
@@ -87,16 +96,24 @@ class GameController extends Controller
      */
     public function skuDetail(Location $location, Product $sku): Response
     {
+        $userId = auth()->id();
         $inventory = Inventory::with(['product', 'location'])
-            ->where('user_id', auth()->id())
+            ->where('user_id', $userId)
             ->where('location_id', $location->id)
             ->where('product_id', $sku->id)
             ->first();
+
+        $gameState = GameState::where('user_id', $userId)->first();
+        $forecast = $gameState
+            ? app(\App\Services\DemandForecastService::class)->getForecast($userId, $location->id, $sku->id, $gameState->day)
+            : [];
 
         return Inertia::render('game/sku-detail', [
             'location' => $location,
             'product' => $sku,
             'inventory' => $inventory,
+            'forecast' => $forecast,
+            'currentDay' => $gameState?->day ?? 1,
         ]);
     }
 

@@ -6,6 +6,7 @@ use App\Models\GameState;
 use App\Models\DemandEvent;
 use App\Models\Inventory;
 use App\Models\Location;
+use App\Models\LostSale;
 use App\Models\SpikeEvent;
 use App\Events\StockoutOccurred;
 use Illuminate\Support\Facades\Log;
@@ -14,12 +15,16 @@ class DemandSimulationService
 {
     /**
      * Baseline daily consumption per product (in units).
-     * TODO: Move to config or database
      */
     protected array $baselineConsumption = [
-        // Product category => units per day per store
         'default' => 5,
     ];
+
+    /**
+     * Price elasticity factor for demand calculation.
+     * Higher = more price-sensitive demand.
+     */
+    protected float $elasticityFactor = 0.5;
 
     /**
      * Process daily consumption for all stores.
@@ -52,9 +57,13 @@ class DemandSimulationService
                 $variance = 1 + (rand(-20, 20) / 100);
                 $consumption = (int) ($baseline * $variance);
 
+                // Apply price elasticity: EffectiveDemand = BaseDemand * (StandardPrice / CurrentPrice)^ElasticityFactor
+                $elasticityMultiplier = $this->getPriceElasticityMultiplier($store, $inventory->product);
+                $consumption = (int) ($consumption * $elasticityMultiplier);
+
                 // Check for active demand spikes affecting this product/location
                 $demandMultiplier = $this->getDemandMultiplier($userId, $store->id, $inventory->product_id);
-                
+
                 if ($demandMultiplier > 1.0) {
                     $consumption = (int) ($consumption * $demandMultiplier);
                     Log::info("Demand spike active: product {$inventory->product_id} at {$store->name}, multiplier: {$demandMultiplier}x");
@@ -73,7 +82,8 @@ class DemandSimulationService
                 }
 
                 $lostQuantity = $requestedQuantity - $actualConsumed;
-                $unitPrice = (int) ($inventory->product->unit_price ?? 0);
+                // Use sell_price if set on location, otherwise use product's unit_price
+                $unitPrice = (int) ($store->sell_price ?? $inventory->product->unit_price ?? 0);
                 $revenue = $actualConsumed * $unitPrice;
                 $lostRevenue = $lostQuantity * $unitPrice;
 
@@ -91,6 +101,15 @@ class DemandSimulationService
                 ]);
 
                 if ($lostQuantity > 0) {
+                    LostSale::create([
+                        'user_id' => $userId,
+                        'location_id' => $store->id,
+                        'product_id' => $inventory->product_id,
+                        'day' => $day,
+                        'quantity_lost' => $lostQuantity,
+                        'potential_revenue_lost' => $lostRevenue,
+                    ]);
+
                     Log::warning("Stockout at {$store->name} for product {$inventory->product_id}");
                     event(new StockoutOccurred($demandEvent));
                 }
@@ -105,6 +124,24 @@ class DemandSimulationService
     {
         // You can extend this to have per-product or per-category baselines
        return $this->baselineConsumption['default'] ?? 5;
+    }
+
+    /**
+     * Calculate price elasticity multiplier.
+     * Formula: (StandardPrice / CurrentPrice)^ElasticityFactor
+     * Returns 1.0 when sell_price is null (standard pricing).
+     */
+    protected function getPriceElasticityMultiplier(Location $store, $product): float
+    {
+        $sellPrice = $store->sell_price;
+        $standardPrice = (int) ($product->unit_price ?? 0);
+
+        // No elasticity if sell_price not set or standard price is 0
+        if ($sellPrice === null || $standardPrice <= 0 || $sellPrice <= 0) {
+            return 1.0;
+        }
+
+        return pow($standardPrice / $sellPrice, $this->elasticityFactor);
     }
 
     /**

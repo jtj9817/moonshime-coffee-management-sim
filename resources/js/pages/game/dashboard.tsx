@@ -28,6 +28,13 @@ import GameLayout from '@/layouts/game-layout';
 import { formatCurrency } from '@/lib/formatCurrency';
 import { AlertModel, DashboardKPI, LocationModel, QuestModel, type BreadcrumbItem } from '@/types/index';
 
+interface DailySummaryData {
+    units_sold: number;
+    lost_sales: number;
+    storage_fees: number;
+    revenue: number;
+}
+
 interface DashboardProps {
     alerts: AlertModel[];
     kpis: DashboardKPI[];
@@ -49,6 +56,14 @@ interface DashboardProps {
             cash: number;
             xp: number;
         };
+    } | null;
+    dailySummary: {
+        id: string;
+        type: string;
+        message: string;
+        severity: string;
+        created_day: number;
+        data: DailySummaryData;
     } | null;
 }
 
@@ -222,7 +237,7 @@ function LocationCard({ location, alerts }: { location: LocationModel; alerts: A
     );
 }
 
-export default function Dashboard({ alerts, kpis, quests, logistics_health, active_spikes_count, dailyReport }: DashboardProps) {
+export default function Dashboard({ alerts, kpis, quests, logistics_health, active_spikes_count, dailyReport, dailySummary }: DashboardProps) {
     const { locations, activeSpikes, gameState } = useGame();
 
     return (
@@ -245,6 +260,40 @@ export default function Dashboard({ alerts, kpis, quests, logistics_health, acti
                 {/* Daily Report Card - shows after day 1 */}
                 {dailyReport && (
                     <DailyReportCard report={dailyReport} />
+                )}
+
+                {/* Daily Summary */}
+                {dailySummary && dailySummary.data && (
+                    <Card className="border-blue-200 bg-blue-50/50 dark:border-blue-800 dark:bg-blue-950/30">
+                        <CardHeader className="pb-2">
+                            <CardTitle className="flex items-center gap-2 text-sm font-medium text-blue-700 dark:text-blue-300">
+                                <Package className="h-4 w-4" />
+                                Day {dailySummary.created_day} Summary
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                                <div>
+                                    <p className="text-xs text-stone-500 dark:text-stone-400">Units Sold</p>
+                                    <p className="text-lg font-bold text-stone-900 dark:text-white">{dailySummary.data.units_sold}</p>
+                                </div>
+                                <div>
+                                    <p className="text-xs text-stone-500 dark:text-stone-400">Revenue</p>
+                                    <p className="text-lg font-bold text-emerald-600">${formatCurrency(dailySummary.data.revenue)}</p>
+                                </div>
+                                <div>
+                                    <p className="text-xs text-stone-500 dark:text-stone-400">Lost Sales</p>
+                                    <p className={`text-lg font-bold ${dailySummary.data.lost_sales > 0 ? 'text-rose-600' : 'text-stone-900 dark:text-white'}`}>
+                                        {dailySummary.data.lost_sales}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-xs text-stone-500 dark:text-stone-400">Storage Fees</p>
+                                    <p className="text-lg font-bold text-amber-600">${formatCurrency(dailySummary.data.storage_fees)}</p>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
                 )}
 
                 {/* Active Spike Alert */}

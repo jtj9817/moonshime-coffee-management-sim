@@ -105,6 +105,8 @@ class GameServiceProvider extends ServiceProvider
         Event::listen(TimeAdvanced::class, ApplyStorageCosts::class);
         Event::listen(TimeAdvanced::class, CreateDailyReport::class);
         Event::listen(TimeAdvanced::class, \App\Listeners\SnapshotInventoryLevels::class);
+        Event::listen(TimeAdvanced::class, \App\Listeners\CreateLocationDailyMetrics::class);
+        Event::listen(TimeAdvanced::class, \App\Listeners\CreateDailySummaryAlert::class);
 
         // DAG Chain for OrderPlaced
         Event::listen(OrderPlaced::class, DeductCash::class);

@@ -16,11 +16,13 @@ class Location extends Model
         'name',
         'address',
         'max_storage',
+        'sell_price',
         'type',
     ];
 
     protected $casts = [
         'max_storage' => 'integer',
+        'sell_price' => 'integer',
     ];
 
     public function inventories(): HasMany

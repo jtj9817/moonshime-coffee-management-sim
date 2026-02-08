@@ -203,6 +203,15 @@ export interface TransferModel {
     target_location?: LocationModel;
 }
 
+// Demand Forecast Types (for SKU detail)
+export interface ForecastRow {
+    day_offset: number;
+    predicted_demand: number;
+    predicted_stock: number;
+    risk_level: 'low' | 'medium' | 'stockout';
+    incoming_deliveries: number;
+}
+
 // KPI Types (for dashboard)
 export interface DashboardKPI {
     label: string;

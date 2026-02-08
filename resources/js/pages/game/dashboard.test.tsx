@@ -40,6 +40,7 @@ describe('game dashboard page', () => {
                 logistics_health={95}
                 active_spikes_count={0}
                 dailyReport={null}
+                dailySummary={null}
             />,
         );
 

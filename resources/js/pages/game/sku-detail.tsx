@@ -1,17 +1,20 @@
 import { Head, Link } from '@inertiajs/react';
 import { ArrowLeft, MapPin, Package, ShoppingCart, TrendingUp } from 'lucide-react';
 
+import DemandForecastChart from '@/components/DemandForecastChart';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import GameLayout from '@/layouts/game-layout';
-import { InventoryModel, LocationModel, ProductModel, type BreadcrumbItem } from '@/types';
+import { ForecastRow, InventoryModel, LocationModel, ProductModel, type BreadcrumbItem } from '@/types';
 
 interface SkuDetailProps {
     location: LocationModel;
     product: ProductModel;
     inventory: InventoryModel | null;
+    forecast: ForecastRow[];
+    currentDay: number;
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -27,7 +30,7 @@ function getStockStatus(quantity: number) {
     return { label: 'Well Stocked', color: 'default' as const };
 }
 
-export default function SkuDetail({ location, product, inventory }: SkuDetailProps) {
+export default function SkuDetail({ location, product, inventory, forecast, currentDay }: SkuDetailProps) {
     const quantity = inventory?.quantity ?? 0;
     const status = getStockStatus(quantity);
     const maxStock = 500; // Placeholder for reorder point calculations
@@ -97,6 +100,11 @@ export default function SkuDetail({ location, product, inventory }: SkuDetailPro
                         </div>
                     </CardContent>
                 </Card>
+
+                {/* Demand Forecast Chart */}
+                {forecast && forecast.length > 0 && (
+                    <DemandForecastChart forecast={forecast} currentDay={currentDay} />
+                )}
 
                 {/* Details Grid */}
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
