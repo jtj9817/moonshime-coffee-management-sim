@@ -1,5 +1,5 @@
 import { SUPPLIER_ITEMS } from '../constants';
-import { InventoryRecord, Item, Location, TransferSuggestion, SupplierItem } from '../types';
+import { InventoryRecord, Item, Location, TransferSuggestion } from '../types';
 
 import { calculateInventoryPositions } from './inventoryService';
 

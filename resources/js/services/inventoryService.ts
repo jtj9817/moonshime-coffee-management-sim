@@ -1,12 +1,11 @@
 import { SUPPLIER_ITEMS } from '../constants';
-import { 
-  InventoryRecord, 
-  Item, 
-  Location, 
-  InventoryPosition, 
-  InventoryStatus, 
-  ExpiryLot,
-  SupplierItem
+import {
+  InventoryRecord,
+  Item,
+  Location,
+  InventoryPosition,
+  InventoryStatus,
+  ExpiryLot
 } from '../types';
 
 // Helper to determine status based on metrics

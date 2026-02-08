@@ -1,13 +1,11 @@
 import { Head, Link } from '@inertiajs/react';
 import {
-    Activity,
     AlertOctagon,
     AlertTriangle,
     ArrowRight,
     Building2,
     CheckCircle2,
     Coffee,
-    DollarSign,
     MapPin,
     Package,
     Target,

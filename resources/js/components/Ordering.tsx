@@ -1,22 +1,22 @@
 
 
-import { 
-  ShoppingBag, Truck, CheckCircle2, AlertCircle, Search, Filter, Plus, Trash2, 
-  ChevronDown, ChevronUp, Package, DollarSign, AlertTriangle, Send, Info, Clock, 
+import {
+  ShoppingBag, Truck, Search, Plus, Trash2,
+  ChevronDown, ChevronUp, Package, DollarSign, AlertTriangle, Send, Clock,
   TrendingUp, Zap, Lightbulb
 } from 'lucide-react';
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 import { useApp } from '../App';
-import { ITEMS, SUPPLIERS, SUPPLIER_ITEMS } from '../constants';
+import { SUPPLIERS, SUPPLIER_ITEMS } from '../constants';
 import { formatCurrency } from '../lib/formatCurrency';
 import { suggestConsolidationAdds } from '../services/cockpitService';
 import { calculateInventoryPositions } from '../services/inventoryService';
 import { calcMaxPerishableOrder } from '../services/orderCalculations';
 import { evaluateBulkTierBreakeven } from '../services/skuMath';
 import { chooseBestVendorGivenUrgency } from '../services/vendorService';
-import { SupplierItem, Supplier, Item, DraftOrder, DraftLineItem, OrderWarning, ConsolidationSuggestion } from '../types';
+import { SupplierItem, Supplier, DraftOrder, OrderWarning, ConsolidationSuggestion } from '../types';
 
 import ProductIcon from './ProductIcon';
 
@@ -39,26 +39,31 @@ const Ordering: React.FC = () => {
     calculateInventoryPositions(inventory, items, locations), 
   [inventory, items, locations]);
 
-  // Handle URL params
-  useEffect(() => {
-    const locParam = searchParams.get('locId');
-    const itemParam = searchParams.get('itemId');
-    if (locParam && locParam !== 'all') {
-      setTargetLocationId(locParam);
-      // Ensure global header matches
-      if (currentLocationId !== locParam) setCurrentLocationId(locParam);
-    }
-    if (itemParam) {
-      setExpandedItemId(itemParam);
-    }
-  }, [searchParams]);
+  // Handle URL params - initialize from search params on mount
+  const locParam = searchParams.get('locId');
+  const itemParam = searchParams.get('itemId');
 
-  // Sync target location when global location changes
-  useEffect(() => {
-    if (currentLocationId !== 'all') {
-      setTargetLocationId(currentLocationId);
-    }
-  }, [currentLocationId]);
+  // Sync target location from URL params or global location
+  const effectiveTargetLocationId = useMemo(() => {
+    if (locParam && locParam !== 'all') return locParam;
+    if (currentLocationId !== 'all') return currentLocationId;
+    return targetLocationId;
+  }, [locParam, currentLocationId, targetLocationId]);
+
+  // Keep targetLocationId in sync
+  if (effectiveTargetLocationId !== targetLocationId) {
+    setTargetLocationId(effectiveTargetLocationId);
+  }
+
+  // Sync global header when URL param specifies a location
+  if (locParam && locParam !== 'all' && currentLocationId !== locParam) {
+    setCurrentLocationId(locParam);
+  }
+
+  // Expand item from URL param
+  if (itemParam && expandedItemId !== itemParam) {
+    setExpandedItemId(itemParam);
+  }
 
   // --- Logic Helpers ---
 
@@ -336,7 +341,7 @@ const Ordering: React.FC = () => {
                                 <span className="text-[10px] text-stone-400">Urgency:</span>
                                 <select 
                                   className="text-[10px] bg-white border border-stone-200 rounded px-1 py-0.5 outline-none"
-                                  onChange={(e) => {}}
+                                  onChange={() => {}}
                                 >
                                   <option value="standard">Standard</option>
                                   <option value="high">High</option>

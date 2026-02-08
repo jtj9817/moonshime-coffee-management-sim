@@ -1,20 +1,15 @@
 
 
-import { 
-  ArrowLeft, 
-  Settings, 
-  Info, 
-  TrendingUp, 
-  TrendingDown, 
-  AlertTriangle, 
-  Package, 
-  Truck, 
-  Clock, 
-  DollarSign, 
+import {
+  ArrowLeft,
+  Info,
+  TrendingUp,
+  AlertTriangle,
+  Package,
+  Truck,
+  DollarSign,
   Calculator,
-  Calendar,
   Layers,
-  ShieldCheck,
   X,
   ArrowRightLeft,
   Scale,
@@ -26,17 +21,17 @@ import {
   ShoppingCart,
   Loader2
 } from 'lucide-react';
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { 
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, 
-  BarChart, Bar, Cell, Legend
+import {
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine,
+  BarChart, Bar, Legend
 } from 'recharts';
 
 import { useApp } from '../App';
 import { SUPPLIERS, SUPPLIER_ITEMS } from '../constants';
 import { getZScore, calculateSafetyStock, calculateROP, calcLandedCostPerUnit, generateMockForecast } from '../services/skuMath';
-import { ReorderPolicy, CostBreakdown, Supplier, SupplierItem, LandedCostBreakdown } from '../types';
+import { CostBreakdown, LandedCostBreakdown } from '../types';
 
 import ProductIcon from './ProductIcon';
 
@@ -54,8 +49,8 @@ const SkuDetail: React.FC = () => {
   const [serviceLevel, setServiceLevel] = useState<number>(0.95);
   const [avgLeadTime, setAvgLeadTime] = useState<number>(3); // Default mocked
   const [avgDailyUsage, setAvgDailyUsage] = useState<number>(25); // Default mocked
-  const [demandStdDev, setDemandStdDev] = useState<number>(5);
-  const [leadTimeStdDev, setLeadTimeStdDev] = useState<number>(1);
+  const [demandStdDev] = useState<number>(5);
+  const [leadTimeStdDev] = useState<number>(1);
   const [activeTab, setActiveTab] = useState<'math' | 'vendors' | 'expiry'>('math');
   
   // New State for Policy Edit Mode

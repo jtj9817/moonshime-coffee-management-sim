@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { Coffee, Info, ShoppingCart, Sparkles } from 'lucide-react';
+import { Info, ShoppingCart, Sparkles } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';

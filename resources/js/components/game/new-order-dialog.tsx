@@ -1,5 +1,5 @@
 import { useForm } from '@inertiajs/react';
-import { Plus, ShoppingCart, Trash2, ArrowRight } from 'lucide-react';
+import { Plus, ShoppingCart, Trash2 } from 'lucide-react';
 import { useMemo, useState, useEffect } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -22,7 +22,6 @@ import {
 } from '@/components/ui/select';
 import { useGame } from '@/contexts/game-context';
 import { formatCurrency } from '@/lib/formatCurrency';
-import { RouteModel } from '@/types';
 
 import { RouteCapacityMeter } from './route-capacity-meter';
 
@@ -92,23 +91,36 @@ export function NewOrderDialog({
         return (locations ?? []).filter(l => l.type === 'store' || l.name.includes('Central'));
     }, [locations]);
 
+    // Clear path when inputs are missing (derived state, not an effect)
+    if ((!selectedSourceId || !data.location_id) && calculatedPath !== null) {
+        setCalculatedPath(null);
+    }
+
+    // Track previous fetch inputs to detect changes
+    const [prevFetchKey, setPrevFetchKey] = useState('');
+    const fetchKey = `${selectedSourceId}|${data.location_id}`;
+    if (selectedSourceId && data.location_id && fetchKey !== prevFetchKey) {
+        setPrevFetchKey(fetchKey);
+        setLoadingPath(true);
+    }
+
     // Fetch path when source or target changes
     useEffect(() => {
         if (!selectedSourceId || !data.location_id) {
-            setCalculatedPath(null);
             return;
         }
 
-        setLoadingPath(true);
+        let cancelled = false;
         fetch(`/game/logistics/path?source_id=${selectedSourceId}&target_id=${data.location_id}`)
             .then(res => res.json())
             .then(result => {
+                if (cancelled) return;
                 if (result.success && result.reachable) {
-                    const path = result.path;
+                    const path = result.path as Array<{ transit_days: number; capacity: number; id: number; source: string; target: string; transport_mode: string; cost: number }>;
                     const totalCost = result.total_cost;
 
-                    const totalDays = path.reduce((sum: number, leg: any) => sum + (leg.transit_days || 0), 0);
-                    const minCapacity = Math.min(...path.map((leg: any) => leg.capacity || 1000));
+                    const totalDays = path.reduce((sum: number, leg) => sum + (leg.transit_days || 0), 0);
+                    const minCapacity = Math.min(...path.map((leg) => leg.capacity || 1000));
 
                     setCalculatedPath({
                         reachable: true,
@@ -121,14 +133,15 @@ export function NewOrderDialog({
                     setCalculatedPath(null);
                 }
             })
-            .catch(() => setCalculatedPath(null))
-            .finally(() => setLoadingPath(false));
+            .catch(() => { if (!cancelled) setCalculatedPath(null); })
+            .finally(() => { if (!cancelled) setLoadingPath(false); });
+        return () => { cancelled = true; };
     }, [selectedSourceId, data.location_id]);
 
     // Sync source_location_id with form data
     useEffect(() => {
         setData('source_location_id', selectedSourceId);
-    }, [selectedSourceId]);
+    }, [selectedSourceId, setData]);
 
     const handleAddItem = () => {
         if (!currentProductId) return;

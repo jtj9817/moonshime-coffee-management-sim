@@ -104,7 +104,7 @@ export default function Transfers({ transfers, suggestions }: TransfersProps) {
         return locationNameById.get(locationId) ?? 'Unknown';
     };
 
-    const { data, setData, post, processing, errors, reset } = useForm({
+    const { data, setData, post, processing, reset } = useForm({
         source_location_id: '',
         target_location_id: '',
         items: [{ product_id: '', quantity: 1 }],
@@ -113,29 +113,37 @@ export default function Transfers({ transfers, suggestions }: TransfersProps) {
     // Determine if the current path contains any premium routes
     const hasPremiumRoute = routeInfo?.path?.some(step => step.is_premium);
 
-    useEffect(() => {
-        if (data.source_location_id && data.target_location_id && data.source_location_id !== data.target_location_id) {
-            fetchRoute();
-        } else {
-            setRouteInfo(null);
-            setShowAlternative(false);
-        }
-    }, [data.source_location_id, data.target_location_id]);
+    const shouldFetchRoute = !!(data.source_location_id && data.target_location_id && data.source_location_id !== data.target_location_id);
 
-    const fetchRoute = async () => {
-        setLoadingRoute(true);
-        try {
-            const response = await fetch(`/game/logistics/path?source_id=${data.source_location_id}&target_id=${data.target_location_id}`);
-            const result = await response.json();
-            setRouteInfo(result);
-            // Reset alternative view if a new route is fetched
-            setShowAlternative(false);
-        } catch (error) {
-            console.error('Failed to fetch route', error);
-        } finally {
-            setLoadingRoute(false);
-        }
-    };
+    // Reset route info when inputs become invalid (derived state)
+    if (!shouldFetchRoute && routeInfo !== null) {
+        setRouteInfo(null);
+        setShowAlternative(false);
+    }
+
+    useEffect(() => {
+        if (!shouldFetchRoute) return;
+
+        let cancelled = false;
+        const controller = new AbortController();
+
+        fetch(`/game/logistics/path?source_id=${data.source_location_id}&target_id=${data.target_location_id}`, { signal: controller.signal })
+            .then(res => res.json())
+            .then(result => {
+                if (!cancelled) {
+                    setRouteInfo(result);
+                    setShowAlternative(false);
+                    setLoadingRoute(false);
+                }
+            })
+            .catch(error => {
+                if (!cancelled && error.name !== 'AbortError') {
+                    console.error('Failed to fetch route', error);
+                    setLoadingRoute(false);
+                }
+            });
+        return () => { cancelled = true; controller.abort(); };
+    }, [data.source_location_id, data.target_location_id, shouldFetchRoute]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();

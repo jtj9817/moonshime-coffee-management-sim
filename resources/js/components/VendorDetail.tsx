@@ -1,14 +1,11 @@
 
 
-import { 
-  ArrowLeft, ShieldCheck, Truck, Package, Mail, Phone, AlertTriangle, TrendingUp, DollarSign,
-  ShoppingCart, Info, History, FileText, User, Calendar, Star, Clock, Handshake, MessageSquare
+import {
+  ArrowLeft, AlertTriangle, TrendingUp,
+  ShoppingCart, User, Clock, Handshake
 } from 'lucide-react';
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { 
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area, Legend 
-} from 'recharts';
 
 import { useApp } from '../App';
 import { SUPPLIERS, SUPPLIER_ITEMS } from '../constants';
@@ -26,6 +23,9 @@ const VendorDetail: React.FC = () => {
   const [isNegotiating, setIsNegotiating] = useState(false);
   const [discount, setDiscount] = useState<number>(0);
 
+  // Capture timestamp once on mount to avoid impure Date.now() calls during render
+  const [nowTimestamp] = useState(() => Date.now());
+
   const supplier = SUPPLIERS.find(s => s.id === id);
   const supplierItems = SUPPLIER_ITEMS.filter(si => si.supplierId === id);
 
@@ -42,56 +42,6 @@ const VendorDetail: React.FC = () => {
       }
   };
 
-  // Calculate current metrics based on supplier data
-  const lastMonthLate = (supplier.metrics?.lateRate || 0) * 100;
-  const lastMonthFill = (supplier.metrics?.fillRate || 0) * 100;
-  const lastMonthComplaint = (supplier.metrics?.complaintRate || 0) * 100;
-
-  // Generate trend data based on current metrics to ensure consistency
-  const performanceTrends = [
-    { month: 'Jun', late: lastMonthLate + 4, fill: Math.max(0, lastMonthFill - 2), complaints: lastMonthComplaint + 1 },
-    { month: 'Jul', late: lastMonthLate + 1, fill: Math.max(0, lastMonthFill - 1), complaints: lastMonthComplaint + 0.5 },
-    { month: 'Aug', late: Math.max(0, lastMonthLate - 1), fill: Math.min(100, lastMonthFill + 1), complaints: lastMonthComplaint + 2 }, 
-    { month: 'Sep', late: lastMonthLate + 2, fill: Math.max(0, lastMonthFill - 3), complaints: Math.max(0, lastMonthComplaint - 0.5) },
-    { month: 'Oct', late: lastMonthLate + 0.5, fill: Math.max(0, lastMonthFill - 0.5), complaints: lastMonthComplaint },
-    { month: 'Nov', late: lastMonthLate, fill: lastMonthFill, complaints: lastMonthComplaint },
-  ].map(d => ({
-      ...d,
-      late: parseFloat(Math.max(0, d.late).toFixed(1)),
-      fill: parseFloat(Math.min(100, d.fill).toFixed(1)),
-      complaints: parseFloat(Math.max(0, d.complaints).toFixed(1))
-  }));
-
-  // Simulated Audit Log Data
-  const auditLogs = [
-    { 
-       id: 'log-1', 
-       type: 'price', 
-       title: 'Price Adjustment', 
-       description: 'Updated unit price for "Espresso Blend" from $17.50 to $18.00 due to market fluctuation.', 
-       user: 'System Integration', 
-       role: 'Automated',
-       timestamp: 'Oct 24, 2023 • 09:15 AM' 
-    },
-    { 
-       id: 'log-2', 
-       type: 'policy', 
-       title: 'Shipping Threshold Update', 
-       description: `Lowered free shipping threshold from $${(supplier.freeShippingThreshold + 50).toFixed(0)} to $${supplier.freeShippingThreshold.toFixed(0)} for holiday season efficiency.`, 
-       user: 'Alex Roaster', 
-       role: 'Regional Manager',
-       timestamp: 'Oct 20, 2023 • 02:30 PM' 
-    },
-     { 
-       id: 'log-4', 
-       type: 'info', 
-       title: 'Contact Information', 
-       description: `Primary contact phone updated to ${supplier.phone}.`, 
-       user: 'Sarah Supply', 
-       role: 'Compliance Officer',
-       timestamp: 'Oct 01, 2023 • 04:45 PM' 
-    }
-  ];
 
   return (
     <div className="space-y-6 pb-20 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -223,8 +173,8 @@ const VendorDetail: React.FC = () => {
                            
                            // Calculate expiry for the specific item in the target location
                            const invRecord = inventory.find(r => r.itemId === item.id && r.locationId === targetLocId);
-                           const daysUntilExpiry = invRecord?.expiryDate 
-                              ? Math.ceil((new Date(invRecord.expiryDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) 
+                           const daysUntilExpiry = invRecord?.expiryDate
+                              ? Math.ceil((new Date(invRecord.expiryDate).getTime() - nowTimestamp) / (1000 * 60 * 60 * 24))
                               : null;
 
                            return (

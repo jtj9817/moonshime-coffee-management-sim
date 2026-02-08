@@ -1,14 +1,9 @@
-import { 
-  ArrowRightLeft, 
-  Search, 
-  MapPin, 
-  Truck, 
-  CheckCircle2, 
-  Clock, 
-  MoreHorizontal, 
+import {
+  ArrowRightLeft,
+  Truck,
+  CheckCircle2,
   Plus,
   ArrowRight,
-  TrendingDown,
   AlertCircle,
   X,
   Package
@@ -17,7 +12,7 @@ import React, { useState, useMemo } from 'react';
 
 import { useApp } from '../App';
 import { generateTransferSuggestions } from '../services/transferService';
-import { Transfer, TransferSuggestion } from '../types';
+import { TransferSuggestion } from '../types';
 
 import ProductIcon from './ProductIcon';
 
@@ -357,7 +352,7 @@ const Transfers: React.FC = () => {
                            );
                         })}
                      </div>
-                     {getStockMatrix(selectedSku).find(m => m.location.id === sourceId)?.qty! < qty && (
+                     {(getStockMatrix(selectedSku).find(m => m.location.id === sourceId)?.qty ?? 0) < qty && (
                         <div className="mt-3 text-xs text-rose-600 font-bold flex items-center gap-1">
                            <AlertCircle size={12} /> Source location has insufficient stock.
                         </div>
@@ -374,7 +369,7 @@ const Transfers: React.FC = () => {
                   </button>
                   <button 
                      onClick={handleSubmitTransfer}
-                     disabled={qty <= 0 || getStockMatrix(selectedSku).find(m => m.location.id === sourceId)?.qty! < qty}
+                     disabled={qty <= 0 || (getStockMatrix(selectedSku).find(m => m.location.id === sourceId)?.qty ?? 0) < qty}
                      className="px-4 py-2 bg-stone-900 text-white font-bold text-sm rounded-lg hover:bg-stone-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                      Confirm Transfer

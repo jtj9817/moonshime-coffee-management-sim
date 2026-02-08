@@ -1,33 +1,31 @@
 
-import { 
-  Sliders, ShieldCheck, DollarSign, Activity, AlertTriangle, Save, RotateCcw, 
+import {
+  Sliders, ShieldCheck, DollarSign, Save, RotateCcw,
   TrendingUp, TrendingDown, Layers, HelpCircle
 } from 'lucide-react';
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 import { useApp } from '../App';
 import { calculatePolicyImpact } from '../services/policyService';
-import { PolicyProfile, PolicyImpactAnalysis } from '../types';
+import { PolicyProfile } from '../types';
 
 const PolicyDeck: React.FC = () => {
-  const { policies, updatePolicies, inventory, items, locations, gameState } = useApp();
+  const { policies, updatePolicies, inventory, items, locations } = useApp();
   
   // Local state for "Draft" policies (sliders move this, not global state immediately)
   const [draftPolicy, setDraftPolicy] = useState<PolicyProfile>({ ...policies });
-  const [impact, setImpact] = useState<PolicyImpactAnalysis | null>(null);
   const [isDirty, setIsDirty] = useState(false);
 
   // Sync draft if global policies change externally (unlikely but good practice)
-  useEffect(() => {
-    if (!isDirty) setDraftPolicy(policies);
-  }, [policies, isDirty]);
+  if (!isDirty && draftPolicy !== policies) {
+    setDraftPolicy(policies);
+  }
 
   // Recalculate impact whenever draft changes
-  useEffect(() => {
-    const analysis = calculatePolicyImpact(policies, draftPolicy, inventory, items, locations);
-    setImpact(analysis);
-  }, [draftPolicy, policies, inventory, items, locations]);
+  const impact = useMemo(() =>
+    calculatePolicyImpact(policies, draftPolicy, inventory, items, locations),
+  [draftPolicy, policies, inventory, items, locations]);
 
   const handleChange = (field: keyof PolicyProfile, value: number) => {
     setDraftPolicy(prev => ({ ...prev, [field]: value }));
@@ -181,7 +179,7 @@ const PolicyDeck: React.FC = () => {
                       {(impact?.deltaCapital || 0) > 0 ? <TrendingUp size={12}/> : <TrendingDown size={12}/>}
                       {impact?.deltaCapital === 0 ? 'No Change' : (
                          <span>
-                            {impact?.deltaCapital! > 0 ? '+' : ''}
+                            {(impact?.deltaCapital ?? 0) > 0 ? '+' : ''}
                             ${impact?.deltaCapital.toLocaleString(undefined, { maximumFractionDigits: 0 })} vs current
                          </span>
                       )}

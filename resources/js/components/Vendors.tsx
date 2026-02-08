@@ -1,4 +1,4 @@
-import { Search, Filter, Star, Truck, ShieldCheck, Box } from 'lucide-react';
+import { Search, Filter, Truck, ShieldCheck, Box } from 'lucide-react';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 

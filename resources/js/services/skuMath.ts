@@ -1,4 +1,4 @@
-import { ReorderPolicy, Supplier, SupplierItem, CostBreakdown, Item, PriceTier, BulkTierAnalysis, LandedCostBreakdown } from '../types';
+import { Supplier, SupplierItem, CostBreakdown, Item, PriceTier, BulkTierAnalysis, LandedCostBreakdown } from '../types';
 
 // Z-Score approximation map for common service levels
 export const getZScore = (serviceLevel: number): number => {
@@ -112,8 +112,7 @@ export const evaluateBulkTierBreakeven = (
   currentTier: PriceTier,
   targetTier: PriceTier,
   item: Item,
-  currentQty: number,
-  holdingCostRate: number = 0.25 // Annual holding cost %
+  currentQty: number
 ): BulkTierAnalysis => {
   
   const unitSavings = currentTier.unitPrice - targetTier.unitPrice;

@@ -1,4 +1,4 @@
-import { MessageSquare, CheckCircle2, AlertOctagon, HelpCircle, X, Save } from 'lucide-react';
+import { MessageSquare, CheckCircle2, AlertOctagon, X, Save } from 'lucide-react';
 import React, { useState } from 'react';
 
 import { SpikeSignal, Item, SpikeFeedback } from '../types';
@@ -15,7 +15,6 @@ interface PostMortemModalProps {
 const PostMortemModal: React.FC<PostMortemModalProps> = ({
   isOpen,
   onClose,
-  signal,
   item,
   onComplete,
   defaultIsFalsePositive = false
@@ -91,7 +90,7 @@ const PostMortemModal: React.FC<PostMortemModalProps> = ({
                  <label className="text-xs font-bold text-stone-500 uppercase">Primary Classification</label>
                  <select 
                     value={classification} 
-                    onChange={(e) => setClassification(e.target.value as any)}
+                    onChange={(e) => setClassification(e.target.value as SpikeFeedback['classification'])}
                     className="w-full p-2.5 bg-stone-50 border border-stone-200 rounded-lg text-sm font-medium outline-none focus:border-indigo-500"
                  >
                     {!isFalsePositive ? (
@@ -116,7 +115,7 @@ const PostMortemModal: React.FC<PostMortemModalProps> = ({
                        {['WEATHER', 'LOCAL_EVENT', 'PROMOTION', 'SUPPLY_FAILURE', 'UNKNOWN'].map(cause => (
                           <button
                              key={cause}
-                             onClick={() => setRootCause(cause as any)}
+                             onClick={() => setRootCause(cause as SpikeFeedback['rootCause'])}
                              className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
                                 rootCause === cause 
                                    ? 'bg-stone-800 text-white border-stone-800' 

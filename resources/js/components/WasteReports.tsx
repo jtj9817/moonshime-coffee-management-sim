@@ -1,54 +1,51 @@
 
-import { 
-  Trash2, 
-  TrendingDown, 
-  TrendingUp, 
-  Filter, 
-  Calendar, 
-  Download, 
-  AlertOctagon, 
-  FileText, 
-  Settings, 
-  ArrowRight, 
-  Search, 
-  DollarSign, 
-  PieChart as PieIcon, 
+import {
+  Trash2,
+  TrendingUp,
+  Calendar,
+  Download,
+  AlertOctagon,
+  FileText,
+  Settings,
+  ArrowRight,
+  Search,
+  DollarSign,
+  PieChart as PieIcon,
   List,
   ChevronDown,
   ChevronUp,
   User,
   Clock
 } from 'lucide-react';
-import React, { useState, useMemo, useEffect } from 'react';
-import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area, Cell, PieChart, Pie 
+import React, { useState, useMemo } from 'react';
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, Cell, PieChart, Pie
 } from 'recharts';
 
 import { useApp } from '../App';
 import { formatCurrency } from '../lib/formatCurrency';
 import { generateMockWasteData, generateMockPolicyChanges } from '../services/wasteService';
-import { WasteEvent, PolicyChangeLog } from '../types';
 
 const WasteReports: React.FC = () => {
   const { items, locations, currentLocationId } = useApp();
   
   // State
   const [dateRange, setDateRange] = useState({ start: '2023-09-01', end: '2023-10-31' });
-  const [wasteEvents, setWasteEvents] = useState<WasteEvent[]>([]);
-  const [policyLogs, setPolicyLogs] = useState<PolicyChangeLog[]>([]);
   const [activeTab, setActiveTab] = useState<'overview' | 'policies'>('overview');
   const [reasonFilter, setReasonFilter] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
-  
+
   // Track expanded policy item
   const [expandedPolicyId, setExpandedPolicyId] = useState<string | null>(null);
 
-  // Load Data
-  useEffect(() => {
+  // Derive data from inputs
+  const { wasteEvents, policyLogs } = useMemo(() => {
     const start = new Date(dateRange.start);
     const end = new Date(dateRange.end);
-    setWasteEvents(generateMockWasteData(items, locations, start, end));
-    setPolicyLogs(generateMockPolicyChanges(items, locations, start, end));
+    return {
+      wasteEvents: generateMockWasteData(items, locations, start, end),
+      policyLogs: generateMockPolicyChanges(items, locations, start, end),
+    };
   }, [dateRange, items, locations]);
 
   // --- Filtering Logic ---
@@ -82,7 +79,7 @@ const WasteReports: React.FC = () => {
   }, [policyLogs, currentLocationId, searchTerm, items]);
 
   // --- CSV Export Helper ---
-  const downloadCSV = (data: any[], filename: string) => {
+  const downloadCSV = (data: Record<string, string | number | boolean | null | undefined>[], filename: string) => {
     if (!data || data.length === 0) {
       alert("No data to export");
       return;

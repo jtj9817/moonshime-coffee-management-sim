@@ -137,7 +137,7 @@ export const generateSuggestedActions = (alerts: Alert[]): SuggestedAction[] => 
   return actions;
 };
 
-export const generateKPIs = (alerts: Alert[], inventory: InventoryRecord[]): GameDashboardKPI[] => {
+export const generateKPIs = (alerts: Alert[]): GameDashboardKPI[] => {
   const criticalCount = alerts.filter(a => a.severity === 'critical').length;
   const expiryCount = alerts.filter(a => a.type === 'EXPIRY').length;
 
@@ -237,7 +237,7 @@ export const suggestConsolidationAdds = (
   });
 
   return {
-    suggestions: suggestions.sort((a, b) => (a.priority === 'high' ? -1 : 1)).slice(0, 3),
+    suggestions: suggestions.sort((a) => (a.priority === 'high' ? -1 : 1)).slice(0, 3),
     gapToFreeShipping: gap
   };
 };

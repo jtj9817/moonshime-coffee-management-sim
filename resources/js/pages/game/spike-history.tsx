@@ -2,7 +2,6 @@ import { Head, Link, router } from '@inertiajs/react';
 import {
     Activity,
     AlertTriangle,
-    ArrowRight,
     CheckCircle2,
     Clock,
     DollarSign,

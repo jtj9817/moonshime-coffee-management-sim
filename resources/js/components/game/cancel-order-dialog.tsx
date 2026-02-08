@@ -26,24 +26,19 @@ export function CancelOrderDialog({
     onOpenChange,
 }: CancelOrderDialogProps) {
     const [processing, setProcessing] = useState(false);
-    const [error, setError] = useState<string | null>(null);
 
     if (!order) return null;
 
     const handleConfirm = () => {
         setProcessing(true);
-        setError(null);
         router.post(`/game/orders/${order.id}/cancel`, {}, {
             preserveScroll: true,
             onSuccess: () => {
                 onOpenChange(false);
                 setProcessing(false);
             },
-            onError: (errors) => {
+            onError: () => {
                 setProcessing(false);
-                // Extract first error message
-                const msg = Object.values(errors)[0] || 'Failed to cancel order.';
-                setError(msg);
             }
         });
     };

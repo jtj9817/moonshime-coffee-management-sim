@@ -1,9 +1,9 @@
 
 import { router } from '@inertiajs/react';
 import {
-  LayoutDashboard, Package, ShoppingCart, BarChart3, Coffee, Bell, Search,
-  ChevronDown, MapPin, Settings, Menu, X, Users, ArrowRightLeft, Activity, PieChart,
-  Zap, Clock, DollarSign, Star, AlertOctagon, TrendingUp, Layers
+  LayoutDashboard, Package, ShoppingCart, BarChart3, Coffee, Bell,
+  MapPin, Menu, X, Users, ArrowRightLeft, Activity, PieChart,
+  Clock, DollarSign, AlertOctagon, Layers
 } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';

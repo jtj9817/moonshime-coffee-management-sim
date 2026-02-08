@@ -9,12 +9,21 @@ interface DayCounterProps {
 
 export function DayCounter({ day, totalDays = 5, className = '' }: DayCounterProps) {
     const [highlight, setHighlight] = useState(false);
+    const [prevDay, setPrevDay] = useState(day);
 
-    useEffect(() => {
+    // Detect day change during render (React-recommended pattern)
+    if (day !== prevDay) {
+        setPrevDay(day);
         setHighlight(true);
-        const timer = setTimeout(() => setHighlight(false), 500);
-        return () => clearTimeout(timer);
-    }, [day]);
+    }
+
+    // Auto-dismiss highlight after 500ms
+    useEffect(() => {
+        if (highlight) {
+            const timer = setTimeout(() => setHighlight(false), 500);
+            return () => clearTimeout(timer);
+        }
+    }, [highlight]);
 
     return (
         <div

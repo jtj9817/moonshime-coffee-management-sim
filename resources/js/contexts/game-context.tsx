@@ -3,7 +3,6 @@ import { createContext, ReactNode, useContext, useState } from 'react';
 
 import {
     AlertModel,
-    GameShared,
     GameStateShared,
     LocationModel,
     ProductModel,

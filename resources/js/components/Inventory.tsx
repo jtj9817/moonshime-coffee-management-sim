@@ -1,11 +1,11 @@
 
 
-import { 
-  Search, Filter, ArrowUpDown, AlertTriangle, CheckCircle2, Clock, 
-  MoreHorizontal, TrendingDown, Truck, Package, ArrowRight, 
-  RefreshCw, Copy, Eye, Info, LayoutGrid, List
+import {
+  Search, ArrowUpDown, AlertTriangle, CheckCircle2, Clock,
+  TrendingDown, Truck, Package,
+  RefreshCw, Eye, LayoutGrid, List
 } from 'lucide-react';
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 
 import { useApp } from '../App';
@@ -56,31 +56,28 @@ const ShelfItem: React.FC<{ pos: InventoryPosition }> = ({ pos }) => {
 }
 
 const Inventory: React.FC = () => {
-  const { inventory, items, locations, currentLocationId, setCurrentLocationId } = useApp();
+  const { inventory, items, locations, currentLocationId } = useApp();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
   // --- State ---
-  const [positions, setPositions] = useState<InventoryPosition[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
-  
+
   // Filters
   const [searchText, setSearchText] = useState(searchParams.get('search') || '');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [filterBelowROP, setFilterBelowROP] = useState(false);
   const [filterPerishables, setFilterPerishables] = useState(false);
-  
+
   // Sorting
   const [sortField, setSortField] = useState<SortField>('riskScore');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
   // --- Data Loading ---
-  useEffect(() => {
-    // Transform raw data into detailed positions
-    const pos = calculateInventoryPositions(inventory, items, locations);
-    setPositions(pos);
-  }, [inventory, items, locations]);
+  const positions = useMemo(() =>
+    calculateInventoryPositions(inventory, items, locations),
+  [inventory, items, locations]);
 
   // --- Filtering & Sorting Logic ---
   const filteredPositions = useMemo(() => {
@@ -103,8 +100,8 @@ const Inventory: React.FC = () => {
 
       return true;
     }).sort((a, b) => {
-      let valA: any = a[sortField as keyof InventoryPosition];
-      let valB: any = b[sortField as keyof InventoryPosition];
+      let valA: string | number = a[sortField as keyof InventoryPosition] as string | number;
+      let valB: string | number = b[sortField as keyof InventoryPosition] as string | number;
 
       // Handle nested/special sorts
       if (sortField === 'riskScore') {

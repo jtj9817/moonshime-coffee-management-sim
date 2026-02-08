@@ -1,5 +1,5 @@
 import { DollarSign } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import {
     Tooltip,
@@ -15,17 +15,17 @@ interface CashDisplayProps {
 }
 
 export function CashDisplay({ cash, className = '' }: CashDisplayProps) {
-    const [prevCash, setPrevCash] = useState(cash);
+    const prevCashRef = useRef(cash);
     const [delta, setDelta] = useState<number | null>(null);
 
     useEffect(() => {
-        if (cash !== prevCash) {
-            setDelta(cash - prevCash);
-            setPrevCash(cash);
+        if (cash !== prevCashRef.current) {
+            setDelta(cash - prevCashRef.current);
+            prevCashRef.current = cash;
             const timer = setTimeout(() => setDelta(null), 1500);
             return () => clearTimeout(timer);
         }
-    }, [cash, prevCash]);
+    }, [cash]);
 
     const getCashColor = () => {
         if (delta && delta > 0) return 'text-emerald-600 dark:text-emerald-400';

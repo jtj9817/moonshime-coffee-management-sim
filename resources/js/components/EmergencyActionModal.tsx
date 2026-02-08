@@ -1,4 +1,4 @@
-import { Clock, DollarSign, AlertTriangle, ArrowRight, CheckCircle2, X, Truck, Zap } from 'lucide-react';
+import { AlertTriangle, ArrowRight, X, Truck, Zap } from 'lucide-react';
 import React, { useState } from 'react';
 
 import { EmergencyOption, SpikeSignal, Item } from '../types';

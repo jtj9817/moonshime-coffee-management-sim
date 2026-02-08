@@ -1,27 +1,35 @@
 import { usePage } from '@inertiajs/react';
 import { AlertCircle, CheckCircle, Info, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+
+interface FlashProps {
+    success?: string;
+    error?: string;
+    warning?: string;
+    info?: string;
+}
 
 export function FlashToast() {
-    const { flash } = usePage<any>().props;
+    const { flash } = usePage<{ flash: FlashProps }>().props;
     const [visible, setVisible] = useState(false);
-    const [msg, setMsg] = useState<{ type: string, text: string } | null>(null);
 
-    useEffect(() => {
-        if (flash.success) {
-            setMsg({ type: 'success', text: flash.success });
-            setVisible(true);
-        } else if (flash.error) {
-            setMsg({ type: 'error', text: flash.error });
-            setVisible(true);
-        } else if (flash.warning) {
-            setMsg({ type: 'warning', text: flash.warning });
-            setVisible(true);
-        } else if (flash.info) {
-            setMsg({ type: 'info', text: flash.info });
+    // Derive message directly from flash props
+    const msg = useMemo(() => {
+        if (flash.success) return { type: 'success', text: flash.success };
+        if (flash.error) return { type: 'error', text: flash.error };
+        if (flash.warning) return { type: 'warning', text: flash.warning };
+        if (flash.info) return { type: 'info', text: flash.info };
+        return null;
+    }, [flash]);
+
+    // Show toast when a new message arrives
+    const [prevMsg, setPrevMsg] = useState(msg);
+    if (msg !== prevMsg) {
+        setPrevMsg(msg);
+        if (msg) {
             setVisible(true);
         }
-    }, [flash]);
+    }
 
     useEffect(() => {
         if (visible) {
