@@ -3,7 +3,7 @@
 This plan implements the features described in the specification to deepen the gameplay simulation through visibility, consequences, progression, and planning tools.
 All tasks in this track must preserve completed Phase 0 invariants (money in cents + strict user isolation).
 
-## Phase 1: Visibility & Consequences (The "Quick Wins")
+## Phase 1: Visibility & Consequences (The "Quick Wins") [checkpoint: 69b2c01]
 
 ### Task 1: Stockout & Lost Sales Tracking
 - [x] Task: Create migration and model for `LostSales`.
