@@ -6,12 +6,13 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 # Active Tracks
 
-- [ ] **Track: Phase 0: Critical Architecture Remediation**
-*Link: [./tracks/arch_remediation_20260207/](./tracks/arch_remediation_20260207/)*
-
 ---
 
 # Archived Tracks
+
+- [x] **Track: Phase 0: Critical Architecture Remediation**
+    - **ID:** `arch_remediation_20260207`
+    - **Link:** [./archive/arch_remediation_20260207/](./archive/arch_remediation_20260207/)
 
 - [x] **Track: TESTING: Modify the @tests/Feature/MultiHopOrderTest.php based on the ideas contained within the @docs/multi-hop-order-test-scenarios.md doc.**
     - **ID:** `multi_hop_regression_20260128`

@@ -138,4 +138,4 @@ This plan implements Phase 0 from `docs/gameplay-features-implementation-spec.md
 ### Final Quality Checks
 - [x] Run `./vendor/bin/sail pest` — 282 passed (1426 assertions).
 - [x] Run `./vendor/bin/sail php ./vendor/bin/pint` on changed files — all clean.
-- [ ] Run `sail pnpm run lint` (deferred — no frontend changes in Phase 2/3).
+- [x] Run `sail pnpm run lint` (manually verified by user).
