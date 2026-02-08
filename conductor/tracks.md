@@ -6,6 +6,9 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 # Active Tracks
 
+- [ ] **Track: Gameplay Loop Expansion (Phases 1-3)**
+*Link: [./tracks/gameplay_expansion_20260207/](./tracks/gameplay_expansion_20260207/)*
+
 ---
 
 # Archived Tracks
