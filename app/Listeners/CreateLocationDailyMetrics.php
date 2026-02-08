@@ -88,7 +88,10 @@ class CreateLocationDailyMetrics
     }
 
     /**
-     * Calculate COGS using average purchase cost from order items.
+     * Calculate COGS using weighted average purchase cost from order items.
+     *
+     * TICKET-001: Uses weighted average (SUM(cost * qty) / SUM(qty)) instead of simple average.
+     * TICKET-002: Batches all product cost queries into a single aggregated query.
      */
     protected function calculateCogs(int $userId, string $locationId, int $day): int
     {
@@ -99,20 +102,35 @@ class CreateLocationDailyMetrics
             ->where('fulfilled_quantity', '>', 0)
             ->select('product_id', DB::raw('SUM(fulfilled_quantity) as qty_sold'))
             ->groupBy('product_id')
-            ->get();
+            ->get()
+            ->keyBy('product_id');
 
+        if ($productsSold->isEmpty()) {
+            return 0;
+        }
+
+        // Batch fetch weighted average costs for all products in ONE query (TICKET-002)
+        // Uses weighted average: SUM(cost * quantity) / SUM(quantity) (TICKET-001)
+        $productCosts = DB::table('order_items')
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->where('orders.user_id', $userId)
+            ->whereIn('order_items.product_id', $productsSold->keys())
+            ->groupBy('order_items.product_id')
+            ->select(
+                'order_items.product_id',
+                DB::raw('SUM(order_items.cost_per_unit * order_items.quantity) as total_cost'),
+                DB::raw('SUM(order_items.quantity) as total_quantity')
+            )
+            ->get()
+            ->keyBy('product_id');
+
+        // Calculate COGS using pre-fetched weighted averages
         $totalCogs = 0;
-        foreach ($productsSold as $ps) {
-            // Get average purchase cost from delivered order items for this product
-            $avgCost = DB::table('order_items')
-                ->join('orders', 'order_items.order_id', '=', 'orders.id')
-                ->where('orders.user_id', $userId)
-                ->where('orders.location_id', $locationId)
-                ->where('order_items.product_id', $ps->product_id)
-                ->avg('order_items.cost_per_unit');
-
-            if ($avgCost) {
-                $totalCogs += (int) ($ps->qty_sold * $avgCost);
+        foreach ($productsSold as $productId => $ps) {
+            $costData = $productCosts->get($productId);
+            if ($costData && $costData->total_quantity > 0) {
+                $weightedAvgCost = $costData->total_cost / $costData->total_quantity;
+                $totalCogs += (int) ($ps->qty_sold * $weightedAvgCost);
             }
         }
 

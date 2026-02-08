@@ -6,13 +6,102 @@ use App\Models\Inventory;
 use App\Models\Location;
 use App\Models\LocationDailyMetric;
 use App\Models\LostSale;
+use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\User;
+use App\Models\Vendor;
 use App\Listeners\CreateLocationDailyMetrics;
 use App\Events\TimeAdvanced;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
+
+/**
+ * TICKET-001: Test weighted average COGS calculation.
+ * With orders of 1 unit @ $10 and 1000 units @ $5, COGS should use
+ * weighted average (~$5.005) not simple average ($7.50).
+ */
+it('calculates COGS using weighted average not simple average', function () {
+    $user = User::factory()->create();
+    $vendor = Vendor::factory()->create();
+    $location = Location::factory()->create(['type' => 'store']);
+    $product = Product::factory()->create([
+        'unit_price' => 500,
+        'storage_cost' => 10,
+    ]);
+    $gameState = GameState::factory()->create(['user_id' => $user->id, 'day' => 5]);
+
+    // Create inventory for the store
+    Inventory::factory()->create([
+        'user_id' => $user->id,
+        'location_id' => $location->id,
+        'product_id' => $product->id,
+        'quantity' => 100,
+    ]);
+
+    // Create two orders with very different quantities and costs:
+    // Order A: 1 unit @ $10.00 (1000 cents)
+    // Order B: 1000 units @ $5.00 (500 cents)
+    $orderA = Order::factory()->create([
+        'user_id' => $user->id,
+        'vendor_id' => $vendor->id,
+        'location_id' => $location->id,
+        'status' => 'delivered',
+        'delivery_day' => 2,
+        'total_cost' => 1000,
+    ]);
+    OrderItem::create([
+        'order_id' => $orderA->id,
+        'product_id' => $product->id,
+        'quantity' => 1,
+        'cost_per_unit' => 1000, // $10.00
+    ]);
+
+    $orderB = Order::factory()->create([
+        'user_id' => $user->id,
+        'vendor_id' => $vendor->id,
+        'location_id' => $location->id,
+        'status' => 'delivered',
+        'delivery_day' => 3,
+        'total_cost' => 500000,
+    ]);
+    OrderItem::create([
+        'order_id' => $orderB->id,
+        'product_id' => $product->id,
+        'quantity' => 1000,
+        'cost_per_unit' => 500, // $5.00
+    ]);
+
+    // Create demand event: sold 10 units today
+    DemandEvent::create([
+        'user_id' => $user->id,
+        'day' => 5,
+        'location_id' => $location->id,
+        'product_id' => $product->id,
+        'requested_quantity' => 10,
+        'fulfilled_quantity' => 10,
+        'lost_quantity' => 0,
+        'unit_price' => 500,
+        'revenue' => 5000,
+        'lost_revenue' => 0,
+    ]);
+
+    $listener = new CreateLocationDailyMetrics();
+    $listener->handle(new TimeAdvanced(5, $gameState));
+
+    $metric = LocationDailyMetric::where('user_id', $user->id)
+        ->where('location_id', $location->id)
+        ->where('day', 5)
+        ->first();
+
+    // Weighted average: (1000*1 + 500*1000) / (1 + 1000) = 501000 / 1001 ≈ 500.5
+    // COGS = 10 units * 500.5 cents = 5005 cents
+    // Simple average would be: (1000 + 500) / 2 = 750 cents, COGS = 7500 cents
+    expect($metric)->not->toBeNull();
+    expect($metric->cogs)->toBeLessThan(6000); // Should be ~5005, NOT 7500
+    expect($metric->cogs)->toBeGreaterThan(4500); // Sanity check
+});
 
 it('creates location daily metrics with correct revenue from demand events', function () {
     $user = User::factory()->create();

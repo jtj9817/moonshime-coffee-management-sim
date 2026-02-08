@@ -6,10 +6,18 @@ use App\Events\TimeAdvanced;
 use App\Models\Alert;
 use App\Models\DemandEvent;
 use App\Models\LostSale;
-use Illuminate\Support\Facades\DB;
+use App\Services\StorageFeeCalculator;
 
+/**
+ * Create daily summary alert aggregating the day's activity.
+ * Uses centralized StorageFeeCalculator service (TICKET-005).
+ */
 class CreateDailySummaryAlert
 {
+    public function __construct(
+        protected StorageFeeCalculator $storageFeeCalculator
+    ) {}
+
     /**
      * Create a daily summary alert aggregating the day's activity.
      */
@@ -43,11 +51,8 @@ class CreateDailySummaryAlert
             ->where('day', $day)
             ->sum('quantity_lost');
 
-        // Calculate storage fees (same formula as ApplyStorageCosts)
-        $storageFees = (int) DB::table('inventories')
-            ->join('products', 'inventories.product_id', '=', 'products.id')
-            ->where('inventories.user_id', $userId)
-            ->sum(DB::raw('inventories.quantity * products.storage_cost'));
+        // Calculate storage fees using centralized service (TICKET-005)
+        $storageFees = $this->storageFeeCalculator->calculate($userId);
 
         // Build summary message
         $parts = [];

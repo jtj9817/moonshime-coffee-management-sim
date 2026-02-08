@@ -27,12 +27,22 @@ class DemandSimulationService
     protected float $elasticityFactor = 0.5;
 
     /**
+     * Pre-loaded demand spikes for current simulation (TICKET-003).
+     * @var \Illuminate\Support\Collection<int, SpikeEvent>|null
+     */
+    protected ?\Illuminate\Support\Collection $demandSpikes = null;
+
+    /**
      * Process daily consumption for all stores.
      * This simulates customer demand and inventory depletion.
      */
     public function processDailyConsumption(GameState $gameState, int $day): void
     {
         $userId = $gameState->user_id;
+
+        // Pre-load all demand spikes for this user/day (TICKET-003 & TICKET-004)
+        // Uses explicit day-based filtering instead of relying on is_active flag
+        $this->demandSpikes = $this->preloadDemandSpikes($userId, $day);
 
         // Get all retail/store locations that have inventory for this user
         $stores = Location::where('type', 'store')
@@ -145,26 +155,37 @@ class DemandSimulationService
     }
 
     /**
-     * Get the demand multiplier from active demand spikes.
+     * Get the demand multiplier from pre-loaded demand spikes (TICKET-003).
+     * Filters spikes in memory instead of querying the database per inventory item.
      * Returns 1.0 if no active spikes, or the spike's magnitude if one is active.
      */
     protected function getDemandMultiplier(int $userId, string $locationId, string $productId): float
     {
-        $spike = SpikeEvent::forUser($userId)
-            ->active()
-            ->where('type', 'demand')
-            ->where(function ($query) use ($locationId) {
-                // Match exact location or global spikes (null location_id)
-                $query->where('location_id', $locationId)
-                    ->orWhereNull('location_id');
-            })
-            ->where(function ($query) use ($productId) {
-                // Match exact product or global spikes (null product_id)
-                $query->where('product_id', $productId)
-                    ->orWhereNull('product_id');
-            })
-            ->first();
+        if ($this->demandSpikes === null || $this->demandSpikes->isEmpty()) {
+            return 1.0;
+        }
 
-        return $spike ? (float) $spike->magnitude : 1.0;
+        // Filter pre-loaded spikes in memory (no DB query)
+        $maxMagnitude = $this->demandSpikes
+            ->filter(fn ($s) =>
+                ($s->location_id === $locationId || $s->location_id === null) &&
+                ($s->product_id === $productId || $s->product_id === null)
+            )
+            ->max('magnitude');
+
+        return $maxMagnitude ? (float) $maxMagnitude : 1.0;
+    }
+
+    /**
+     * Pre-load all active demand spikes with explicit day-based filtering (TICKET-004).
+     * Uses starts_at_day <= $day and ends_at_day > $day instead of relying on is_active flag.
+     */
+    protected function preloadDemandSpikes(int $userId, int $day): \Illuminate\Support\Collection
+    {
+        return SpikeEvent::forUser($userId)
+            ->where('type', 'demand')
+            ->where('starts_at_day', '<=', $day)
+            ->where('ends_at_day', '>', $day)
+            ->get();
     }
 }

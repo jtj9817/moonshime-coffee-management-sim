@@ -51,7 +51,7 @@ it('creates a daily summary alert on time advanced', function () {
         'potential_revenue_lost' => 1000,
     ]);
 
-    $listener = new CreateDailySummaryAlert();
+    $listener = app(CreateDailySummaryAlert::class);
     $listener->handle(new TimeAdvanced(3, $gameState));
 
     $alert = Alert::where('user_id', $user->id)
@@ -80,7 +80,7 @@ it('includes storage fee deduction in summary', function () {
         'quantity' => 30,
     ]);
 
-    $listener = new CreateDailySummaryAlert();
+    $listener = app(CreateDailySummaryAlert::class);
     $listener->handle(new TimeAdvanced(5, $gameState));
 
     $alert = Alert::where('user_id', $user->id)
@@ -105,7 +105,7 @@ it('creates only one summary per day per user', function () {
         'quantity' => 50,
     ]);
 
-    $listener = new CreateDailySummaryAlert();
+    $listener = app(CreateDailySummaryAlert::class);
     $listener->handle(new TimeAdvanced(2, $gameState));
     $listener->handle(new TimeAdvanced(2, $gameState));
 
