@@ -1,38 +1,42 @@
 # Specification: Track - Gameplay Loop Expansion (Phases 1-3)
 
 ## 1. Overview
-This track implements the core gameplay loop expansion as outlined in Phases 1, 2, and 3 of the `gameplay-features-implementation-spec.md`. The goal is to transform the simulation from a basic inventory manager into a deep, strategic management game with visibility into simulation mechanics, consequences for failure, progression systems, and advanced planning tools.
+This track implements Phases 1, 2, and 3 from `docs/gameplay-features-implementation-spec.md` to deepen gameplay through visibility, consequences, progression, and planning tools.
+
+Phase 0 is already complete and is a hard prerequisite: all new work must preserve money-in-cents invariants and strict per-user data isolation.
 
 ## 2. Functional Requirements
 
 ### Phase 1: Visibility & Consequences
-- **Demand Forecasting Engine:** Implement `DemandForecastService` to project stock levels and stockout risks. Create a `DemandForecastChart` component.
-- **Stockout & Lost Sales Tracking:** Track economic damage when demand exceeds inventory via a new `lost_sales` table and event-driven logic.
-- **Daily Summary Notifications:** Generate an aggregate report after each `advanceDay` showing sales, losses, and costs.
-- **Financial Granularity (P&L):** Implement `location_daily_metrics` to track revenue, COGS, OpEx, and Net Profit per location.
-- **Pricing Strategy:** Add `sell_price` to locations and implement price elasticity in the demand simulation.
+- **Demand Forecasting Engine:** Implement `DemandForecastService::getForecast()` for a 7-day projection using base consumption, active spikes, and incoming Orders/Transfers. Return daily `day_offset`, `predicted_demand`, `predicted_stock`, and `risk_level` (`low|medium|stockout`).
+- **Demand Forecast Chart:** Implement `DemandForecastChart.tsx` with projected stock line, zero stockout reference line, and incoming-delivery bars.
+- **Stockout & Lost Sales Tracking:** Persist `lost_sales` when demand exceeds inventory, calculate `quantity_lost` and `potential_revenue_lost` (cents), and dispatch `StockoutOccurred`.
+- **Daily Summary Notifications:** On `advanceDay`, aggregate units sold, lost sales, and storage-fee cash deducted, then create a `summary`/`info` alert with structured metadata for dashboard display.
+- **Financial Granularity (P&L):** Implement `location_daily_metrics` with revenue, COGS, OpEx, net profit, units sold, stockouts, and satisfaction per location/day. Use OpEx formula `rent + (inventory quantity * storage_cost)`.
+- **Pricing Strategy:** Add `sell_price` (integer cents) and apply elasticity formula `EffectiveDemand = BaseDemand * (StandardPrice / CurrentPrice)^ElasticityFactor`.
 
 ### Phase 2: Core Engagement & Progression
-- **Quest System Architecture:** Implement a state-driven quest system (`quests` and `user_quests` tables) with Transactional, Financial, Resilience, and Operational triggers.
-- **Active Spike Resolution:** Allow players to spend Cash or Reputation to mitigate active Spike events (e.g., Expedite or Marketing).
+- **Quest System Architecture:** Implement `quests` and `user_quests` using trigger classes (`trigger_class`, `trigger_params`) and rewards metadata. `QuestService::checkTriggers()` runs on gameplay events (for example, `OrderPlaced`, `DayAdvanced`) and marks quest completion.
+- **Active Spike Resolution:** Implement `spike_resolutions` and `POST /game/spikes/{spike}/resolve` for actions like expedite/marketing, with resource validation and effect persistence.
 
 ### Phase 3: Strategic Planning Tools
-- **"What-If" Scenario Calculator:** Create a planning tool that calculates time-to-stockout and recommended order quantities. This will be available as both a standalone page and an integrated helper within ordering dialogs.
-- **Bulk Order Scheduler:** Implement a system to schedule repeating orders with "Auto-Submit" functionality (dependent on funds and capacity).
+- **"What-If" Scenario Calculator (Initial Scope):** Frontend-only implementation (`ScenarioPlanner.tsx`) with stockout horizon and reorder recommendation outputs. Reuse demand-forecast math via shared frontend logic; use an API endpoint only if an async constraint requires it.
+- **Bulk Order Scheduler:** Implement `scheduled_orders` with `interval_days` or `cron_expression`, execute schedules on `DayAdvanced`, and support optional auto-submit when constraints (funds/capacity) are satisfied.
 
 ## 3. Technical Constraints & Standards
-- **Monetary Integrity:** All calculations and persistence MUST use integer cents.
-- **User Isolation:** All data, metrics, and quests MUST be strictly scoped to the authenticated user.
-- **Architecture:** Business logic resides in Services; Controllers remain thin.
-- **State Management:** Use `spatie/laravel-model-states` for complex transitions (Quests/Orders) where applicable.
+- **Monetary Integrity:** All persistence and domain math use integer cents; display conversion happens at serialization/render boundaries only.
+- **User Isolation:** All gameplay reads/writes are strictly user-scoped.
+- **Architecture:** Controllers remain thin; business logic lives in Services.
+- **Inertia-First Delivery:** Use Inertia pages/props for gameplay flows; avoid pure API endpoints unless truly necessary.
+- **Testing:** Every new Service method gets unit coverage; every controller action gets feature coverage.
 
 ## 4. Acceptance Criteria
-- [ ] Players can see a 7-day stock projection for any SKU.
-- [ ] Stockouts result in persistent `LostSales` records and a reduction in potential revenue.
-- [ ] A "Daily Summary" modal or alert appears after advancing the day.
-- [ ] Players can view a P&L statement for each location.
-- [ ] Adjusting prices dynamically affects demand based on elasticity.
-- [ ] Quests trigger and reward correctly across all four categories (Transactional, Financial, Resilience, Operational).
-- [ ] Players can "Resolve" a spike to reduce its duration or intensity.
-- [ ] The Scenario Calculator provides accurate "Safe-to-date" projections.
-- [ ] Scheduled orders execute automatically on `advanceDay` if valid.
+- [ ] Players can view accurate 7-day stock projections (including inbound deliveries) for a selected SKU/location.
+- [ ] Stockouts create persistent `lost_sales` records with correct lost quantity and potential revenue values.
+- [ ] Advancing the day produces a daily summary alert with units sold, lost sales, and storage-fee deductions.
+- [ ] Players can view per-location daily P&L and operational metrics.
+- [ ] Changing `sell_price` affects demand according to the elasticity rule.
+- [ ] Quest triggers execute from gameplay events and grant configured rewards on completion.
+- [ ] Players can resolve active spikes, paying required costs to reduce duration/intensity.
+- [ ] Scenario Planner (frontend) returns accurate stockout horizon and reorder guidance.
+- [ ] Scheduled orders run on `advanceDay` and auto-submit only when valid.
