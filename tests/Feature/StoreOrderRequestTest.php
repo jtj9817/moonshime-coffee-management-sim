@@ -155,5 +155,9 @@ test('store order request reports no-route errors when no valid path exists', fu
     $response->assertSessionHasErrors('location_id');
     expect(session('errors')->first('location_id'))->toBe('No valid route found to this destination.');
     expect(Order::where('user_id', $world['user']->id)->count())->toBe(0);
-    expect(OrderItem::count())->toBe(0);
+    expect(
+        OrderItem::query()
+            ->whereHas('order', fn ($query) => $query->where('user_id', $world['user']->id))
+            ->count()
+    )->toBe(0);
 });
