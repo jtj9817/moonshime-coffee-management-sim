@@ -1,5 +1,6 @@
 import { type ReactNode } from 'react';
 
+import { BetaBanner } from '@/components/game/beta-banner';
 import { GameHeader } from '@/components/game/game-header';
 import { FlashToast } from '@/components/ui/flash-toast';
 import { GameProvider } from '@/contexts/game-context';
@@ -15,6 +16,7 @@ interface GameLayoutProps {
 export default function GameLayout({ children, breadcrumbs }: GameLayoutProps) {
     return (
         <GameProvider>
+            <BetaBanner />
             <FlashToast />
             <AppSidebarLayout breadcrumbs={breadcrumbs}>
                 <GameHeader />
