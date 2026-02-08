@@ -10,13 +10,13 @@ import { useSearchParams } from 'react-router-dom';
 
 import { useApp } from '../App';
 import { ITEMS, SUPPLIERS, SUPPLIER_ITEMS } from '../constants';
+import { formatCurrency } from '../lib/formatCurrency';
 import { suggestConsolidationAdds } from '../services/cockpitService';
 import { calculateInventoryPositions } from '../services/inventoryService';
 import { calcMaxPerishableOrder } from '../services/orderCalculations';
 import { evaluateBulkTierBreakeven } from '../services/skuMath';
 import { chooseBestVendorGivenUrgency } from '../services/vendorService';
 import { SupplierItem, Supplier, Item, DraftOrder, DraftLineItem, OrderWarning, ConsolidationSuggestion } from '../types';
-import { formatCurrency } from '../lib/formatCurrency';
 
 import ProductIcon from './ProductIcon';
 

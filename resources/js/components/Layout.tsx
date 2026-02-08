@@ -11,6 +11,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { useOptionalGame } from '@/contexts/game-context';
 import { formatCurrency } from '@/lib/formatCurrency';
 import { AlertModel } from '@/types/index';
+
 import { FloatingTextEvent } from '../types';
 
 const userAvatarIcon = '/assets/user-avatar.svg';

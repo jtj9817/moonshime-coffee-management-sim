@@ -1,7 +1,7 @@
 import { BarChart3, DollarSign, TrendingUp } from 'lucide-react';
 
-import { CollapsibleSection } from '@/components/ui/collapsible-section';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CollapsibleSection } from '@/components/ui/collapsible-section';
 import { formatCurrency } from '@/lib/formatCurrency';
 
 interface InventoryTrendPoint {

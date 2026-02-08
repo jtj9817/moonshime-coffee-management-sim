@@ -18,16 +18,16 @@ import {
 } from 'lucide-react';
 import { type ReactNode } from 'react';
 
+import { DailyReportCard } from '@/components/game/DailyReportCard';
 import { LogisticsStatusWidget } from '@/components/game/LogisticsStatusWidget';
 import ResetGameButton from '@/components/game/reset-game-button';
 import { WelcomeBanner } from '@/components/game/welcome-banner';
-import { DailyReportCard } from '@/components/game/DailyReportCard';
 import { Badge } from '@/components/ui/badge';
-import { formatCurrency } from '@/lib/formatCurrency';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useGame } from '@/contexts/game-context';
 import GameLayout from '@/layouts/game-layout';
+import { formatCurrency } from '@/lib/formatCurrency';
 import { AlertModel, DashboardKPI, LocationModel, QuestModel, type BreadcrumbItem } from '@/types/index';
 
 interface DashboardProps {

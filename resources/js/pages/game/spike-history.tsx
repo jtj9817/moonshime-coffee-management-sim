@@ -33,8 +33,8 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { formatCurrency } from '@/lib/formatCurrency';
 import GameLayout from '@/layouts/game-layout';
+import { formatCurrency } from '@/lib/formatCurrency';
 import { SpikeEventModel, type BreadcrumbItem } from '@/types';
 
 interface SpikeHistoryProps {

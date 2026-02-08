@@ -32,8 +32,8 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { useGame } from '@/contexts/game-context';
-import { formatCurrency } from '@/lib/formatCurrency';
 import GameLayout from '@/layouts/game-layout';
+import { formatCurrency } from '@/lib/formatCurrency';
 import game from '@/routes/game';
 import { TransferModel, type BreadcrumbItem } from '@/types';
 

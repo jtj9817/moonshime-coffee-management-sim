@@ -1,7 +1,7 @@
 import { Package } from 'lucide-react';
 
-import { CollapsibleSection } from '@/components/ui/collapsible-section';
 import { Card, CardContent } from '@/components/ui/card';
+import { CollapsibleSection } from '@/components/ui/collapsible-section';
 
 interface StorageUtilizationItem {
     location_id: string;
