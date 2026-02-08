@@ -15,76 +15,53 @@ It is organized by the phases defined in the analysis roadmap, prioritizing crit
 
 ---
 
-## 2. Phase 0: Critical Architecture Remediation
+## 2. Phase 0: Critical Architecture Remediation ✅ COMPLETED
 
 **Objective:** Lock core architecture invariants (money units + user isolation) before introducing new gameplay systems.
 
-### 2.1 Monetary Unit Canonicalization (Cents)
-**Current State (Verified):**
+**Status:** Completed (archived via `d885a1b`)
+
+### 2.1 Monetary Unit Canonicalization (Cents) ✅ COMPLETED
+**Status:** Completed
+
+**Verified State:**
 - `InitializeNewGame` creates starting cash with `1000000`.
 - `HandleInertiaRequests` fallback `firstOrCreate` uses `1000000`.
-- Startup defaults are partially aligned with cent-based storage.
-
-**Remaining Risk:**
-- Monetary fields and calculations are still mixed between integer-cent and float-dollar semantics across models, requests, listeners, and frontend formatting.
-- `GameState` still casts `cash` as `float`, which conflicts with strict cent-based architecture.
-
-**Target State:**
-- All persisted monetary values are integer cents.
+- All monetary fields standardized to integer cents in persistence.
 - Business logic performs arithmetic in integer cents only.
 - Conversion to display dollars happens only at frontend rendering boundaries.
 
-**Implementation Details:**
-- **Primary Audit Files:**
-  - `app/Models/GameState.php`
-  - `app/Models/Order.php`
-  - `app/Models/Product.php`
-  - `app/Models/DemandEvent.php`
-  - `app/Listeners/DeductCash.php`
-  - `app/Http/Requests/StoreOrderRequest.php`
-  - `resources/js/lib/formatCurrency.ts`
-- **Rules to Enforce:**
-  1. Replace float money casts with integer casts for cent-based columns.
-  2. Keep request validation/storage contracts explicit about units (dollars at input boundary, cents in persistence).
-  3. Require a single, documented conversion boundary when serializing backend values for UI display.
+### 2.2 Global User Isolation Audit ✅ COMPLETED
+**Status:** Completed
 
-### 2.2 Global User Isolation Audit
-**Current State (Verified):**
+**Verified State:**
 - Shared Inertia game props are user-scoped for alerts, reputation, and strikes in middleware.
-
-**Remaining Risk:**
-- Query scoping is inconsistent in gameplay controllers and derived aggregates.
-- Some views can still read global records when `user_id` filters are missing on per-user tables.
-
-**Target State:**
-- Every per-user read/write path is strictly scoped to the authenticated user.
+- All per-user queries strictly scoped to authenticated user via `user_id` filters.
 - No gameplay dashboard/list/analytics endpoint can leak another player's data.
 
-**Implementation Details:**
-- **Primary Audit File:** `app/Http/Controllers/GameController.php`
-- **Scope Rule:** Any query against per-user tables (`alerts`, `orders`, `transfers`, `inventory`, `spike_events`, `demand_events`, `daily_reports`, `game_states`) must include explicit `user_id` scoping (or an equivalent model scope/policy).
-- **Preferred Pattern:**
-  ```php
-  $userId = auth()->id();
-  Alert::where('user_id', $userId)->get();
-  ```
+**Implementation Pattern:**
+```php
+$userId = auth()->id();
+Alert::where('user_id', $userId)->get();
+```
 
-### 2.3 Phase 0 Verification Matrix
-Phase 0 is complete only when all checks pass:
+### 2.3 Phase 0 Verification Matrix ✅ ALL CHECKS PASSED
 
-1. **Money Invariants**
-   - No game creation/reset path initializes cash with `10000.00`.
-   - Starting cash invariant remains `1000000` cents for new games.
-   - Monetary casts and arithmetic are integer-cent based in domain logic.
+**Completion Date:** Archived via commit `d885a1b`
 
-2. **Isolation Invariants**
-   - No dashboard/list/analytics query can return rows owned by another user.
-   - Shared middleware props and page-specific props both enforce user isolation.
-
-3. **Regression Coverage**
-   - Keep and enforce `tests/Feature/GameInitializationTest.php`.
-   - Add/maintain feature tests for multi-user isolation on dashboard and key game pages.
-   - Add targeted assertions for user-scoped aggregates in analytics/reporting responses.
+| Check | Status |
+|-------|--------|
+| **Money Invariants** | ✅ Pass |
+| - No game creation/reset path initializes cash with `10000.00` | ✅ |
+| - Starting cash invariant remains `1000000` cents for new games | ✅ |
+| - Monetary casts and arithmetic are integer-cent based in domain logic | ✅ |
+| **Isolation Invariants** | ✅ Pass |
+| - No dashboard/list/analytics query can return rows owned by another user | ✅ |
+| - Shared middleware props and page-specific props both enforce user isolation | ✅ |
+| **Regression Coverage** | ✅ Pass |
+| - `tests/Feature/GameInitializationTest.php` enforced | ✅ |
+| - Feature tests for multi-user isolation on dashboard and key game pages | ✅ |
+| - Targeted assertions for user-scoped aggregates in analytics/reporting | ✅ |
 
 ---
 
