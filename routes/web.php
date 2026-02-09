@@ -24,6 +24,7 @@ Route::middleware(['auth', 'verified'])->prefix('game')->name('game.')->group(fu
     Route::get('/spike-history', [GameController::class, 'spikeHistory'])->name('spike-history');
     Route::get('/reports', [GameController::class, 'wasteReports'])->name('reports');
     Route::get('/strategy', [GameController::class, 'strategy'])->name('strategy');
+    Route::get('/quests', [GameController::class, 'quests'])->name('quests');
 
     // Actions
     Route::post('/advance-day', [GameController::class, 'advanceDay'])->name('advance-day');

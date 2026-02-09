@@ -22,6 +22,8 @@ class Quest extends Model
         'is_active',
         'sort_order',
         'meta',
+        'trigger_class',
+        'trigger_params',
     ];
 
     protected $casts = [
@@ -31,6 +33,7 @@ class Quest extends Model
         'is_active' => 'boolean',
         'sort_order' => 'integer',
         'meta' => 'array',
+        'trigger_params' => 'array',
     ];
 
     public function userQuests(): HasMany

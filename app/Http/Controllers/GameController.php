@@ -287,6 +287,18 @@ class GameController extends Controller
     }
 
     /**
+     * Display the quests page.
+     */
+    public function quests(QuestService $questService): Response
+    {
+        $user = auth()->user();
+
+        return Inertia::render('game/quests', [
+            'quests' => $questService->getActiveQuestsForUser($user),
+        ]);
+    }
+
+    /**
      * Display the strategy page.
      */
     public function strategy(): Response

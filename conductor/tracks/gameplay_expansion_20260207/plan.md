@@ -50,26 +50,26 @@ All tasks in this track must preserve completed Phase 0 invariants (money in cen
 ## Phase 2: Core Engagement & Progression
 
 ### Task 1: Quest System Architecture
-- [ ] Task: Create migrations and models for Quests.
-    - [ ] Write migrations for `quests` and `user_quests` tables.
-    - [ ] Create `Quest` and `UserQuest` models.
-- [ ] Task: Implement `QuestService` and Trigger Architecture.
-    - [ ] Write test for `QuestService@checkTriggers` with a mock trigger.
-    - [ ] Implement `QuestService` to load active user quests and execute `trigger_class` implementations.
-    - [ ] Wire trigger checks to gameplay events (for example `OrderPlaced`, `DayAdvanced`).
-- [ ] Task: Frontend Quest Dashboard.
-    - [ ] Create `QuestList` component and integrate it into a new "Quests" page or sidebar.
+- [x] Task: Create migrations and models for Quests.
+    - [x] Write migrations for `quests` and `user_quests` tables.
+    - [x] Create `Quest` and `UserQuest` models.
+- [x] Task: Implement `QuestService` and Trigger Architecture.
+    - [x] Write test for `QuestService@checkTriggers` with a mock trigger.
+    - [x] Implement `QuestService` to load active user quests and execute `trigger_class` implementations.
+    - [x] Wire trigger checks to gameplay events (for example `OrderPlaced`, `DayAdvanced`).
+- [x] Task: Frontend Quest Dashboard.
+    - [x] Create `QuestList` component and integrate it into a new "Quests" page or sidebar.
 
 ### Task 2: Active Spike Resolution
-- [ ] Task: Create migration and model for `SpikeResolution`.
-    - [ ] Write migration for `spike_resolutions` table.
-- [ ] Task: Implement Spike Resolution logic.
-    - [ ] Write test for `resolveSpike` action to verify effect application (duration reduction / demand reduction).
-    - [ ] Implement `POST /game/spikes/{spike}/resolve` endpoint and logic.
-- [ ] Task: Spike Interaction UI.
-    - [ ] Add "Resolve" buttons and cost indicators to Spike alerts or Spike War Room UI.
+- [x] Task: Create migration and model for `SpikeResolution`.
+    - [x] Write migration for `spike_resolutions` table.
+- [x] Task: Implement Spike Resolution logic.
+    - [x] Write test for `resolveSpike` action to verify effect application (duration reduction / demand reduction).
+    - [x] Implement `POST /game/spikes/{spike}/resolve` endpoint and logic.
+- [x] Task: Spike Interaction UI.
+    - [x] Add "Resolve" buttons and cost indicators to Spike alerts or Spike War Room UI.
 
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Core Engagement & Progression' (Protocol in workflow.md)
+- [~] Task: Conductor - User Manual Verification 'Phase 2: Core Engagement & Progression' (Protocol in workflow.md)
 
 ## Phase 3: Strategic Planning Tools
 

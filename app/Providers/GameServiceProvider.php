@@ -2,41 +2,37 @@
 
 namespace App\Providers;
 
-use App\Events\OrderPlaced;
-use App\Events\OrderDelivered;
 use App\Events\OrderCancelled;
+use App\Events\OrderDelivered;
+use App\Events\OrderPlaced;
+use App\Events\SpikeEnded;
 use App\Events\SpikeOccurred;
+use App\Events\StockoutOccurred;
 use App\Events\TimeAdvanced;
 use App\Events\TransferCompleted;
-use App\Events\StockoutOccurred;
 use App\Interfaces\AiProviderInterface;
 use App\Interfaces\RestockStrategyInterface;
+use App\Listeners\ApplySpikeEffect;
+use App\Listeners\ApplyStorageCosts;
+use App\Listeners\CheckQuestTriggers;
+use App\Listeners\CreateDailyReport;
+use App\Listeners\DecayPerishables;
 use App\Listeners\DeductCash;
 use App\Listeners\GenerateAlert;
+use App\Listeners\GenerateStockoutAlert;
+use App\Listeners\RollbackSpikeEffect;
 use App\Listeners\UpdateInventory;
 use App\Listeners\UpdateMetrics;
-use App\Listeners\DecayPerishables;
-use App\Listeners\ProcessDeliveries;
-use App\Listeners\GenerateSpike;
-use App\Listeners\CreateDailyReport;
-use App\Listeners\GenerateStockoutAlert;
+use App\Models\GameState;
+use App\Models\User;
 use App\Services\InventoryManagementService;
 use App\Services\InventoryMathService;
 use App\Services\PrismAiService;
+use App\Services\SimulationService;
 use App\Services\Strategies\JustInTimeStrategy;
 use App\Services\Strategies\SafetyStockStrategy;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
-
-use App\Services\SimulationService;
-use App\Models\GameState;
-use App\Models\User;
-
-use App\Events\SpikeEnded;
-use App\Listeners\ApplySpikeEffect;
-use App\Listeners\RollbackSpikeEffect;
-
-use App\Listeners\ApplyStorageCosts;
 
 class GameServiceProvider extends ServiceProvider
 {
@@ -48,10 +44,11 @@ class GameServiceProvider extends ServiceProvider
         // Bind GameState as singleton based on auth user
         $this->app->singleton(GameState::class, function ($app) {
             $user = auth()->user();
-            if (!$user) {
+            if (! $user) {
                 // Fallback for tests or console if needed
                 return new GameState(['day' => 1, 'cash' => 1000000, 'xp' => 0]);
             }
+
             return GameState::firstOrCreate(
                 ['user_id' => $user->id],
                 ['cash' => 1000000, 'xp' => 0, 'day' => 1]
@@ -134,5 +131,10 @@ class GameServiceProvider extends ServiceProvider
 
         // DAG Chain for SpikeEnded
         Event::listen(SpikeEnded::class, RollbackSpikeEffect::class);
+
+        // Quest trigger checks on gameplay events
+        Event::listen(TimeAdvanced::class, [CheckQuestTriggers::class, 'onTimeAdvanced']);
+        Event::listen(OrderPlaced::class, [CheckQuestTriggers::class, 'onOrderPlaced']);
+        Event::listen(TransferCompleted::class, [CheckQuestTriggers::class, 'onTransferCompleted']);
     }
 }

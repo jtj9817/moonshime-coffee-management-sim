@@ -7,6 +7,7 @@ use App\Models\GameState;
 use App\Models\Location;
 use App\Models\Order;
 use App\Models\SpikeEvent;
+use App\Models\SpikeResolution;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -21,13 +22,13 @@ class SpikeResolutionService
      */
     public function resolveEarly(SpikeEvent $spike): void
     {
-        if (!$spike->isResolvable()) {
+        if (! $spike->isResolvable()) {
             throw new \InvalidArgumentException(
                 "Spike type '{$spike->type}' cannot be resolved early. Only breakdown and blizzard spikes support early resolution."
             );
         }
 
-        if (!$spike->is_active) {
+        if (! $spike->is_active) {
             throw new \InvalidArgumentException('Spike is not currently active.');
         }
 
@@ -36,8 +37,8 @@ class SpikeResolutionService
 
         if ($gameState->cash < $cost) {
             throw new \RuntimeException(
-                "Insufficient funds. Required: $" . number_format($cost / 100, 2) .
-                ", Available: $" . number_format($gameState->cash / 100, 2)
+                'Insufficient funds. Required: $'.number_format($cost / 100, 2).
+                ', Available: $'.number_format($gameState->cash / 100, 2)
             );
         }
 
@@ -66,6 +67,16 @@ class SpikeResolutionService
             ];
             $spike->update(['action_log' => $actionLog]);
 
+            // Create audit trail record
+            SpikeResolution::create([
+                'user_id' => $spike->user_id,
+                'spike_event_id' => $spike->id,
+                'action_type' => 'resolve_early',
+                'cost_cents' => $cost,
+                'effect' => ['spike_deactivated' => true, 'type' => $spike->type],
+                'game_day' => $currentDay,
+            ]);
+
             // Trigger rollback via event (reuses existing listener chain)
             event(new SpikeEnded($spike));
         });
@@ -77,7 +88,7 @@ class SpikeResolutionService
      */
     public function mitigate(SpikeEvent $spike, string $action): void
     {
-        if (!$spike->is_active) {
+        if (! $spike->is_active) {
             throw new \InvalidArgumentException('Spike is not currently active.');
         }
 
@@ -90,7 +101,7 @@ class SpikeResolutionService
         $meta = $spike->meta ?? [];
         $meta['mitigation_count'] = ($meta['mitigation_count'] ?? 0) + 1;
 
-        if (!isset($meta['original_magnitude'])) {
+        if (! isset($meta['original_magnitude'])) {
             $meta['original_magnitude'] = (float) $spike->magnitude;
         }
 
@@ -131,6 +142,18 @@ class SpikeResolutionService
         $updates['meta'] = $meta;
 
         $spike->update($updates);
+
+        // Create audit trail record
+        $gameState = GameState::where('user_id', $spike->user_id)->first();
+        SpikeResolution::create([
+            'user_id' => $spike->user_id,
+            'spike_event_id' => $spike->id,
+            'action_type' => 'mitigate',
+            'action_detail' => $action,
+            'cost_cents' => 0,
+            'effect' => ['type' => $spike->type, 'new_magnitude' => $spike->magnitude],
+            'game_day' => $gameState ? $gameState->day : 0,
+        ]);
     }
 
     /**
@@ -152,6 +175,16 @@ class SpikeResolutionService
             'acknowledged_at' => now(),
             'action_log' => $actionLog,
         ]);
+
+        // Create audit trail record
+        $gameState = GameState::where('user_id', $spike->user_id)->first();
+        SpikeResolution::create([
+            'user_id' => $spike->user_id,
+            'spike_event_id' => $spike->id,
+            'action_type' => 'acknowledge',
+            'cost_cents' => 0,
+            'game_day' => $gameState ? $gameState->day : 0,
+        ]);
     }
 
     protected function applyDelayMitigation(SpikeEvent $spike, int $delayDays): void
@@ -161,7 +194,7 @@ class SpikeResolutionService
 
         foreach ($affectedOrders as $orderId => $originals) {
             $order = Order::find($orderId);
-            if (!$order) {
+            if (! $order) {
                 continue;
             }
 
@@ -178,7 +211,7 @@ class SpikeResolutionService
                     : null;
             }
 
-            if (!empty($updates)) {
+            if (! empty($updates)) {
                 $order->update($updates);
             }
         }
@@ -186,16 +219,16 @@ class SpikeResolutionService
 
     protected function applyBreakdownMitigation(SpikeEvent $spike, float $newMagnitude, array &$meta): void
     {
-        if (!$spike->location_id) {
+        if (! $spike->location_id) {
             return;
         }
 
         $location = Location::find($spike->location_id);
-        if (!$location) {
+        if (! $location) {
             return;
         }
 
-        if (!isset($meta['original_max_storage'])) {
+        if (! isset($meta['original_max_storage'])) {
             $meta['original_max_storage'] = $location->max_storage;
         }
 
@@ -211,7 +244,7 @@ class SpikeResolutionService
         $spike->loadMissing('affectedRoute');
         $route = $spike->affectedRoute;
 
-        if ($route && !$route->is_active) {
+        if ($route && ! $route->is_active) {
             $route->update(['is_active' => true]);
         }
     }

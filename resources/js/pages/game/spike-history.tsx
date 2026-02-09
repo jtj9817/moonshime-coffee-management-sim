@@ -15,7 +15,13 @@ import { useEffect, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import {
     Dialog,
     DialogContent,
@@ -56,15 +62,31 @@ const breadcrumbs: BreadcrumbItem[] = [
 function getSpikeTypeBadge(type: string) {
     switch (type.toLowerCase()) {
         case 'demand':
-            return <Badge className="bg-amber-500 hover:bg-amber-600">Demand Surge</Badge>;
+            return (
+                <Badge className="bg-amber-500 hover:bg-amber-600">
+                    Demand Surge
+                </Badge>
+            );
         case 'delay':
-            return <Badge className="bg-blue-500 hover:bg-blue-600">Delivery Delay</Badge>;
+            return (
+                <Badge className="bg-blue-500 hover:bg-blue-600">
+                    Delivery Delay
+                </Badge>
+            );
         case 'price':
-            return <Badge className="bg-rose-500 hover:bg-rose-600">Price Spike</Badge>;
+            return (
+                <Badge className="bg-rose-500 hover:bg-rose-600">
+                    Price Spike
+                </Badge>
+            );
         case 'breakdown':
             return <Badge variant="destructive">Equipment Breakdown</Badge>;
         case 'blizzard':
-            return <Badge className="bg-sky-600 hover:bg-sky-700">Blizzard Warning</Badge>;
+            return (
+                <Badge className="bg-sky-600 hover:bg-sky-700">
+                    Blizzard Warning
+                </Badge>
+            );
         default:
             return <Badge variant="outline">{type}</Badge>;
     }
@@ -104,13 +126,53 @@ function getResolutionStatus(spike: SpikeEventModel) {
     return <Badge variant="outline">Resolved</Badge>;
 }
 
+function getMitigationActions(
+    type: string,
+): { label: string; action: string }[] {
+    switch (type) {
+        case 'demand':
+            return [
+                { label: 'Run Promotion', action: 'run_promotion' },
+                { label: 'Adjust Pricing', action: 'adjust_pricing' },
+            ];
+        case 'delay':
+            return [
+                { label: 'Expedite Shipping', action: 'expedite_shipping' },
+                { label: 'Source Locally', action: 'source_locally' },
+            ];
+        case 'price':
+            return [
+                { label: 'Negotiate Discount', action: 'negotiate_discount' },
+                { label: 'Switch Supplier', action: 'switch_supplier' },
+            ];
+        case 'breakdown':
+            return [
+                { label: 'Emergency Repair', action: 'emergency_repair' },
+                { label: 'Temporary Storage', action: 'temporary_storage' },
+            ];
+        case 'blizzard':
+            return [
+                { label: 'Hire Courier', action: 'hire_courier' },
+                { label: 'Reroute Shipments', action: 'reroute_shipments' },
+            ];
+        default:
+            return [];
+    }
+}
+
 interface ActiveEventCardProps {
     spike: SpikeEventModel;
     currentDay: number;
     onResolve: (spike: SpikeEventModel) => void;
+    onMitigate: (spike: SpikeEventModel, action: string) => void;
 }
 
-function ActiveEventCard({ spike, currentDay, onResolve }: ActiveEventCardProps) {
+function ActiveEventCard({
+    spike,
+    currentDay,
+    onResolve,
+    onMitigate,
+}: ActiveEventCardProps) {
     const daysRemaining = spike.ends_at_day - currentDay;
 
     return (
@@ -122,13 +184,17 @@ function ActiveEventCard({ spike, currentDay, onResolve }: ActiveEventCardProps)
                             {getSpikeTypeIcon(spike.type)}
                         </div>
                         <div>
-                            <CardTitle className="text-lg">{spike.name}</CardTitle>
+                            <CardTitle className="text-lg">
+                                {spike.name}
+                            </CardTitle>
                             {getSpikeTypeBadge(spike.type)}
                         </div>
                     </div>
                     <div className="flex items-center gap-1 rounded-full bg-rose-100 px-3 py-1 text-sm font-bold text-rose-700 dark:bg-rose-900/50 dark:text-rose-300">
                         <Timer className="h-4 w-4" />
-                        {daysRemaining > 0 ? `${daysRemaining} day${daysRemaining > 1 ? 's' : ''} left` : 'Ends today'}
+                        {daysRemaining > 0
+                            ? `${daysRemaining} day${daysRemaining > 1 ? 's' : ''} left`
+                            : 'Ends today'}
                     </div>
                 </div>
                 <CardDescription className="mt-2 text-stone-600 dark:text-stone-400">
@@ -139,13 +205,17 @@ function ActiveEventCard({ spike, currentDay, onResolve }: ActiveEventCardProps)
                 {/* Playbook Actions */}
                 {spike.playbook && spike.playbook.actions.length > 0 && (
                     <div>
-                        <h4 className="mb-2 text-xs font-bold uppercase tracking-wider text-stone-500">
+                        <h4 className="mb-2 text-xs font-bold tracking-wider text-stone-500 uppercase">
                             Playbook Actions
                         </h4>
                         <div className="flex flex-wrap gap-2">
                             {spike.playbook.actions.map((action, idx) => (
                                 <Link key={idx} href={action.href}>
-                                    <Button variant="outline" size="sm" className="gap-1">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="gap-1"
+                                    >
                                         {action.label}
                                         <ExternalLink className="h-3 w-3" />
                                     </Button>
@@ -164,7 +234,8 @@ function ActiveEventCard({ spike, currentDay, onResolve }: ActiveEventCardProps)
                                     Early Resolution Available
                                 </h4>
                                 <p className="text-sm text-emerald-600 dark:text-emerald-400">
-                                    Pay to resolve immediately and restore normal operations
+                                    Pay to resolve immediately and restore
+                                    normal operations
                                 </p>
                             </div>
                             <Button
@@ -173,57 +244,103 @@ function ActiveEventCard({ spike, currentDay, onResolve }: ActiveEventCardProps)
                             >
                                 Resolve
                                 <span className="font-mono">
-                                    ${formatCurrency(spike.playbook.resolutionCost)}
+                                    $
+                                    {formatCurrency(
+                                        spike.playbook.resolutionCost,
+                                    )}
                                 </span>
                             </Button>
                         </div>
                     </div>
                 )}
 
-                {/* Info for non-resolvable spikes */}
-                {spike.playbook && !spike.playbook.canResolveEarly && (
-                    <p className="text-xs text-stone-500 dark:text-stone-400">
-                        <em>This event cannot be resolved early. Use the playbook actions to mitigate its effects.</em>
-                    </p>
+                {/* Mitigation Actions */}
+                {!spike.mitigated_at && (
+                    <div>
+                        <h4 className="mb-2 text-xs font-bold tracking-wider text-stone-500 uppercase">
+                            Mitigation Actions
+                        </h4>
+                        <div className="flex flex-wrap gap-2">
+                            {getMitigationActions(spike.type).map(
+                                (mitAction) => (
+                                    <Button
+                                        key={mitAction.action}
+                                        variant="outline"
+                                        size="sm"
+                                        className="gap-1 border-amber-500/30 text-amber-700 hover:bg-amber-50 dark:text-amber-300 dark:hover:bg-amber-900/20"
+                                        onClick={() =>
+                                            onMitigate(spike, mitAction.action)
+                                        }
+                                    >
+                                        <Shield className="h-3 w-3" />
+                                        {mitAction.label}
+                                    </Button>
+                                ),
+                            )}
+                        </div>
+                    </div>
+                )}
+                {spike.mitigated_at && (
+                    <div className="flex items-center gap-2 rounded-lg bg-amber-50 p-2 text-sm text-amber-700 dark:bg-amber-900/20 dark:text-amber-300">
+                        <CheckCircle2 className="h-4 w-4" />
+                        Mitigation applied — effects reduced
+                    </div>
                 )}
             </CardContent>
         </Card>
     );
 }
 
-export default function SpikeHistory({ spikes, activeSpikes, statistics, currentDay }: SpikeHistoryProps) {
+export default function SpikeHistory({
+    spikes,
+    activeSpikes,
+    statistics,
+    currentDay,
+}: SpikeHistoryProps) {
     const [resolving, setResolving] = useState<SpikeEventModel | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
-
     const handleResolve = (spike: SpikeEventModel) => {
         setResolving(spike);
+    };
+
+    const handleMitigate = (spike: SpikeEventModel, action: string) => {
+        router.post(`/game/spikes/${spike.id}/mitigate`, { action });
     };
 
     const confirmResolve = () => {
         if (!resolving) return;
         setIsSubmitting(true);
-        router.post(`/game/spikes/${resolving.id}/resolve`, {}, {
-            onSuccess: (page) => {
-                const flash = (page.props as { flash?: { success?: string } }).flash;
-                if (flash?.success) {
-                    setResolving(null);
-                    setShowSuccessAnimation(true);
-                }
+        router.post(
+            `/game/spikes/${resolving.id}/resolve`,
+            {},
+            {
+                onSuccess: (page) => {
+                    const flash = (
+                        page.props as { flash?: { success?: string } }
+                    ).flash;
+                    if (flash?.success) {
+                        setResolving(null);
+                        setShowSuccessAnimation(true);
+                    }
+                },
+                onError: () => {
+                    setIsSubmitting(false);
+                },
+                onFinish: () => {
+                    setIsSubmitting(false);
+                },
             },
-            onError: () => {
-                setIsSubmitting(false);
-            },
-            onFinish: () => {
-                setIsSubmitting(false);
-            },
-        });
+        );
     };
 
     // Auto-hide success animation after 3 seconds
     useEffect(() => {
         if (showSuccessAnimation) {
-            const timer = setTimeout(() => setShowSuccessAnimation(false), 3000);
+            const timer = setTimeout(
+                () => setShowSuccessAnimation(false),
+                3000,
+            );
             return () => clearTimeout(timer);
         }
     }, [showSuccessAnimation]);
@@ -258,7 +375,9 @@ export default function SpikeHistory({ spikes, activeSpikes, statistics, current
                             <Activity className="h-4 w-4 text-blue-500" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{statistics.totalSpikes}</div>
+                            <div className="text-2xl font-bold">
+                                {statistics.totalSpikes}
+                            </div>
                         </CardContent>
                     </Card>
                     <Card>
@@ -283,7 +402,8 @@ export default function SpikeHistory({ spikes, activeSpikes, statistics, current
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold text-stone-600">
-                                {statistics.resolvedSpikes - statistics.resolvedByPlayer}
+                                {statistics.resolvedSpikes -
+                                    statistics.resolvedByPlayer}
                             </div>
                         </CardContent>
                     </Card>
@@ -318,6 +438,7 @@ export default function SpikeHistory({ spikes, activeSpikes, statistics, current
                                     spike={spike}
                                     currentDay={currentDay}
                                     onResolve={handleResolve}
+                                    onMitigate={handleMitigate}
                                 />
                             ))}
                         </div>
@@ -333,7 +454,8 @@ export default function SpikeHistory({ spikes, activeSpikes, statistics, current
                                 All Clear
                             </h3>
                             <p className="text-sm text-emerald-600 dark:text-emerald-400">
-                                No active disruptions. Operations running smoothly.
+                                No active disruptions. Operations running
+                                smoothly.
                             </p>
                         </div>
                     </div>
@@ -360,19 +482,28 @@ export default function SpikeHistory({ spikes, activeSpikes, statistics, current
                         <TableBody>
                             {spikes.map((spike) => (
                                 <TableRow key={spike.id}>
-                                    <TableCell className="font-medium">{spike.name}</TableCell>
-                                    <TableCell>{getSpikeTypeBadge(spike.type)}</TableCell>
-                                    <TableCell className="text-stone-500">
-                                        Day {spike.starts_at_day} → {spike.ends_at_day}
+                                    <TableCell className="font-medium">
+                                        {spike.name}
                                     </TableCell>
-                                    <TableCell>{getResolutionStatus(spike)}</TableCell>
+                                    <TableCell>
+                                        {getSpikeTypeBadge(spike.type)}
+                                    </TableCell>
+                                    <TableCell className="text-stone-500">
+                                        Day {spike.starts_at_day} →{' '}
+                                        {spike.ends_at_day}
+                                    </TableCell>
+                                    <TableCell>
+                                        {getResolutionStatus(spike)}
+                                    </TableCell>
                                     <TableCell className="text-stone-500">
                                         {spike.resolution_cost
                                             ? `$${formatCurrency(spike.resolution_cost)}`
                                             : '—'}
                                     </TableCell>
                                     <TableCell className="text-stone-500">
-                                        {new Date(spike.created_at).toLocaleDateString()}
+                                        {new Date(
+                                            spike.created_at,
+                                        ).toLocaleDateString()}
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -407,24 +538,35 @@ export default function SpikeHistory({ spikes, activeSpikes, statistics, current
                     <DialogHeader>
                         <DialogTitle>Confirm Early Resolution</DialogTitle>
                         <DialogDescription>
-                            You are about to resolve the <strong>{resolving?.name}</strong> event early.
+                            You are about to resolve the{' '}
+                            <strong>{resolving?.name}</strong> event early.
                         </DialogDescription>
                     </DialogHeader>
                     <div className="py-4">
                         <div className="rounded-lg bg-stone-100 p-4 dark:bg-stone-800">
                             <div className="flex items-center justify-between">
-                                <span className="text-stone-600 dark:text-stone-400">Resolution Cost</span>
+                                <span className="text-stone-600 dark:text-stone-400">
+                                    Resolution Cost
+                                </span>
                                 <span className="text-xl font-bold text-stone-900 dark:text-white">
-                                    ${formatCurrency(resolving?.playbook?.resolutionCost ?? 0)}
+                                    $
+                                    {formatCurrency(
+                                        resolving?.playbook?.resolutionCost ??
+                                            0,
+                                    )}
                                 </span>
                             </div>
                         </div>
                         <p className="mt-3 text-sm text-stone-500">
-                            This will deduct the amount from your cash and immediately restore normal operations.
+                            This will deduct the amount from your cash and
+                            immediately restore normal operations.
                         </p>
                     </div>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setResolving(null)}>
+                        <Button
+                            variant="outline"
+                            onClick={() => setResolving(null)}
+                        >
                             Cancel
                         </Button>
                         <Button

@@ -10,6 +10,7 @@ import {
     Package,
     PieChart,
     ShoppingCart,
+    Trophy,
     Users,
 } from 'lucide-react';
 
@@ -65,6 +66,11 @@ const mainNavItems: NavItem[] = [
         title: 'Analytics',
         href: game.analytics(),
         icon: BarChart3,
+    },
+    {
+        title: 'Quests',
+        href: game.quests(),
+        icon: Trophy,
     },
     {
         title: 'War Room',
