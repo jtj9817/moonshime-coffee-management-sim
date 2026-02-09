@@ -69,7 +69,8 @@ All tasks in this track must preserve completed Phase 0 invariants (money in cen
 - [x] Task: Spike Interaction UI.
     - [x] Add "Resolve" buttons and cost indicators to Spike alerts or Spike War Room UI.
 
-- [~] Task: Conductor - User Manual Verification 'Phase 2: Core Engagement & Progression' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Core Engagement & Progression' (Protocol in workflow.md)
+    - Checkpoint SHA: (pending)
 
 ## Phase 3: Strategic Planning Tools
 
