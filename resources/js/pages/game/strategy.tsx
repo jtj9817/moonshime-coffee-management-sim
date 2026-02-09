@@ -2,7 +2,13 @@ import { Head, useForm } from '@inertiajs/react';
 import { CheckCircle2, Layers, Settings, Zap } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import GameLayout from '@/layouts/game-layout';
 import { type BreadcrumbItem } from '@/types';
 
@@ -55,7 +61,9 @@ function PolicyCard({
                                 <Settings className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                             </div>
                         )}
-                        <CardTitle className="text-lg">{policy.label}</CardTitle>
+                        <CardTitle className="text-lg">
+                            {policy.label}
+                        </CardTitle>
                     </div>
                     {isSelected && (
                         <CheckCircle2 className="h-5 w-5 text-amber-500" />
@@ -68,31 +76,55 @@ function PolicyCard({
                     {policy.name === 'just_in_time' ? (
                         <>
                             <div className="flex items-center justify-between">
-                                <span className="text-stone-500">Inventory Levels</span>
-                                <span className="font-medium text-blue-600">Minimal</span>
+                                <span className="text-stone-500">
+                                    Inventory Levels
+                                </span>
+                                <span className="font-medium text-blue-600">
+                                    Minimal
+                                </span>
                             </div>
                             <div className="flex items-center justify-between">
-                                <span className="text-stone-500">Order Frequency</span>
-                                <span className="font-medium text-blue-600">High</span>
+                                <span className="text-stone-500">
+                                    Order Frequency
+                                </span>
+                                <span className="font-medium text-blue-600">
+                                    High
+                                </span>
                             </div>
                             <div className="flex items-center justify-between">
-                                <span className="text-stone-500">Risk Level</span>
-                                <span className="font-medium text-amber-600">Medium</span>
+                                <span className="text-stone-500">
+                                    Risk Level
+                                </span>
+                                <span className="font-medium text-amber-600">
+                                    Medium
+                                </span>
                             </div>
                         </>
                     ) : (
                         <>
                             <div className="flex items-center justify-between">
-                                <span className="text-stone-500">Inventory Levels</span>
-                                <span className="font-medium text-emerald-600">Buffer Stock</span>
+                                <span className="text-stone-500">
+                                    Inventory Levels
+                                </span>
+                                <span className="font-medium text-emerald-600">
+                                    Buffer Stock
+                                </span>
                             </div>
                             <div className="flex items-center justify-between">
-                                <span className="text-stone-500">Order Frequency</span>
-                                <span className="font-medium text-emerald-600">Moderate</span>
+                                <span className="text-stone-500">
+                                    Order Frequency
+                                </span>
+                                <span className="font-medium text-emerald-600">
+                                    Moderate
+                                </span>
                             </div>
                             <div className="flex items-center justify-between">
-                                <span className="text-stone-500">Risk Level</span>
-                                <span className="font-medium text-emerald-600">Low</span>
+                                <span className="text-stone-500">
+                                    Risk Level
+                                </span>
+                                <span className="font-medium text-emerald-600">
+                                    Low
+                                </span>
                             </div>
                         </>
                     )}
@@ -102,7 +134,10 @@ function PolicyCard({
     );
 }
 
-export default function Strategy({ currentPolicy, policyOptions }: StrategyProps) {
+export default function Strategy({
+    currentPolicy,
+    policyOptions,
+}: StrategyProps) {
     const { data, setData, put, processing } = useForm({
         policy: currentPolicy.name,
     });
@@ -148,8 +183,9 @@ export default function Strategy({ currentPolicy, policyOptions }: StrategyProps
                         <CheckCircle2 className="h-5 w-5 text-amber-600" />
                         <span className="font-medium text-amber-800 dark:text-amber-300">
                             Current Strategy:{' '}
-                            {policyOptions.find((p) => p.name === currentPolicy.name)?.label ??
-                                'Unknown'}
+                            {policyOptions.find(
+                                (p) => p.name === currentPolicy.name,
+                            )?.label ?? 'Unknown'}
                         </span>
                     </div>
                 </div>
@@ -169,22 +205,25 @@ export default function Strategy({ currentPolicy, policyOptions }: StrategyProps
                 {/* Info Box */}
                 <Card>
                     <CardHeader>
-                        <CardTitle className="text-base">About Inventory Strategies</CardTitle>
+                        <CardTitle className="text-base">
+                            About Inventory Strategies
+                        </CardTitle>
                     </CardHeader>
                     <CardContent className="text-sm text-stone-600 dark:text-stone-400">
                         <p className="mb-3">
-                            Your inventory strategy determines how the system calculates reorder
-                            points and safety stock levels. Choose based on your risk tolerance and
-                            cash flow preferences.
+                            Your inventory strategy determines how the system
+                            calculates reorder points and safety stock levels.
+                            Choose based on your risk tolerance and cash flow
+                            preferences.
                         </p>
                         <ul className="list-inside list-disc space-y-1">
                             <li>
-                                <strong>Just-In-Time:</strong> Lower holding costs but higher risk
-                                during demand spikes
+                                <strong>Just-In-Time:</strong> Lower holding
+                                costs but higher risk during demand spikes
                             </li>
                             <li>
-                                <strong>Safety Stock:</strong> Higher holding costs but better
-                                protection against stockouts
+                                <strong>Safety Stock:</strong> Higher holding
+                                costs but better protection against stockouts
                             </li>
                         </ul>
                     </CardContent>

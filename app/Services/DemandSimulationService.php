@@ -2,13 +2,13 @@
 
 namespace App\Services;
 
-use App\Models\GameState;
+use App\Events\StockoutOccurred;
 use App\Models\DemandEvent;
+use App\Models\GameState;
 use App\Models\Inventory;
 use App\Models\Location;
 use App\Models\LostSale;
 use App\Models\SpikeEvent;
-use App\Events\StockoutOccurred;
 use Illuminate\Support\Facades\Log;
 
 class DemandSimulationService
@@ -28,6 +28,7 @@ class DemandSimulationService
 
     /**
      * Pre-loaded demand spikes for current simulation (TICKET-003).
+     *
      * @var \Illuminate\Support\Collection<int, SpikeEvent>|null
      */
     protected ?\Illuminate\Support\Collection $demandSpikes = null;
@@ -133,7 +134,7 @@ class DemandSimulationService
     protected function getBaselineConsumption($product): int
     {
         // You can extend this to have per-product or per-category baselines
-       return $this->baselineConsumption['default'] ?? 5;
+        return $this->baselineConsumption['default'] ?? 5;
     }
 
     /**
@@ -167,8 +168,7 @@ class DemandSimulationService
 
         // Filter pre-loaded spikes in memory (no DB query)
         $maxMagnitude = $this->demandSpikes
-            ->filter(fn ($s) =>
-                ($s->location_id === $locationId || $s->location_id === null) &&
+            ->filter(fn ($s) => ($s->location_id === $locationId || $s->location_id === null) &&
                 ($s->product_id === $productId || $s->product_id === null)
             )
             ->max('magnitude');

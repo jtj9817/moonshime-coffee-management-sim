@@ -2,18 +2,16 @@
 
 use App\Events\TimeAdvanced;
 use App\Models\GameState;
-use App\Models\User;
 use App\Models\Order;
-use App\Models\Vendor;
 use App\Models\SpikeEvent;
+use App\Models\User;
+use App\Models\Vendor;
 use App\Services\SimulationService;
 use App\Services\SpikeEventFactory;
-use App\States\Order\Shipped;
 use App\States\Order\Delivered;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\DB;
+use App\States\Order\Shipped;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Mockery\MockInterface;
+use Illuminate\Support\Facades\Event;
 
 uses(RefreshDatabase::class);
 
@@ -27,7 +25,7 @@ beforeEach(function () {
 
     // We need to act as the user so the singleton works if resolved from container
     $this->actingAs($user);
-    
+
     // However, in our tests, we instantiate it manually for some tests
     $this->service = new SimulationService($this->gameState);
 });
@@ -73,12 +71,12 @@ test('it triggers spike activation and future generation on time advancement', f
 
     // 2. Mock SpikeEventFactory to verify future generation is called
     // Note: We don't mock 'apply' here because it's called via event listener which we want to run
-    
+
     $this->service->advanceTime(); // Advance to Day 2
 
     // 3. Assert pending spike is now active
     expect($pendingSpike->fresh()->is_active)->toBeTrue();
-    
+
     // 4. Assert a new spike was generated (it will have starts_at_day = 3)
     // We check if any spike exists starting on Day 3
     expect(SpikeEvent::where('starts_at_day', 3)->exists())->toBeTrue();

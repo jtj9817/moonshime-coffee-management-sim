@@ -4,8 +4,6 @@ namespace App\Listeners;
 
 use App\Events\SpikeEnded;
 use App\Services\SpikeEventFactory;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
 
 class RollbackSpikeEffect
 {

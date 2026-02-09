@@ -61,8 +61,9 @@ export default function Welcome({ isAuthenticated }: WelcomeProps) {
                         Supply Chain Management Simulation
                     </p>
                     <p className="mb-12 max-w-2xl text-stone-500 dark:text-stone-400">
-                        Master the art of coffee shop inventory management. Balance supply and demand,
-                        negotiate with vendors, survive market spikes, and grow your coffee empire.
+                        Master the art of coffee shop inventory management.
+                        Balance supply and demand, negotiate with vendors,
+                        survive market spikes, and grow your coffee empire.
                     </p>
 
                     {/* Feature Cards */}
@@ -73,7 +74,8 @@ export default function Welcome({ isAuthenticated }: WelcomeProps) {
                                 Manage Inventory
                             </h3>
                             <p className="text-sm text-stone-500 dark:text-stone-400">
-                                Track stock across 3 locations. Optimize reorder points and safety stock.
+                                Track stock across 3 locations. Optimize reorder
+                                points and safety stock.
                             </p>
                         </div>
 
@@ -83,7 +85,8 @@ export default function Welcome({ isAuthenticated }: WelcomeProps) {
                                 Grow Revenue
                             </h3>
                             <p className="text-sm text-stone-500 dark:text-stone-400">
-                                Negotiate with suppliers, reduce waste, and maximize profitability.
+                                Negotiate with suppliers, reduce waste, and
+                                maximize profitability.
                             </p>
                         </div>
 
@@ -93,7 +96,8 @@ export default function Welcome({ isAuthenticated }: WelcomeProps) {
                                 Survive Spikes
                             </h3>
                             <p className="text-sm text-stone-500 dark:text-stone-400">
-                                React to demand surges, supply disruptions, and market chaos.
+                                React to demand surges, supply disruptions, and
+                                market chaos.
                             </p>
                         </div>
                     </div>

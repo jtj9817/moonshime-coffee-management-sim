@@ -75,7 +75,9 @@ export function DailyReportCard({ report }: DailyReportCardProps) {
                             key={stat.label}
                             className="rounded-lg border border-stone-200 bg-white p-3 text-center dark:border-stone-700 dark:bg-stone-800"
                         >
-                            <stat.icon className={`mx-auto mb-1 h-4 w-4 ${stat.color}`} />
+                            <stat.icon
+                                className={`mx-auto mb-1 h-4 w-4 ${stat.color}`}
+                            />
                             <div className="text-xl font-bold text-stone-900 dark:text-white">
                                 {stat.value}
                             </div>

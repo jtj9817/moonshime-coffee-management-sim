@@ -1,26 +1,27 @@
 <?php
+
 /**
  * Manual Test Script for UI Integration (Logistics)
  * Generated: 2026-01-16
  */
 
-require __DIR__ . '/../../vendor/autoload.php';
+require __DIR__.'/../../vendor/autoload.php';
 
-$app = require_once __DIR__ . '/../../bootstrap/app.php';
+$app = require_once __DIR__.'/../../bootstrap/app.php';
 $kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
 $kernel->bootstrap();
 
 use App\Models\Location;
 use App\Models\Route;
 use App\Services\LogisticsService;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Carbon\Carbon;
 
-$testRunId = 'test_ui_logistics_' . Carbon::now()->format('Y_m_d_His');
+$testRunId = 'test_ui_logistics_'.Carbon::now()->format('Y_m_d_His');
 $logFile = storage_path("logs/manual_tests/{$testRunId}.log");
 
-if (!is_dir(dirname($logFile))) {
+if (! is_dir(dirname($logFile))) {
     mkdir(dirname($logFile), 0755, true);
 }
 
@@ -30,12 +31,14 @@ config(['logging.channels.manual_test' => [
     'level' => 'debug',
 ]]);
 
-function logInfo($message, $context = []) {
+function logInfo($message, $context = [])
+{
     Log::channel('manual_test')->info($message, $context);
     echo "[INFO] {$message}\n";
 }
 
-function logError($message, $context = []) {
+function logError($message, $context = [])
+{
     Log::channel('manual_test')->error($message, $context);
     echo "[ERROR] {$message}\n";
 }
@@ -44,13 +47,13 @@ try {
     DB::beginTransaction();
     logInfo("=== Test Run Started: {$testRunId} ===");
 
-    logInfo("Phase 1: Data Setup");
-    
+    logInfo('Phase 1: Data Setup');
+
     $locA = Location::factory()->create(['name' => 'Store A', 'type' => 'store']);
     $locB = Location::factory()->create(['name' => 'Warehouse B', 'type' => 'warehouse']);
     $locC = Location::factory()->create(['name' => 'Hub C', 'type' => 'hub']);
-    
-    logInfo("Created locations", ['A' => $locA->id, 'B' => $locB->id, 'C' => $locC->id]);
+
+    logInfo('Created locations', ['A' => $locA->id, 'B' => $locB->id, 'C' => $locC->id]);
 
     // Create a path: A -> C -> B
     Route::factory()->create([
@@ -59,7 +62,7 @@ try {
         'is_active' => true,
         'weights' => ['cost' => 5],
     ]);
-    
+
     Route::factory()->create([
         'source_id' => $locC->id,
         'target_id' => $locB->id,
@@ -75,45 +78,45 @@ try {
         'weights' => ['cost' => 2],
     ]);
 
-    logInfo("Routes created");
+    logInfo('Routes created');
 
-    logInfo("Phase 2: Test Execution");
-    
+    logInfo('Phase 2: Test Execution');
+
     $service = app(LogisticsService::class);
-    
-    logInfo("Testing getLogisticsHealth()");
+
+    logInfo('Testing getLogisticsHealth()');
     $health = $service->getLogisticsHealth();
     logInfo("Logistics Health: {$health}%");
 
-    logInfo("Testing findBestRoute(Store A -> Warehouse B)");
+    logInfo('Testing findBestRoute(Store A -> Warehouse B)');
     $path = $service->findBestRoute($locA, $locB);
-    
+
     if ($path && $path->count() === 2) {
-        logInfo("Test passed: Optimal path found with 2 segments (via Hub C)");
-        $totalCost = $path->sum(fn($r) => $service->calculateCost($r));
+        logInfo('Test passed: Optimal path found with 2 segments (via Hub C)');
+        $totalCost = $path->sum(fn ($r) => $service->calculateCost($r));
         logInfo("Total Cost: {$totalCost}");
     } else {
-        logError("Test failed: Path not found or incorrect length", ['count' => $path ? $path->count() : 0]);
+        logError('Test failed: Path not found or incorrect length', ['count' => $path ? $path->count() : 0]);
     }
 
-    logInfo("Testing Logistics Health calculation logic");
+    logInfo('Testing Logistics Health calculation logic');
     $total = Route::count();
     $active = Route::where('is_active', true)->count();
     $expectedHealth = ($active / $total) * 100;
-    
+
     if (abs($health - $expectedHealth) < 0.01) {
-        logInfo("Test passed: Health calculation matches database state");
+        logInfo('Test passed: Health calculation matches database state');
     } else {
-        logError("Test failed: Health mismatch", ['actual' => $health, 'expected' => $expectedHealth]);
+        logError('Test failed: Health mismatch', ['actual' => $health, 'expected' => $expectedHealth]);
     }
 
-    logInfo("Phase 3: Cleanup (Automatic via Rollback)");
+    logInfo('Phase 3: Cleanup (Automatic via Rollback)');
     DB::rollBack();
-    logInfo("Database rolled back");
-    
+    logInfo('Database rolled back');
+
 } catch (\Exception $e) {
     DB::rollBack();
-    logError("Test failed: " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+    logError('Test failed: '.$e->getMessage(), ['trace' => $e->getTraceAsString()]);
 } finally {
     logInfo("=== Test Run Completed: {$testRunId} ===");
     echo "\n✓ Full logs at: {$logFile}\n";

@@ -25,7 +25,7 @@ class UpdateMetrics
     {
         $user = Auth::user();
 
-        if (!$user) {
+        if (! $user) {
             return;
         }
 
@@ -46,7 +46,7 @@ class UpdateMetrics
     {
         $user = Auth::user();
 
-        if (!$user) {
+        if (! $user) {
             return;
         }
 

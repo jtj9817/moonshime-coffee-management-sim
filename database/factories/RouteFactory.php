@@ -18,7 +18,7 @@ class RouteFactory extends Factory
     public function definition(): array
     {
         $mode = $this->faker->randomElement(['Truck', 'Air', 'Ship']);
-        
+
         return [
             'source_id' => Location::factory(),
             'target_id' => Location::factory(),

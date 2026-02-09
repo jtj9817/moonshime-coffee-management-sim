@@ -2,11 +2,11 @@
 
 namespace App\States\Order\Transitions;
 
-use App\Models\Order;
 use App\Models\GameState;
+use App\Models\Order;
 use App\States\Order\Shipped;
-use Spatie\ModelStates\Transition;
 use RuntimeException;
+use Spatie\ModelStates\Transition;
 
 class ToShipped extends Transition
 {

@@ -16,7 +16,7 @@ class StorageFeeCalculator
      * Calculate total storage fees for a user's inventory.
      * Formula: SUM(inventory.quantity * product.storage_cost)
      *
-     * @param int $userId The user ID
+     * @param  int  $userId  The user ID
      * @return int Total storage cost in cents
      */
     public function calculate(int $userId): int
@@ -31,8 +31,8 @@ class StorageFeeCalculator
      * Calculate storage fees for a specific location.
      * Formula: SUM(inventory.quantity * product.storage_cost) for location
      *
-     * @param int $userId The user ID
-     * @param string $locationId The location ID
+     * @param  int  $userId  The user ID
+     * @param  string  $locationId  The location ID
      * @return int Storage cost for location in cents
      */
     public function calculateForLocation(int $userId, string $locationId): int

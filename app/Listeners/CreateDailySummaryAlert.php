@@ -67,7 +67,7 @@ class CreateDailySummaryAlert
             $parts[] = "\${$formattedFees} storage fees";
         }
 
-        $message = "Day {$day} Summary: " . (count($parts) > 0 ? implode(', ', $parts) . '.' : 'No activity.');
+        $message = "Day {$day} Summary: ".(count($parts) > 0 ? implode(', ', $parts).'.' : 'No activity.');
 
         Alert::create([
             'user_id' => $userId,

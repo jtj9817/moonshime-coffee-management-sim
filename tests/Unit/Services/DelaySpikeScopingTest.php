@@ -21,12 +21,12 @@ beforeEach(function () {
     ]);
     $this->vendor = Vendor::factory()->create();
     $this->product = Product::factory()->create();
-    $this->delaySpike = new DelaySpike();
+    $this->delaySpike = new DelaySpike;
 });
 
 test('DelaySpike only affects orders owned by the spike user', function () {
     $otherUser = User::factory()->create();
-    
+
     // Create order for spike owner
     $ownerOrder = Order::factory()->create([
         'user_id' => $this->user->id,
@@ -34,7 +34,7 @@ test('DelaySpike only affects orders owned by the spike user', function () {
         'delivery_day' => 7,
     ]);
     $ownerOrder->status->transitionTo(Shipped::class);
-    
+
     // Create order for other user
     $otherOrder = Order::factory()->create([
         'user_id' => $otherUser->id,

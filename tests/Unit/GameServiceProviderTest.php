@@ -1,6 +1,5 @@
 <?php
 
-use App\Interfaces\AiProviderInterface;
 use App\Interfaces\RestockStrategyInterface;
 use App\Services\InventoryManagementService;
 use App\Services\InventoryMathService;

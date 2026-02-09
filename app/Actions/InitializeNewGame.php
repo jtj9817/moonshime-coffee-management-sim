@@ -6,9 +6,7 @@ use App\Models\GameState;
 use App\Models\Inventory;
 use App\Models\Location;
 use App\Models\Order;
-use App\Models\OrderItem;
 use App\Models\Product;
-use App\Models\Route;
 use App\Models\Transfer;
 use App\Models\User;
 use App\Models\Vendor;
@@ -60,6 +58,7 @@ class InitializeNewGame
                             'existing_inventory_count' => $existingInventoryCount,
                             'existing_transfer_count' => $existingTransferCount,
                         ]);
+
                         return $gameState;
                     }
 
@@ -108,7 +107,7 @@ class InitializeNewGame
             throw new RuntimeException('Cannot initialize game: No stores found. Please ensure GraphSeeder has been run.');
         }
 
-        if (!$warehouse) {
+        if (! $warehouse) {
             $logger->error('InitializeNewGame: Cannot seed inventory - no warehouse found', [
                 'user_id' => $user->id,
                 'hint' => 'GraphSeeder may not have been run',
@@ -211,7 +210,7 @@ class InitializeNewGame
         $warehouse = Location::where('type', 'warehouse')->first();
         $product = Product::first();
 
-        if (!$vendor) {
+        if (! $vendor) {
             $logger->error('InitializeNewGame: Cannot seed pipeline - no vendor found', [
                 'user_id' => $user->id,
                 'hint' => 'CoreGameStateSeeder may not have been run',
@@ -219,21 +218,21 @@ class InitializeNewGame
             throw new RuntimeException('Cannot initialize game: No vendor found. Please ensure CoreGameStateSeeder has been run.');
         }
 
-        if (!$store) {
+        if (! $store) {
             $logger->error('InitializeNewGame: Cannot seed pipeline - no store found', [
                 'user_id' => $user->id,
             ]);
             throw new RuntimeException('Cannot initialize game: No store found.');
         }
 
-        if (!$warehouse) {
+        if (! $warehouse) {
             $logger->error('InitializeNewGame: Cannot seed pipeline - no warehouse found', [
                 'user_id' => $user->id,
             ]);
             throw new RuntimeException('Cannot initialize game: No warehouse found.');
         }
 
-        if (!$product) {
+        if (! $product) {
             $logger->error('InitializeNewGame: Cannot seed pipeline - no product found', [
                 'user_id' => $user->id,
             ]);

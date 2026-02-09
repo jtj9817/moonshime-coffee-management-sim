@@ -7,7 +7,10 @@ interface LogisticsStatusWidgetProps {
     activeSpikesCount: number;
 }
 
-export function LogisticsStatusWidget({ health, activeSpikesCount }: LogisticsStatusWidgetProps) {
+export function LogisticsStatusWidget({
+    health,
+    activeSpikesCount,
+}: LogisticsStatusWidgetProps) {
     const isHealthy = health >= 90;
     const isCritical = health < 70;
 
@@ -26,9 +29,11 @@ export function LogisticsStatusWidget({ health, activeSpikesCount }: LogisticsSt
     }
 
     return (
-        <Card className={`overflow-hidden border-2 transition-all ${borderColor}`}>
+        <Card
+            className={`overflow-hidden border-2 transition-all ${borderColor}`}
+        >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400">
+                <CardTitle className="text-sm font-bold tracking-wider text-stone-500 uppercase dark:text-stone-400">
                     Logistics Health
                 </CardTitle>
                 <Activity className={`h-4 w-4 ${statusColor}`} />
@@ -38,8 +43,14 @@ export function LogisticsStatusWidget({ health, activeSpikesCount }: LogisticsSt
                     <div className="text-3xl font-black text-stone-900 dark:text-white">
                         {Math.round(health)}%
                     </div>
-                    <div className={`flex items-center gap-1 text-xs font-bold ${statusColor}`}>
-                        {isHealthy ? 'OPTIMAL' : isCritical ? 'CRITICAL' : 'DEGRADED'}
+                    <div
+                        className={`flex items-center gap-1 text-xs font-bold ${statusColor}`}
+                    >
+                        {isHealthy
+                            ? 'OPTIMAL'
+                            : isCritical
+                              ? 'CRITICAL'
+                              : 'DEGRADED'}
                     </div>
                 </div>
 
@@ -55,7 +66,9 @@ export function LogisticsStatusWidget({ health, activeSpikesCount }: LogisticsSt
                         <Zap className="h-3 w-3" />
                         Active Disruptions
                     </div>
-                    <div className={`flex h-5 w-5 items-center justify-center rounded text-[10px] font-bold ${activeSpikesCount > 0 ? 'bg-rose-500 text-white animate-pulse' : 'bg-stone-200 text-stone-600 dark:bg-stone-700 dark:text-stone-400'}`}>
+                    <div
+                        className={`flex h-5 w-5 items-center justify-center rounded text-[10px] font-bold ${activeSpikesCount > 0 ? 'animate-pulse bg-rose-500 text-white' : 'bg-stone-200 text-stone-600 dark:bg-stone-700 dark:text-stone-400'}`}
+                    >
                         {activeSpikesCount}
                     </div>
                 </div>

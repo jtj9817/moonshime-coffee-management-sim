@@ -6,8 +6,8 @@ use App\Models\User;
 use App\States\Order\Cancelled;
 use App\States\Order\Delivered;
 use App\States\Order\Shipped;
+
 use function Pest\Laravel\actingAs;
-use function Pest\Laravel\postJson;
 
 test('authenticated users can cancel shipped orders', function () {
     $user = User::factory()->create();

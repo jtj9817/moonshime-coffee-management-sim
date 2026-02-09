@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Manual Test: Phase 0 Monetary Canonicalization Verification
  * Track: conductor/tracks/arch_remediation_20260207/plan.md
@@ -45,7 +46,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-$testRunId = 'phase0_money_' . Carbon::now()->format('Y_m_d_His');
+$testRunId = 'phase0_money_'.Carbon::now()->format('Y_m_d_His');
 $logFile = storage_path("logs/manual_tests/{$testRunId}.log");
 
 if (! is_dir(dirname($logFile))) {

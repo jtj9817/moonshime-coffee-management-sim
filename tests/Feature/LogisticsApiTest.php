@@ -1,9 +1,9 @@
 <?php
 
-use App\Models\User;
 use App\Models\Location;
 use App\Models\Route;
 use App\Models\SpikeEvent;
+use App\Models\User;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
@@ -18,7 +18,7 @@ test('getPath returns optimal path and cost', function () {
         'target_id' => $locB->id,
         'transport_mode' => 'truck',
         'cost' => 100,
-        'is_active' => true
+        'is_active' => true,
     ]);
 
     $response = $this->actingAs($user)
@@ -31,7 +31,7 @@ test('getPath returns optimal path and cost', function () {
         ->assertJson([
             'success' => true,
             'reachable' => true,
-            'total_cost' => 100
+            'total_cost' => 100,
         ]);
 });
 
@@ -52,7 +52,7 @@ test('getPath returns 404/error when no path exists', function () {
     $response->assertOk()
         ->assertJson([
             'success' => false,
-            'reachable' => false
+            'reachable' => false,
         ]);
 });
 
@@ -67,7 +67,7 @@ test('getPath reflects cost increases from active spikes', function () {
         'target_id' => $locB->id,
         'transport_mode' => 'truck',
         'cost' => 100,
-        'is_active' => true
+        'is_active' => true,
     ]);
 
     // Create a spike that affects this route (scoped to the acting user)
@@ -76,9 +76,9 @@ test('getPath reflects cost increases from active spikes', function () {
         'type' => 'blizzard',
         'is_active' => true,
         'affected_route_id' => $route->id,
-        'magnitude' => 0.5 // 50% increase
+        'magnitude' => 0.5, // 50% increase
     ]);
-    
+
     $response = $this->actingAs($user)
         ->getJson(route('game.logistics.path', [
             'source_id' => $locA->id,
@@ -88,6 +88,6 @@ test('getPath reflects cost increases from active spikes', function () {
     $response->assertOk()
         ->assertJson([
             'success' => true,
-            'total_cost' => 150
+            'total_cost' => 150,
         ]);
 });

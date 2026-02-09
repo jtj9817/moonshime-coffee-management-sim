@@ -5,7 +5,6 @@ use App\Events\SpikeOccurred;
 use App\Models\Route;
 use App\Models\SpikeEvent;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Event;
 
 uses(RefreshDatabase::class);
 

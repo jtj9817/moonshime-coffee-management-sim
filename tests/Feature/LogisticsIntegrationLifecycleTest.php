@@ -1,10 +1,10 @@
 <?php
 
-use App\Models\User;
 use App\Models\GameState;
 use App\Models\Location;
 use App\Models\Route;
 use App\Models\SpikeEvent;
+use App\Models\User;
 use Inertia\Testing\AssertableInertia as Assert;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
@@ -24,21 +24,21 @@ test('full disruption lifecycle integration', function () {
         'source_id' => $locA->id,
         'target_id' => $locC->id,
         'cost' => 100,
-        'is_active' => true
+        'is_active' => true,
     ]);
 
     Route::factory()->create([
         'source_id' => $locA->id,
         'target_id' => $locB->id,
         'cost' => 50,
-        'is_active' => true
+        'is_active' => true,
     ]);
 
     Route::factory()->create([
         'source_id' => $locB->id,
         'target_id' => $locC->id,
         'cost' => 50,
-        'is_active' => true
+        'is_active' => true,
     ]);
 
     // 2. Trigger Blizzard (Block Direct Route)
@@ -48,18 +48,18 @@ test('full disruption lifecycle integration', function () {
         'type' => 'blizzard',
         'is_active' => true,
         'affected_route_id' => $directRoute->id,
-        'magnitude' => 0.0
+        'magnitude' => 0.0,
     ]);
 
     // 3. Verify Dashboard Metric Update (check we have at least our created spike)
     $response = $this->actingAs($user)
         ->get(route('game.dashboard'));
-    
+
     $response->assertInertia(fn (Assert $page) => $page
         ->has('active_spikes_count')
         ->has('logistics_health')
     );
-    
+
     $activeSpikesCount = $response->original->getData()['page']['props']['active_spikes_count'];
     expect($activeSpikesCount)->toBeGreaterThanOrEqual(1);
 
@@ -74,9 +74,9 @@ test('full disruption lifecycle integration', function () {
         ->assertJson([
             'success' => true,
             'reachable' => true,
-            'total_cost' => 100 // 50 + 50
+            'total_cost' => 100, // 50 + 50
         ]);
-    
+
     $data = $response->json();
     expect($data['path'])->toHaveCount(2); // Alpha -> Beta -> Gamma
 });

@@ -7,7 +7,6 @@ import { GameProvider } from '@/contexts/game-context';
 import AppSidebarLayout from '@/layouts/app/app-sidebar-layout';
 import { type BreadcrumbItem } from '@/types';
 
-
 interface GameLayoutProps {
     children: ReactNode;
     breadcrumbs?: BreadcrumbItem[];

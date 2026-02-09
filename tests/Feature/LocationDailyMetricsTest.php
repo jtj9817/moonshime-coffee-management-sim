@@ -1,5 +1,7 @@
 <?php
 
+use App\Events\TimeAdvanced;
+use App\Listeners\CreateLocationDailyMetrics;
 use App\Models\DemandEvent;
 use App\Models\GameState;
 use App\Models\Inventory;
@@ -11,8 +13,6 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\User;
 use App\Models\Vendor;
-use App\Listeners\CreateLocationDailyMetrics;
-use App\Events\TimeAdvanced;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -87,7 +87,7 @@ it('calculates COGS using weighted average not simple average', function () {
         'lost_revenue' => 0,
     ]);
 
-    $listener = new CreateLocationDailyMetrics();
+    $listener = new CreateLocationDailyMetrics;
     $listener->handle(new TimeAdvanced(5, $gameState));
 
     $metric = LocationDailyMetric::where('user_id', $user->id)
@@ -134,7 +134,7 @@ it('creates location daily metrics with correct revenue from demand events', fun
         'lost_revenue' => 0,
     ]);
 
-    $listener = new CreateLocationDailyMetrics();
+    $listener = new CreateLocationDailyMetrics;
     $listener->handle(new TimeAdvanced(5, $gameState));
 
     $metric = LocationDailyMetric::where('user_id', $user->id)
@@ -169,7 +169,7 @@ it('calculates opex as inventory quantity times storage cost', function () {
         'quantity' => 40,
     ]);
 
-    $listener = new CreateLocationDailyMetrics();
+    $listener = new CreateLocationDailyMetrics;
     $listener->handle(new TimeAdvanced(3, $gameState));
 
     $metric = LocationDailyMetric::where('user_id', $user->id)
@@ -205,7 +205,7 @@ it('tracks stockout count from lost sales', function () {
         'potential_revenue_lost' => 2500,
     ]);
 
-    $listener = new CreateLocationDailyMetrics();
+    $listener = new CreateLocationDailyMetrics;
     $listener->handle(new TimeAdvanced(2, $gameState));
 
     $metric = LocationDailyMetric::where('user_id', $user->id)
@@ -237,7 +237,7 @@ it('creates metrics for each active store location', function () {
         'quantity' => 30,
     ]);
 
-    $listener = new CreateLocationDailyMetrics();
+    $listener = new CreateLocationDailyMetrics;
     $listener->handle(new TimeAdvanced(1, $gameState));
 
     expect(LocationDailyMetric::where('user_id', $user->id)->where('day', 1)->count())->toBe(2);
@@ -265,7 +265,7 @@ it('isolates metrics per user', function () {
         'quantity' => 50,
     ]);
 
-    $listener = new CreateLocationDailyMetrics();
+    $listener = new CreateLocationDailyMetrics;
     $listener->handle(new TimeAdvanced(1, $gs1));
     $listener->handle(new TimeAdvanced(1, $gs2));
 

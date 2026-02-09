@@ -19,7 +19,7 @@ class SpikeImpactTest extends TestCase
         \App\Models\GameState::factory()->create(['user_id' => $user->id]);
         $location = \App\Models\Location::factory()->create(['name' => 'Affected Cafe']);
         $product = \App\Models\Product::factory()->create(['name' => 'Espresso']);
-        
+
         // Create a past spike: Day 2 to 4
         $spike = SpikeEvent::factory()->create([
             'user_id' => $user->id,
@@ -27,7 +27,7 @@ class SpikeImpactTest extends TestCase
             'location_id' => $location->id,
             'product_id' => $product->id,
             'starts_at_day' => 2,
-            'duration' => 3, // Ends at 2 + 3 = 5? Or inclusive? Usually duration is added. 
+            'duration' => 3, // Ends at 2 + 3 = 5? Or inclusive? Usually duration is added.
             // If logic says ends_at = start + duration, then 2+3=5.
             'ends_at_day' => 4, // Let's set it explicitly for clarity in factory if possible, or update it
         ]);
@@ -36,32 +36,32 @@ class SpikeImpactTest extends TestCase
         // Seed Inventory History
         // Day 1: 100 (Pre-spike)
         DB::table('inventory_history')->insert([
-            'user_id' => $user->id, 'location_id' => $location->id, 'product_id' => $product->id, 
-            'day' => 1, 'quantity' => 100, 'created_at' => now(), 'updated_at' => now()
+            'user_id' => $user->id, 'location_id' => $location->id, 'product_id' => $product->id,
+            'day' => 1, 'quantity' => 100, 'created_at' => now(), 'updated_at' => now(),
         ]);
-        
+
         // Day 2: 80 (Spike Start)
         DB::table('inventory_history')->insert([
-            'user_id' => $user->id, 'location_id' => $location->id, 'product_id' => $product->id, 
-            'day' => 2, 'quantity' => 80, 'created_at' => now(), 'updated_at' => now()
+            'user_id' => $user->id, 'location_id' => $location->id, 'product_id' => $product->id,
+            'day' => 2, 'quantity' => 80, 'created_at' => now(), 'updated_at' => now(),
         ]);
-        
+
         // Day 3: 20 (Deep Impact)
         DB::table('inventory_history')->insert([
-            'user_id' => $user->id, 'location_id' => $location->id, 'product_id' => $product->id, 
-            'day' => 3, 'quantity' => 20, 'created_at' => now(), 'updated_at' => now()
+            'user_id' => $user->id, 'location_id' => $location->id, 'product_id' => $product->id,
+            'day' => 3, 'quantity' => 20, 'created_at' => now(), 'updated_at' => now(),
         ]);
-        
+
         // Day 4: 10 (End)
         DB::table('inventory_history')->insert([
-            'user_id' => $user->id, 'location_id' => $location->id, 'product_id' => $product->id, 
-            'day' => 4, 'quantity' => 10, 'created_at' => now(), 'updated_at' => now()
+            'user_id' => $user->id, 'location_id' => $location->id, 'product_id' => $product->id,
+            'day' => 4, 'quantity' => 10, 'created_at' => now(), 'updated_at' => now(),
         ]);
-        
+
         // Day 5: 90 (Recovery)
         DB::table('inventory_history')->insert([
-            'user_id' => $user->id, 'location_id' => $location->id, 'product_id' => $product->id, 
-            'day' => 5, 'quantity' => 90, 'created_at' => now(), 'updated_at' => now()
+            'user_id' => $user->id, 'location_id' => $location->id, 'product_id' => $product->id,
+            'day' => 5, 'quantity' => 90, 'created_at' => now(), 'updated_at' => now(),
         ]);
 
         $response = $this->actingAs($user)

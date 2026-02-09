@@ -1,6 +1,9 @@
 <?php
 
+use App\Events\OrderPlaced;
+use App\Events\SpikeOccurred;
 use App\Models\GameState;
+use App\Models\Inventory;
 use App\Models\Location;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -8,18 +11,14 @@ use App\Models\Product;
 use App\Models\Route;
 use App\Models\Shipment;
 use App\Models\SpikeEvent;
-use App\Models\Vendor;
 use App\Models\User;
-use App\Models\Inventory;
+use App\Models\Vendor;
 use App\Services\SimulationService;
-use App\States\Order\Draft;
+use App\States\Order\Delivered;
 use App\States\Order\Pending;
 use App\States\Order\Shipped;
-use App\States\Order\Delivered;
-use App\Events\OrderPlaced;
-use App\Events\SpikeOccurred;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 
 uses(RefreshDatabase::class);
 
@@ -29,7 +28,7 @@ test('comprehensive 5-day gameplay loop simulation with player agency', function
     $gameState = GameState::factory()->create([
         'user_id' => $user->id,
         'day' => 1,
-        'cash' => 1000000 // Start with 10000 dollars in cents
+        'cash' => 1000000, // Start with 10000 dollars in cents
     ]);
     Auth::login($user);
 
@@ -39,9 +38,9 @@ test('comprehensive 5-day gameplay loop simulation with player agency', function
     $product = Product::factory()->create([
         'name' => 'Premium Arabica',
         'storage_cost' => 10,
-        'is_perishable' => false
+        'is_perishable' => false,
     ]);
-    
+
     // Connect Vendor to Warehouse (Standard Route)
     $standardRoute = Route::factory()->create([
         'source_id' => $vendorLoc->id,
@@ -76,7 +75,7 @@ test('comprehensive 5-day gameplay loop simulation with player agency', function
         'location_id' => $warehouse->id,
         'total_cost' => 10000,
         'status' => 'draft',
-    ]);    
+    ]);
     Shipment::create([
         'order_id' => $order->id,
         'route_id' => $standardRoute->id,
@@ -85,7 +84,7 @@ test('comprehensive 5-day gameplay loop simulation with player agency', function
         'status' => 'pending',
         'sequence_index' => 0,
     ]);
-    
+
     OrderItem::create([
         'order_id' => $order->id,
         'product_id' => $product->id,
@@ -114,18 +113,18 @@ test('comprehensive 5-day gameplay loop simulation with player agency', function
         'starts_at_day' => 2,
         'ends_at_day' => 4,
         'is_active' => false,
-    ]);        
-    
+    ]);
+
     $blizzard->update(['is_active' => true]);
     event(new SpikeOccurred($blizzard));
-    
+
     // Verify standard route is blocked
     expect($standardRoute->fresh()->is_active)->toBeFalse();
 
     // Player agency: Responding to disruption
     $logistics = app(\App\Services\LogisticsService::class);
     $bestPath = $logistics->findBestRoute($vendorLoc, $warehouse);
-    
+
     // Verify the engine suggests the Air route because Truck is blocked
     expect($bestPath->first()->id)->toBe($premiumRoute->id);
 
@@ -145,7 +144,7 @@ test('comprehensive 5-day gameplay loop simulation with player agency', function
         'status' => 'pending',
         'sequence_index' => 0,
     ]);
-    
+
     $emergencyOrder->status->transitionTo(Pending::class);
     OrderItem::create([
         'order_id' => $emergencyOrder->id,
@@ -166,7 +165,7 @@ test('comprehensive 5-day gameplay loop simulation with player agency', function
     $order->status->transitionTo(Shipped::class);
     // emergencyOrder transit_days is 1. Day 3 + 1 = 4.
     $emergencyOrder->status->transitionTo(Shipped::class);
-    
+
     // --- DAY 4: Restoration & Delivery ---
     $service->advanceTime(); // Advance to Day 4
     expect($gameState->fresh()->day)->toBe(4);
@@ -177,7 +176,7 @@ test('comprehensive 5-day gameplay loop simulation with player agency', function
 
     // Emergency Order should be Delivered (Shipped on Day 3, transit 1 -> Day 4)
     expect($emergencyOrder->fresh()->status)->toBeInstanceOf(Delivered::class);
-    
+
     // Standard Order should NOT be delivered yet (Shipped on Day 3, transit 2 -> Day 5)
     expect($order->fresh()->status)->toBeInstanceOf(Shipped::class);
 
@@ -193,7 +192,7 @@ test('comprehensive 5-day gameplay loop simulation with player agency', function
         ->where('product_id', $product->id)
         ->where('user_id', $user->id)
         ->first();
-    
+
     expect($inventory)->not->toBeNull('Inventory record should be created');
     expect($inventory->quantity)->toBe(150, 'Inventory quantity should match both orders (100+50)');
 
@@ -205,7 +204,7 @@ test('comprehensive 5-day gameplay loop simulation with player agency', function
     // 1. Cannot cancel Delivered order
     try {
         $order->fresh()->status->transitionTo(\App\States\Order\Cancelled::class);
-        $this->fail("Should not be able to cancel delivered order");
+        $this->fail('Should not be able to cancel delivered order');
     } catch (\Throwable $e) {
         // Expected
     }
@@ -263,7 +262,7 @@ test('comprehensive 5-day gameplay loop simulation with player agency', function
     try {
         $massiveOrder->status->transitionTo(Pending::class);
         $massiveOrder->status->transitionTo(Shipped::class);
-        $this->fail("Should not be able to ship order exceeding route capacity");
+        $this->fail('Should not be able to ship order exceeding route capacity');
     } catch (\RuntimeException $e) {
         expect($e->getMessage())->toContain('exceeds route capacity');
     }

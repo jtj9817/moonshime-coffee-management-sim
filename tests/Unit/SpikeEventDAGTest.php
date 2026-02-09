@@ -13,7 +13,7 @@ test('spike event causal chain (DAG) persists correctly', function () {
         'duration' => 3,
         'starts_at_day' => 1,
         'ends_at_day' => 4,
-        'is_active' => true
+        'is_active' => true,
     ]);
 
     // 2. Create Symptom Spike (e.g., Route Closure caused by Blizzard)
@@ -24,7 +24,7 @@ test('spike event causal chain (DAG) persists correctly', function () {
         'duration' => 2,
         'starts_at_day' => 1,
         'ends_at_day' => 3,
-        'is_active' => true
+        'is_active' => true,
     ]);
 
     // 3. Verify Persistence and Relationships

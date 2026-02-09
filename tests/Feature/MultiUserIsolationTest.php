@@ -6,8 +6,8 @@ use App\Models\Alert;
 use App\Models\SpikeEvent;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use Inertia\Testing\AssertableInertia;
+use Tests\TestCase;
 
 class MultiUserIsolationTest extends TestCase
 {
@@ -48,10 +48,10 @@ class MultiUserIsolationTest extends TestCase
         $response->assertInertia(fn (AssertableInertia $page) => $page
             // Check that User A sees 0 alerts (since all created ones belong to User B)
             ->has('game.alerts', 0)
-            
+
             // Check that User A sees 0 active spikes
             ->has('game.activeSpikes', 0)
-            
+
             // Check User A's reputation is base value (85) because they have 0 alerts
             // If leaked, it would be lower due to User B's 5 alerts
             ->where('game.state.reputation', 85)

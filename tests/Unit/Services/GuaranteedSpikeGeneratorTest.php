@@ -5,8 +5,6 @@ use App\Models\Location;
 use App\Models\SpikeEvent;
 use App\Models\User;
 use App\Services\GuaranteedSpikeGenerator;
-use App\Services\SpikeConstraintChecker;
-use App\Services\SpikeEventFactory;
 
 beforeEach(function () {
     $this->user = User::factory()->create();
@@ -18,7 +16,7 @@ beforeEach(function () {
     ]);
     // Create a location for spikes that need it
     Location::factory()->create(['type' => 'warehouse']);
-    
+
     $this->generator = app(GuaranteedSpikeGenerator::class);
 });
 

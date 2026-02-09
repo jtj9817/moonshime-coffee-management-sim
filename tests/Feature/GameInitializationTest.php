@@ -18,7 +18,7 @@ class GameInitializationTest extends TestCase
         $this->seed(\Database\Seeders\GraphSeeder::class);
 
         $user = User::factory()->create();
-        
+
         $action = app(InitializeNewGame::class);
         $gameState = $action->handle($user);
 
@@ -32,12 +32,12 @@ class GameInitializationTest extends TestCase
     {
         $this->seed(\Database\Seeders\CoreGameStateSeeder::class);
         $this->seed(\Database\Seeders\GraphSeeder::class);
-        
+
         $user = User::factory()->create();
 
         // Acting as the user, visit the dashboard
         $response = $this->actingAs($user)->get('/game/dashboard');
-        
+
         // Assert Inertia prop 'game.state.cash' is 1000000
         $response->assertInertia(fn (\Inertia\Testing\AssertableInertia $page) => $page
             ->where('game.state.cash', 1000000)

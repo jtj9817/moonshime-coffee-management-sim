@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\Inventory;
-use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\SpikeEvent;
 use App\Models\Transfer;

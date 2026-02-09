@@ -80,7 +80,12 @@ export const mergeMockPageProps = (props: GenericRecord): void => {
     };
 };
 
-export const getMockPage = (): { component: string; props: GenericRecord; url: string; version: null } => ({
+export const getMockPage = (): {
+    component: string;
+    props: GenericRecord;
+    url: string;
+    version: null;
+} => ({
     component: 'tests/component',
     props: pagePropsState,
     url: '/tests',
@@ -101,14 +106,17 @@ export const buildUseFormState = (): GenericRecord => {
     return buildDefaultUseFormState();
 };
 
-export const setMockGameContext = (overrides: Partial<ReturnType<typeof defaultGameContext>>): void => {
+export const setMockGameContext = (
+    overrides: Partial<ReturnType<typeof defaultGameContext>>,
+): void => {
     gameContextState = {
         ...gameContextState,
         ...overrides,
     };
 };
 
-export const getMockGameContext = (): ReturnType<typeof defaultGameContext> => gameContextState;
+export const getMockGameContext = (): ReturnType<typeof defaultGameContext> =>
+    gameContextState;
 
 export const resetTestMocks = (): void => {
     pagePropsState = defaultPageProps();

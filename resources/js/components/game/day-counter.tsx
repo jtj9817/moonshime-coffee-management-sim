@@ -7,7 +7,11 @@ interface DayCounterProps {
     className?: string;
 }
 
-export function DayCounter({ day, totalDays = 5, className = '' }: DayCounterProps) {
+export function DayCounter({
+    day,
+    totalDays = 5,
+    className = '',
+}: DayCounterProps) {
     const [highlight, setHighlight] = useState(false);
     const [prevDay, setPrevDay] = useState(day);
 
@@ -27,16 +31,22 @@ export function DayCounter({ day, totalDays = 5, className = '' }: DayCounterPro
 
     return (
         <div
-            className={`flex items-center gap-2 rounded-lg border px-3 py-1.5 transition-colors duration-500 ${highlight
+            className={`flex items-center gap-2 rounded-lg border px-3 py-1.5 transition-colors duration-500 ${
+                highlight
                     ? 'border-amber-400 bg-amber-50 dark:border-amber-600 dark:bg-amber-900/40'
                     : 'border-stone-200 bg-white dark:border-stone-700 dark:bg-stone-800'
-                } ${className}`}
+            } ${className}`}
             role="status"
             aria-live="polite"
         >
-            <Calendar className={`h-4 w-4 transition-colors duration-500 ${highlight ? 'text-amber-600 dark:text-amber-400' : 'text-stone-400'}`} />
+            <Calendar
+                className={`h-4 w-4 transition-colors duration-500 ${highlight ? 'text-amber-600 dark:text-amber-400' : 'text-stone-400'}`}
+            />
             <span className="font-mono font-bold text-stone-900 dark:text-white">
-                Day {day} <span className="text-stone-400 font-normal">of {totalDays}</span>
+                Day {day}{' '}
+                <span className="font-normal text-stone-400">
+                    of {totalDays}
+                </span>
             </span>
         </div>
     );

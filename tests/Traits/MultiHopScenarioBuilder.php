@@ -8,7 +8,6 @@ use App\Models\Product;
 use App\Models\Route;
 use App\Models\User;
 use App\Models\Vendor;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 trait MultiHopScenarioBuilder
@@ -21,11 +20,11 @@ trait MultiHopScenarioBuilder
             return $alias;
         }
 
-        if (!isset($this->idMap[$modelClass])) {
+        if (! isset($this->idMap[$modelClass])) {
             $this->idMap[$modelClass] = [];
         }
 
-        if (!isset($this->idMap[$modelClass][$alias])) {
+        if (! isset($this->idMap[$modelClass][$alias])) {
             $this->idMap[$modelClass][$alias] = (string) Str::uuid();
         }
 
@@ -37,14 +36,14 @@ trait MultiHopScenarioBuilder
         foreach ($locations as $loc) {
             if (is_string($loc)) {
                 $uuid = $this->resolveId($loc, Location::class);
-                if (!Location::find($uuid)) {
+                if (! Location::find($uuid)) {
                     $normalized = Str::lower($loc);
-                    $l = new Location();
+                    $l = new Location;
                     $l->id = $uuid;
                     $l->fill([
                         'name' => ucfirst(str_replace('-', ' ', $loc)),
                         'type' => $this->resolveLocationType($normalized),
-                        'address' => 'Test Address ' . $loc,
+                        'address' => 'Test Address '.$loc,
                         'max_storage' => 1000,
                     ]);
                     $l->save();
@@ -91,7 +90,7 @@ trait MultiHopScenarioBuilder
             // Route ID is auto-generated usually, we don't map it explicitly
             // But we should check if route exists?
             // "createRoutes" usually implies adding them.
-            
+
             Route::create([
                 'source_id' => $originId,
                 'target_id' => $destId,
@@ -111,8 +110,8 @@ trait MultiHopScenarioBuilder
             $prodId = $this->resolveId($pData['id'], Product::class);
 
             $product = Product::find($prodId);
-            if (!$product) {
-                $product = new Product();
+            if (! $product) {
+                $product = new Product;
                 $product->id = $prodId;
                 $product->fill([
                     'name' => $pData['name'] ?? ucfirst($pData['id']),
@@ -128,8 +127,8 @@ trait MultiHopScenarioBuilder
                 $vendId = $this->resolveId($pData['vendor']['id'], Vendor::class);
 
                 $vendor = Vendor::find($vendId);
-                if (!$vendor) {
-                    $vendor = new Vendor();
+                if (! $vendor) {
+                    $vendor = new Vendor;
                     $vendor->id = $vendId;
                     $vendor->fill([
                         'name' => $pData['vendor']['name'] ?? 'Test Vendor',
@@ -140,7 +139,7 @@ trait MultiHopScenarioBuilder
                 }
 
                 // Attach if not already attached
-                if (!$product->vendors()->where('vendor_id', $vendor->id)->exists()) {
+                if (! $product->vendors()->where('vendor_id', $vendor->id)->exists()) {
                     $product->vendors()->attach($vendor->id);
                 }
             }

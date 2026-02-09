@@ -11,7 +11,7 @@
 
 // Load user
 $user = App\Models\User::find(14);
-if (!$user) {
+if (! $user) {
     echo "User 14 not found!\n";
     exit;
 }
@@ -19,11 +19,11 @@ if (!$user) {
 echo "=== User 14 ({$user->name}) Bootstrap Remediation ===\n\n";
 
 echo "Current state before cleanup:\n";
-echo "  Game States: " . App\Models\GameState::where('user_id', $user->id)->count() . "\n";
-echo "  Inventories: " . App\Models\Inventory::where('user_id', $user->id)->count() . "\n";
-echo "  Orders: " . App\Models\Order::where('user_id', $user->id)->count() . "\n";
-echo "  Transfers: " . App\Models\Transfer::where('user_id', $user->id)->count() . "\n";
-echo "  Spike Events: " . App\Models\SpikeEvent::where('user_id', $user->id)->count() . "\n";
+echo '  Game States: '.App\Models\GameState::where('user_id', $user->id)->count()."\n";
+echo '  Inventories: '.App\Models\Inventory::where('user_id', $user->id)->count()."\n";
+echo '  Orders: '.App\Models\Order::where('user_id', $user->id)->count()."\n";
+echo '  Transfers: '.App\Models\Transfer::where('user_id', $user->id)->count()."\n";
+echo '  Spike Events: '.App\Models\SpikeEvent::where('user_id', $user->id)->count()."\n";
 echo "\n";
 
 echo "Cleaning up User 14's incomplete game state...\n";
@@ -51,15 +51,15 @@ echo "  ✓ Bootstrap action completed\n\n";
 
 echo "=== New Game State ===\n";
 echo "Day: {$gameState->day}\n";
-echo "Cash: \$" . number_format($gameState->cash, 2) . "\n";
+echo 'Cash: $'.number_format($gameState->cash, 2)."\n";
 echo "XP: {$gameState->xp}\n";
 echo "\n";
 
 echo "=== Created Records ===\n";
-echo "Inventories: " . App\Models\Inventory::where('user_id', $user->id)->count() . "\n";
-echo "Orders: " . App\Models\Order::where('user_id', $user->id)->count() . "\n";
-echo "Transfers: " . App\Models\Transfer::where('user_id', $user->id)->count() . "\n";
-echo "Spike Events: " . App\Models\SpikeEvent::where('user_id', $user->id)->count() . "\n";
+echo 'Inventories: '.App\Models\Inventory::where('user_id', $user->id)->count()."\n";
+echo 'Orders: '.App\Models\Order::where('user_id', $user->id)->count()."\n";
+echo 'Transfers: '.App\Models\Transfer::where('user_id', $user->id)->count()."\n";
+echo 'Spike Events: '.App\Models\SpikeEvent::where('user_id', $user->id)->count()."\n";
 echo "\n";
 
 echo "=== Inventory Breakdown ===\n";
@@ -86,7 +86,7 @@ foreach ($orders as $order) {
     echo "    Destination: {$location->name}\n";
     echo "    Status: {$order->status}\n";
     echo "    Delivery Day: {$order->delivery_day}\n";
-    echo "    Total Cost: \$" . number_format($order->total_cost, 2) . "\n";
+    echo '    Total Cost: $'.number_format($order->total_cost, 2)."\n";
     echo "\n";
 }
 
@@ -111,7 +111,7 @@ foreach ($spikes as $spike) {
     echo "  Type: {$spike->type}\n";
     echo "    Days: {$spike->starts_at_day} - {$spike->ends_at_day}\n";
     echo "    Magnitude: {$spike->magnitude}x\n";
-    echo "    Active: " . ($spike->is_active ? 'Yes' : 'No') . "\n";
+    echo '    Active: '.($spike->is_active ? 'Yes' : 'No')."\n";
     echo "\n";
 }
 

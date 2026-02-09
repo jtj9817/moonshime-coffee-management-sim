@@ -20,7 +20,7 @@ class SpikeSeeder extends Seeder
     {
         // Local/dev seeding only: if no GameState exists, skip.
         $gameState = GameState::query()->first();
-        if (!$gameState) {
+        if (! $gameState) {
             return;
         }
 

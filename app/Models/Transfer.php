@@ -2,18 +2,17 @@
 
 namespace App\Models;
 
+use App\States\TransferState;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-
-use App\States\TransferState;
 use Spatie\ModelStates\HasStates;
 
 class Transfer extends Model
 {
     /** @use HasFactory<\Database\Factories\TransferFactory> */
-    use HasFactory, HasUuids, HasStates;
+    use HasFactory, HasStates, HasUuids;
 
     protected $fillable = [
         'user_id',

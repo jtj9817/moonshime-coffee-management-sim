@@ -2,8 +2,8 @@
 
 namespace App\Listeners;
 
-use App\Events\TimeAdvanced;
 use App\Events\SpikeOccurred;
+use App\Events\TimeAdvanced;
 use App\Services\SpikeEventFactory;
 
 class GenerateSpike

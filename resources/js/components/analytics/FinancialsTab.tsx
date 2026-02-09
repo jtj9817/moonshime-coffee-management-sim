@@ -22,20 +22,26 @@ interface FinancialsTabProps {
 
 const categoryColors: Record<string, string> = {
     'Coffee Beans': 'bg-amber-500',
-    'Dairy': 'bg-blue-500',
-    'Syrups': 'bg-purple-500',
+    Dairy: 'bg-blue-500',
+    Syrups: 'bg-purple-500',
     'Cups & Lids': 'bg-emerald-500',
-    'Pastries': 'bg-rose-500',
-    'Tea': 'bg-green-500',
-    'Equipment': 'bg-gray-500',
+    Pastries: 'bg-rose-500',
+    Tea: 'bg-green-500',
+    Equipment: 'bg-gray-500',
 };
 
 function getCategoryColor(category: string): string {
     return categoryColors[category] || 'bg-stone-500';
 }
 
-export function FinancialsTab({ spendingByCategory, fulfillmentMetrics }: FinancialsTabProps) {
-    const totalSpending = spendingByCategory.reduce((sum, cat) => sum + cat.amount, 0);
+export function FinancialsTab({
+    spendingByCategory,
+    fulfillmentMetrics,
+}: FinancialsTabProps) {
+    const totalSpending = spendingByCategory.reduce(
+        (sum, cat) => sum + cat.amount,
+        0,
+    );
 
     return (
         <div className="flex flex-col gap-6">
@@ -70,7 +76,9 @@ export function FinancialsTab({ spendingByCategory, fulfillmentMetrics }: Financ
                         <div className="rounded-lg border border-stone-200 p-4 dark:border-stone-700">
                             <div className="flex items-center gap-2 text-stone-500">
                                 <TrendingUp className="h-4 w-4" />
-                                <span className="text-sm">Fulfillment Rate</span>
+                                <span className="text-sm">
+                                    Fulfillment Rate
+                                </span>
                             </div>
                             <div className="mt-2 text-2xl font-bold text-blue-600">
                                 {fulfillmentMetrics.fulfillmentRate}%
@@ -79,7 +87,9 @@ export function FinancialsTab({ spendingByCategory, fulfillmentMetrics }: Financ
                         <div className="rounded-lg border border-stone-200 p-4 dark:border-stone-700">
                             <div className="flex items-center gap-2 text-stone-500">
                                 <Clock className="h-4 w-4" />
-                                <span className="text-sm">Avg Delivery Time</span>
+                                <span className="text-sm">
+                                    Avg Delivery Time
+                                </span>
                             </div>
                             <div className="mt-2 text-2xl font-bold text-amber-600">
                                 {fulfillmentMetrics.averageDeliveryTime} days
@@ -99,7 +109,9 @@ export function FinancialsTab({ spendingByCategory, fulfillmentMetrics }: Financ
                         <div className="space-y-4">
                             {spendingByCategory.map((cat, i) => {
                                 const percentage =
-                                    totalSpending > 0 ? (cat.amount / totalSpending) * 100 : 0;
+                                    totalSpending > 0
+                                        ? (cat.amount / totalSpending) * 100
+                                        : 0;
                                 return (
                                     <div key={i}>
                                         <div className="mb-1 flex items-center justify-between text-sm">
@@ -116,14 +128,17 @@ export function FinancialsTab({ spendingByCategory, fulfillmentMetrics }: Financ
                                                     {percentage.toFixed(1)}%
                                                 </span>
                                                 <span className="font-medium text-stone-900 dark:text-white">
-                                                    ${formatCurrency(cat.amount)}
+                                                    $
+                                                    {formatCurrency(cat.amount)}
                                                 </span>
                                             </div>
                                         </div>
                                         <div className="h-2 w-full overflow-hidden rounded-full bg-stone-200 dark:bg-stone-700">
                                             <div
                                                 className={`h-full transition-all ${getCategoryColor(cat.category)}`}
-                                                style={{ width: `${percentage}%` }}
+                                                style={{
+                                                    width: `${percentage}%`,
+                                                }}
                                             />
                                         </div>
                                     </div>
@@ -142,7 +157,8 @@ export function FinancialsTab({ spendingByCategory, fulfillmentMetrics }: Financ
                         </div>
                     ) : (
                         <div className="py-8 text-center text-stone-500">
-                            No spending data yet. Place orders to see spending breakdown.
+                            No spending data yet. Place orders to see spending
+                            breakdown.
                         </div>
                     )}
                 </CardContent>

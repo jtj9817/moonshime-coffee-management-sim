@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Manual Test: Phase 0 Global User Isolation Verification
  * Track: conductor/tracks/arch_remediation_20260207/plan.md
@@ -46,7 +47,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
-$testRunId = 'phase0_isolation_' . Carbon::now()->format('Y_m_d_His');
+$testRunId = 'phase0_isolation_'.Carbon::now()->format('Y_m_d_His');
 $logFile = storage_path("logs/manual_tests/{$testRunId}.log");
 
 if (! is_dir(dirname($logFile))) {

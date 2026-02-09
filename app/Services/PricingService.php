@@ -10,10 +10,10 @@ class PricingService
 {
     /**
      * Calculate the effective unit cost for a product, accounting for active price spikes.
-     * 
-     * @param Product $product The product to price
-     * @param User $user The user placing the order
-     * @param int|null $vendorId Optional vendor ID for vendor-specific price spikes
+     *
+     * @param  Product  $product  The product to price
+     * @param  User  $user  The user placing the order
+     * @param  int|null  $vendorId  Optional vendor ID for vendor-specific price spikes
      * @return int Cost in cents
      */
     public function calculateUnitCost(Product $product, User $user, ?string $vendorId = null): int

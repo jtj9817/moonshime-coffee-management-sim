@@ -1,9 +1,9 @@
 <?php
 
-use App\Models\User;
 use App\Models\Location;
 use App\Models\Route;
 use App\Models\SpikeEvent;
+use App\Models\User;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
@@ -19,7 +19,7 @@ test('getPath marks expensive alternative routes as premium', function () {
         'target_id' => $locB->id,
         'transport_mode' => 'Truck',
         'cost' => 100,
-        'is_active' => true
+        'is_active' => true,
     ]);
 
     // Premium expensive route
@@ -28,7 +28,7 @@ test('getPath marks expensive alternative routes as premium', function () {
         'target_id' => $locB->id,
         'transport_mode' => 'Air',
         'cost' => 500,
-        'is_active' => true
+        'is_active' => true,
     ]);
 
     // Case 1: Standard route is active and cheapest.
@@ -48,7 +48,7 @@ test('getPath marks expensive alternative routes as premium', function () {
         'type' => 'strike',
         'is_active' => true,
         'affected_route_id' => $standard->id,
-        'magnitude' => 10.0 // Cost becomes 11.00
+        'magnitude' => 10.0, // Cost becomes 11.00
     ]);
 
     $response = $this->actingAs($user)

@@ -1,5 +1,7 @@
 <?php
 
+use App\Events\TimeAdvanced;
+use App\Listeners\CreateDailySummaryAlert;
 use App\Models\Alert;
 use App\Models\DemandEvent;
 use App\Models\GameState;
@@ -8,8 +10,6 @@ use App\Models\Location;
 use App\Models\LostSale;
 use App\Models\Product;
 use App\Models\User;
-use App\Listeners\CreateDailySummaryAlert;
-use App\Events\TimeAdvanced;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);

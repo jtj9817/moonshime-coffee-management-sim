@@ -1,5 +1,12 @@
 import { Head } from '@inertiajs/react';
-import { Clock, Package, Plus, ShoppingCart, Truck, XCircle } from 'lucide-react';
+import {
+    Clock,
+    Package,
+    Plus,
+    ShoppingCart,
+    Truck,
+    XCircle,
+} from 'lucide-react';
 import { useState } from 'react';
 
 import { CancelOrderDialog } from '@/components/game/cancel-order-dialog';
@@ -41,7 +48,9 @@ function getStatusBadge(status: string) {
         case 'shipped':
             return <Badge className="bg-blue-500 text-white">Shipped</Badge>;
         case 'delivered':
-            return <Badge className="bg-emerald-500 text-white">Delivered</Badge>;
+            return (
+                <Badge className="bg-emerald-500 text-white">Delivered</Badge>
+            );
         case 'cancelled':
             return <Badge variant="destructive">Cancelled</Badge>;
         default:
@@ -51,7 +60,8 @@ function getStatusBadge(status: string) {
 
 export default function Ordering({ orders, vendorProducts }: OrderingProps) {
     const [isNewOrderDialogOpen, setIsNewOrderDialogOpen] = useState(false);
-    const [selectedOrderToCancel, setSelectedOrderToCancel] = useState<OrderModel | null>(null);
+    const [selectedOrderToCancel, setSelectedOrderToCancel] =
+        useState<OrderModel | null>(null);
 
     const handleCancelOrder = (order: OrderModel) => {
         setSelectedOrderToCancel(order);
@@ -92,7 +102,13 @@ export default function Ordering({ orders, vendorProducts }: OrderingProps) {
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">
-                                {orders.filter((o) => o.status.toLowerCase().includes('pending')).length}
+                                {
+                                    orders.filter((o) =>
+                                        o.status
+                                            .toLowerCase()
+                                            .includes('pending'),
+                                    ).length
+                                }
                             </div>
                         </CardContent>
                     </Card>
@@ -105,7 +121,13 @@ export default function Ordering({ orders, vendorProducts }: OrderingProps) {
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">
-                                {orders.filter((o) => o.status.toLowerCase().includes('shipped')).length}
+                                {
+                                    orders.filter((o) =>
+                                        o.status
+                                            .toLowerCase()
+                                            .includes('shipped'),
+                                    ).length
+                                }
                             </div>
                         </CardContent>
                     </Card>
@@ -117,13 +139,15 @@ export default function Ordering({ orders, vendorProducts }: OrderingProps) {
                             <ShoppingCart className="h-4 w-4 text-emerald-500" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{vendorProducts.length}</div>
+                            <div className="text-2xl font-bold">
+                                {vendorProducts.length}
+                            </div>
                         </CardContent>
                     </Card>
                 </div>
 
                 {/* Orders Table */}
-                <div className="rounded-xl border border-stone-200 bg-white dark:border-stone-700 dark:bg-stone-800 overflow-hidden">
+                <div className="overflow-hidden rounded-xl border border-stone-200 bg-white dark:border-stone-700 dark:bg-stone-800">
                     <div className="border-b border-stone-200 p-4 dark:border-stone-700">
                         <h2 className="font-semibold text-stone-900 dark:text-white">
                             Recent Orders
@@ -135,10 +159,14 @@ export default function Ordering({ orders, vendorProducts }: OrderingProps) {
                                 <TableHead>Order ID</TableHead>
                                 <TableHead>Vendor</TableHead>
                                 <TableHead>Items</TableHead>
-                                <TableHead className="text-right">Total</TableHead>
+                                <TableHead className="text-right">
+                                    Total
+                                </TableHead>
                                 <TableHead>Status</TableHead>
                                 <TableHead>Delivery</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
+                                <TableHead className="text-right">
+                                    Actions
+                                </TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -151,7 +179,9 @@ export default function Ordering({ orders, vendorProducts }: OrderingProps) {
                                         <TableCell className="font-mono text-sm">
                                             {order.id.substring(0, 8)}
                                         </TableCell>
-                                        <TableCell>{order.vendor?.name ?? 'Unknown'}</TableCell>
+                                        <TableCell>
+                                            {order.vendor?.name ?? 'Unknown'}
+                                        </TableCell>
                                         <TableCell>
                                             <div className="flex items-center gap-1">
                                                 <Package className="h-4 w-4 text-stone-400" />
@@ -161,7 +191,9 @@ export default function Ordering({ orders, vendorProducts }: OrderingProps) {
                                         <TableCell className="text-right font-mono">
                                             ${formatCurrency(order.total_cost)}
                                         </TableCell>
-                                        <TableCell>{getStatusBadge(order.status)}</TableCell>
+                                        <TableCell>
+                                            {getStatusBadge(order.status)}
+                                        </TableCell>
                                         <TableCell>
                                             {order.delivery_day
                                                 ? `Day ${order.delivery_day}`
@@ -172,7 +204,9 @@ export default function Ordering({ orders, vendorProducts }: OrderingProps) {
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
-                                                    onClick={() => handleCancelOrder(order)}
+                                                    onClick={() =>
+                                                        handleCancelOrder(order)
+                                                    }
                                                     className="h-8 gap-1 text-rose-600 hover:bg-rose-50 hover:text-rose-700 dark:text-rose-400 dark:hover:bg-rose-900/20"
                                                 >
                                                     <XCircle className="h-3.5 w-3.5" />
@@ -197,13 +231,20 @@ export default function Ordering({ orders, vendorProducts }: OrderingProps) {
                                                 <h3 className="font-semibold text-stone-900 dark:text-white">
                                                     No active orders
                                                 </h3>
-                                                <p className="text-sm text-stone-500 max-w-xs mx-auto">
-                                                    Your supply chain is quiet. Start by placing a purchase order from one of our vendors.
+                                                <p className="mx-auto max-w-xs text-sm text-stone-500">
+                                                    Your supply chain is quiet.
+                                                    Start by placing a purchase
+                                                    order from one of our
+                                                    vendors.
                                                 </p>
                                             </div>
                                             <Button
-                                                onClick={() => setIsNewOrderDialogOpen(true)}
-                                                className="mt-2 bg-amber-600 hover:bg-amber-700 text-white gap-2"
+                                                onClick={() =>
+                                                    setIsNewOrderDialogOpen(
+                                                        true,
+                                                    )
+                                                }
+                                                className="mt-2 gap-2 bg-amber-600 text-white hover:bg-amber-700"
                                             >
                                                 <Plus className="h-4 w-4" />
                                                 Place First Order

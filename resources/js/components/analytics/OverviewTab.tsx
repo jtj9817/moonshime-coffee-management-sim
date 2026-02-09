@@ -45,7 +45,9 @@ export function OverviewTab({
                         <DollarSign className="h-4 w-4 text-emerald-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">${formatCurrency(overviewMetrics.cash)}</div>
+                        <div className="text-2xl font-bold">
+                            ${formatCurrency(overviewMetrics.cash)}
+                        </div>
                     </CardContent>
                 </Card>
                 <Card>
@@ -56,7 +58,9 @@ export function OverviewTab({
                         <TrendingUp className="h-4 w-4 text-amber-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">${formatCurrency(overviewMetrics.netWorth)}</div>
+                        <div className="text-2xl font-bold">
+                            ${formatCurrency(overviewMetrics.netWorth)}
+                        </div>
                     </CardContent>
                 </Card>
                 <Card>
@@ -67,7 +71,9 @@ export function OverviewTab({
                         <BarChart3 className="h-4 w-4 text-blue-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">${formatCurrency(overviewMetrics.revenue7Day)}</div>
+                        <div className="text-2xl font-bold">
+                            ${formatCurrency(overviewMetrics.revenue7Day)}
+                        </div>
                     </CardContent>
                 </Card>
             </div>
@@ -101,7 +107,8 @@ export function OverviewTab({
                                 </>
                             ) : (
                                 <div className="flex h-64 items-center justify-center text-stone-500">
-                                    No inventory history data yet. Advance a few days to see trends.
+                                    No inventory history data yet. Advance a few
+                                    days to see trends.
                                 </div>
                             )}
                         </CardContent>
@@ -127,13 +134,16 @@ export function OverviewTab({
                                             </span>
                                         </div>
                                         <p className="mt-1 text-2xl font-bold text-amber-600">
-                                            ${formatCurrency(loc.inventoryValue)}
+                                            $
+                                            {formatCurrency(loc.inventoryValue)}
                                         </p>
                                         <div className="mt-2 flex items-center gap-2">
                                             <div className="h-2 flex-1 overflow-hidden rounded-full bg-stone-200 dark:bg-stone-700">
                                                 <div
                                                     className="h-full bg-emerald-500"
-                                                    style={{ width: `${Math.min(loc.utilization, 100)}%` }}
+                                                    style={{
+                                                        width: `${Math.min(loc.utilization, 100)}%`,
+                                                    }}
                                                 />
                                             </div>
                                             <span className="text-xs text-stone-500">

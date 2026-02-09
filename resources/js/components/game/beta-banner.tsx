@@ -7,7 +7,9 @@ const COOKIE_NAME = 'beta-banner-dismissed';
 const COOKIE_EXPIRY_DAYS = 30;
 
 function getCookie(name: string): string | null {
-    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    const match = document.cookie.match(
+        new RegExp('(^| )' + name + '=([^;]+)'),
+    );
     return match ? match[2] : null;
 }
 
@@ -32,7 +34,7 @@ export function BetaBanner() {
     if (!isVisible) return null;
 
     return (
-        <div className="fixed top-0 left-0 right-0 z-50 px-4 py-3">
+        <div className="fixed top-0 right-0 left-0 z-50 px-4 py-3">
             <Alert className="border-amber-300 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/50">
                 <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                 <div className="flex-1">
@@ -40,7 +42,8 @@ export function BetaBanner() {
                         Beta Version
                     </AlertTitle>
                     <AlertDescription className="text-amber-800 dark:text-amber-200/80">
-                        This website is in active development. Features are unrefined and breaking changes may occur.
+                        This website is in active development. Features are
+                        unrefined and breaking changes may occur.
                     </AlertDescription>
                 </div>
                 <button

@@ -2,14 +2,14 @@
 
 namespace Tests\Feature\Analytics\Database;
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\QueryException;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
-use App\Models\User;
 use App\Models\Location;
 use App\Models\Product;
+use App\Models\User;
+use Illuminate\Database\QueryException;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Tests\TestCase;
 
 class InventoryHistoryMigrationTest extends TestCase
 {
@@ -48,7 +48,7 @@ class InventoryHistoryMigrationTest extends TestCase
                 'product_id' => $product->id,
                 'day' => $day,
                 'quantity' => 20,
-                 'created_at' => now(),
+                'created_at' => now(),
                 'updated_at' => now(),
             ]);
             $this->fail('Should have thrown QueryException for duplicate entry');

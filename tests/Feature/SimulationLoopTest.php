@@ -8,8 +8,8 @@ use App\Models\Route;
 use App\Models\SpikeEvent;
 use App\Models\Transfer;
 use App\Services\SimulationService;
-use App\States\Transfer\InTransit;
 use App\States\Transfer\Completed;
+use App\States\Transfer\InTransit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -22,7 +22,7 @@ test('simulation loop integrates event, physics and analysis ticks', function ()
     $warehouse = Location::factory()->create(['type' => 'warehouse']);
     $store = Location::factory()->create(['type' => 'store']);
     $product = Product::factory()->create();
-    
+
     // Route for the store
     $route = Route::factory()->create([
         'source_id' => $warehouse->id,
@@ -91,14 +91,14 @@ test('simulation loop integrates event, physics and analysis ticks', function ()
     $service->advanceTime(); // Advance to Day 4
 
     // Event Tick Assertion: Spike should be inactive, route should be restored
-    // Note: We check if it is inactive. A NEW blizzard might have started, 
+    // Note: We check if it is inactive. A NEW blizzard might have started,
     // but the specific spike we are tracking MUST be inactive.
     expect($pendingSpike->fresh()->is_active)->toBeFalse();
-    
+
     // To ensure the route is active, we must make sure no OTHER blizzard is active.
     // In this test, we can just check if any active blizzard exists.
     $activeBlizzard = SpikeEvent::where('type', 'blizzard')->where('is_active', true)->exists();
-    if (!$activeBlizzard) {
+    if (! $activeBlizzard) {
         expect($route->fresh()->is_active)->toBeTrue();
     }
 });

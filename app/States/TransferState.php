@@ -2,7 +2,6 @@
 
 namespace App\States;
 
-use App\States\Transfer;
 use Spatie\ModelStates\State;
 use Spatie\ModelStates\StateConfig;
 

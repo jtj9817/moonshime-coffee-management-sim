@@ -4,11 +4,9 @@ use App\Actions\GenerateIsolationAlerts;
 use App\Models\Alert;
 use App\Models\Location;
 use App\Models\SpikeEvent;
+use App\Models\User;
 use App\Services\LogisticsService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Mockery\MockInterface;
-
-use App\Models\User;
 
 uses(RefreshDatabase::class);
 
@@ -17,17 +15,17 @@ test('generates isolation alert when store is unreachable and stock is low', fun
     $user = User::factory()->create();
     $store = Location::factory()->create(['type' => 'store']);
     $blizzard = SpikeEvent::factory()->create(['type' => 'blizzard', 'is_active' => true, 'user_id' => $user->id]);
-    
+
     // Add low stock inventory
     \App\Models\Inventory::factory()->create([
         'location_id' => $store->id,
         'quantity' => 5,
-        'user_id' => $user->id
+        'user_id' => $user->id,
     ]);
 
     // Mock LogisticsService to return false for reachability
     $logistics = Mockery::mock(LogisticsService::class);
-    $logistics->shouldReceive('checkReachability')->with(Mockery::on(fn($loc) => $loc->id === $store->id))->andReturn(false);
+    $logistics->shouldReceive('checkReachability')->with(Mockery::on(fn ($loc) => $loc->id === $store->id))->andReturn(false);
     // For any other locations (like the one created by SpikeEventFactory), return true to avoid extra alerts
     $logistics->shouldReceive('checkReachability')->andReturn(true);
 
@@ -47,9 +45,9 @@ test('does not generate alert if store is unreachable but stock is healthy', fun
     \App\Models\Inventory::factory()->create([
         'location_id' => $store->id,
         'quantity' => 50,
-        'user_id' => $user->id
+        'user_id' => $user->id,
     ]);
-    
+
     $logistics = Mockery::mock(LogisticsService::class);
     $logistics->shouldReceive('checkReachability')->andReturn(false);
 
@@ -65,9 +63,9 @@ test('does not generate alert if store is reachable', function () {
     \App\Models\Inventory::factory()->create([
         'location_id' => $store->id,
         'quantity' => 5,
-        'user_id' => $user->id
+        'user_id' => $user->id,
     ]);
-    
+
     $logistics = Mockery::mock(LogisticsService::class);
     $logistics->shouldReceive('checkReachability')->andReturn(true);
 

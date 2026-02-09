@@ -121,7 +121,7 @@ test('does not generate guaranteed spike on day 1', function () {
     // Manually call processEventTick through advanceTime
     // But day 1 should skip guaranteed spike
     $simulation = new SimulationService($this->gameState);
-    
+
     // Get count before
     $countBefore = SpikeEvent::where('user_id', $this->user->id)->where('is_guaranteed', true)->count();
 

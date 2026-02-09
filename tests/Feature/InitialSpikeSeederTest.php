@@ -4,7 +4,6 @@ use App\Models\GameState;
 use App\Models\Location;
 use App\Models\SpikeEvent;
 use App\Models\User;
-use App\Services\SpikeConstraintChecker;
 use Database\Seeders\SpikeSeeder;
 
 beforeEach(function () {

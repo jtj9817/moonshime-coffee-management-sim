@@ -7,6 +7,7 @@ use App\Events\TransferCompleted;
 use App\Listeners\DeductCash;
 use App\Listeners\GenerateAlert;
 use App\Listeners\UpdateInventory;
+use App\Listeners\UpdateMetrics;
 use App\Models\Alert;
 use App\Models\GameState;
 use App\Models\Inventory;
@@ -18,8 +19,6 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use RuntimeException;
 use Tests\TestCase;
-
-use App\Listeners\UpdateMetrics;
 
 class DAGListenersTest extends TestCase
 {
@@ -36,7 +35,7 @@ class DAGListenersTest extends TestCase
         $order = Order::factory()->create();
 
         $event = new OrderPlaced($order);
-        $listener = new UpdateMetrics();
+        $listener = new UpdateMetrics;
 
         $this->actingAs($user);
 
@@ -77,7 +76,7 @@ class DAGListenersTest extends TestCase
         ]);
 
         $event = new TransferCompleted($transfer);
-        $listener = new UpdateInventory();
+        $listener = new UpdateInventory;
 
         $listener->handle($event);
 
@@ -91,7 +90,7 @@ class DAGListenersTest extends TestCase
         ]);
 
         $event = new OrderPlaced($order);
-        $listener = new GenerateAlert();
+        $listener = new GenerateAlert;
 
         $listener->handle($event);
 
@@ -117,7 +116,7 @@ class DAGListenersTest extends TestCase
         ]);
 
         $event = new OrderPlaced($order);
-        $listener = new DeductCash();
+        $listener = new DeductCash;
 
         $this->actingAs($user);
 
@@ -140,7 +139,7 @@ class DAGListenersTest extends TestCase
         ]);
 
         $event = new OrderPlaced($order);
-        $listener = new DeductCash();
+        $listener = new DeductCash;
 
         $this->actingAs($user);
 

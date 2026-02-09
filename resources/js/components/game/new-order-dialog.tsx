@@ -1,6 +1,6 @@
 import { useForm } from '@inertiajs/react';
 import { Plus, ShoppingCart, Trash2 } from 'lucide-react';
-import { useMemo, useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -81,14 +81,20 @@ export function NewOrderDialog({
     });
 
     const vendorOptions = (vendorProducts ?? []).map((vp) => vp.vendor);
-    const selectedVendorData = (vendorProducts ?? []).find((vp) => vp.vendor.id === data.vendor_id);
+    const selectedVendorData = (vendorProducts ?? []).find(
+        (vp) => vp.vendor.id === data.vendor_id,
+    );
 
     const vendorLocations = useMemo(() => {
-        return (locations ?? []).filter(l => l.type === 'vendor' || l.type === 'warehouse');
+        return (locations ?? []).filter(
+            (l) => l.type === 'vendor' || l.type === 'warehouse',
+        );
     }, [locations]);
 
     const playerStores = useMemo(() => {
-        return (locations ?? []).filter(l => l.type === 'store' || l.name.includes('Central'));
+        return (locations ?? []).filter(
+            (l) => l.type === 'store' || l.name.includes('Central'),
+        );
     }, [locations]);
 
     // Clear path when inputs are missing (derived state, not an effect)
@@ -111,31 +117,52 @@ export function NewOrderDialog({
         }
 
         let cancelled = false;
-        fetch(`/game/logistics/path?source_id=${selectedSourceId}&target_id=${data.location_id}`)
-            .then(res => res.json())
-            .then(result => {
+        fetch(
+            `/game/logistics/path?source_id=${selectedSourceId}&target_id=${data.location_id}`,
+        )
+            .then((res) => res.json())
+            .then((result) => {
                 if (cancelled) return;
                 if (result.success && result.reachable) {
-                    const path = result.path as Array<{ transit_days: number; capacity: number; id: number; source: string; target: string; transport_mode: string; cost: number }>;
+                    const path = result.path as Array<{
+                        transit_days: number;
+                        capacity: number;
+                        id: number;
+                        source: string;
+                        target: string;
+                        transport_mode: string;
+                        cost: number;
+                    }>;
                     const totalCost = result.total_cost;
 
-                    const totalDays = path.reduce((sum: number, leg) => sum + (leg.transit_days || 0), 0);
-                    const minCapacity = Math.min(...path.map((leg) => leg.capacity || 1000));
+                    const totalDays = path.reduce(
+                        (sum: number, leg) => sum + (leg.transit_days || 0),
+                        0,
+                    );
+                    const minCapacity = Math.min(
+                        ...path.map((leg) => leg.capacity || 1000),
+                    );
 
                     setCalculatedPath({
                         reachable: true,
                         path: path,
                         total_cost: totalCost,
                         total_days: totalDays,
-                        min_capacity: minCapacity
+                        min_capacity: minCapacity,
                     });
                 } else {
                     setCalculatedPath(null);
                 }
             })
-            .catch(() => { if (!cancelled) setCalculatedPath(null); })
-            .finally(() => { if (!cancelled) setLoadingPath(false); });
-        return () => { cancelled = true; };
+            .catch(() => {
+                if (!cancelled) setCalculatedPath(null);
+            })
+            .finally(() => {
+                if (!cancelled) setLoadingPath(false);
+            });
+        return () => {
+            cancelled = true;
+        };
     }, [selectedSourceId, data.location_id]);
 
     // Sync source_location_id with form data
@@ -146,14 +173,19 @@ export function NewOrderDialog({
     const handleAddItem = () => {
         if (!currentProductId) return;
 
-        const product = selectedVendorData?.products.find(p => p.id === currentProductId);
+        const product = selectedVendorData?.products.find(
+            (p) => p.id === currentProductId,
+        );
         if (!product) return;
 
-        const newItems = [...data.items, {
-            product_id: currentProductId,
-            quantity: currentQuantity,
-            unit_price: 250, // Placeholder price in cents ($2.50)
-        }];
+        const newItems = [
+            ...data.items,
+            {
+                product_id: currentProductId,
+                quantity: currentQuantity,
+                unit_price: 250, // Placeholder price in cents ($2.50)
+            },
+        ];
 
         setData('items', newItems);
         setCurrentProductId('');
@@ -161,22 +193,41 @@ export function NewOrderDialog({
     };
 
     const removeItem = (index: number) => {
-        setData('items', data.items.filter((_, i) => i !== index));
+        setData(
+            'items',
+            data.items.filter((_, i) => i !== index),
+        );
     };
 
-    const totalQuantity = data.items.reduce((sum, item) => sum + item.quantity, 0);
-    const isOverCapacity = calculatedPath ? totalQuantity > calculatedPath.min_capacity : false;
+    const totalQuantity = data.items.reduce(
+        (sum, item) => sum + item.quantity,
+        0,
+    );
+    const isOverCapacity = calculatedPath
+        ? totalQuantity > calculatedPath.min_capacity
+        : false;
 
     // Derived values for summary
-    const itemsSubtotal = data.items.reduce((sum, i) => sum + i.quantity * i.unit_price, 0);
+    const itemsSubtotal = data.items.reduce(
+        (sum, i) => sum + i.quantity * i.unit_price,
+        0,
+    );
     const shippingCost = calculatedPath?.total_cost ?? 0;
     const totalCost = itemsSubtotal + shippingCost;
-    const excess = calculatedPath ? Math.max(0, totalQuantity - calculatedPath.min_capacity) : 0;
+    const excess = calculatedPath
+        ? Math.max(0, totalQuantity - calculatedPath.min_capacity)
+        : 0;
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!data.vendor_id || !data.location_id || !calculatedPath || data.items.length === 0 || isOverCapacity) {
+        if (
+            !data.vendor_id ||
+            !data.location_id ||
+            !calculatedPath ||
+            data.items.length === 0 ||
+            isOverCapacity
+        ) {
             return;
         }
 
@@ -216,7 +267,7 @@ export function NewOrderDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col p-0 overflow-hidden">
+            <DialogContent className="flex max-h-[90vh] max-w-2xl flex-col overflow-hidden p-0">
                 <DialogHeader className="p-6 pb-2">
                     <DialogTitle className="flex items-center gap-2">
                         <ShoppingCart className="h-5 w-5 text-amber-600" />
@@ -227,12 +278,18 @@ export function NewOrderDialog({
                     </DialogDescription>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-6 py-2 space-y-6">
+                <form
+                    onSubmit={handleSubmit}
+                    className="flex-1 space-y-6 overflow-y-auto px-6 py-2"
+                >
                     <div className="grid grid-cols-2 gap-4">
                         {/* Vendor Selection */}
                         <div className="space-y-2">
                             <Label>Vendor</Label>
-                            <Select value={data.vendor_id} onValueChange={(v) => setData('vendor_id', v)}>
+                            <Select
+                                value={data.vendor_id}
+                                onValueChange={(v) => setData('vendor_id', v)}
+                            >
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select vendor" />
                                 </SelectTrigger>
@@ -247,7 +304,10 @@ export function NewOrderDialog({
                         </div>
                         <div className="space-y-2">
                             <Label>Destination Store</Label>
-                            <Select value={data.location_id} onValueChange={(v) => setData('location_id', v)}>
+                            <Select
+                                value={data.location_id}
+                                onValueChange={(v) => setData('location_id', v)}
+                            >
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select store" />
                                 </SelectTrigger>
@@ -265,7 +325,10 @@ export function NewOrderDialog({
                     {/* Logistics Source Selection */}
                     <div className="space-y-2">
                         <Label>Ship From (Vendor Hub)</Label>
-                        <Select value={selectedSourceId} onValueChange={setSelectedSourceId}>
+                        <Select
+                            value={selectedSourceId}
+                            onValueChange={setSelectedSourceId}
+                        >
                             <SelectTrigger>
                                 <SelectValue placeholder="Select departure point" />
                             </SelectTrigger>
@@ -290,14 +353,25 @@ export function NewOrderDialog({
                                     disabled={!data.vendor_id}
                                 >
                                     <SelectTrigger>
-                                        <SelectValue placeholder={data.vendor_id ? "Pick a product" : "Select vendor first"} />
+                                        <SelectValue
+                                            placeholder={
+                                                data.vendor_id
+                                                    ? 'Pick a product'
+                                                    : 'Select vendor first'
+                                            }
+                                        />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {selectedVendorData?.products.map((p) => (
-                                            <SelectItem key={p.id} value={p.id}>
-                                                {p.name} ({p.category})
-                                            </SelectItem>
-                                        ))}
+                                        {selectedVendorData?.products.map(
+                                            (p) => (
+                                                <SelectItem
+                                                    key={p.id}
+                                                    value={p.id}
+                                                >
+                                                    {p.name} ({p.category})
+                                                </SelectItem>
+                                            ),
+                                        )}
                                     </SelectContent>
                                 </Select>
                             </div>
@@ -306,7 +380,11 @@ export function NewOrderDialog({
                                 <Input
                                     type="number"
                                     value={currentQuantity}
-                                    onChange={(e) => setCurrentQuantity(parseInt(e.target.value))}
+                                    onChange={(e) =>
+                                        setCurrentQuantity(
+                                            parseInt(e.target.value),
+                                        )
+                                    }
                                     min={1}
                                 />
                             </div>
@@ -324,18 +402,30 @@ export function NewOrderDialog({
                         {data.items.length > 0 && (
                             <div className="mt-4 space-y-2">
                                 {data.items.map((item, index) => {
-                                    const product = selectedVendorData?.products.find(p => p.id === item.product_id);
+                                    const product =
+                                        selectedVendorData?.products.find(
+                                            (p) => p.id === item.product_id,
+                                        );
                                     return (
-                                        <div key={index} className="flex items-center justify-between rounded-md bg-white p-2 text-sm shadow-sm dark:bg-stone-800">
-                                            <span className="font-medium">{product?.name}</span>
+                                        <div
+                                            key={index}
+                                            className="flex items-center justify-between rounded-md bg-white p-2 text-sm shadow-sm dark:bg-stone-800"
+                                        >
+                                            <span className="font-medium">
+                                                {product?.name}
+                                            </span>
                                             <div className="flex items-center gap-4">
-                                                <span className="text-stone-500 font-mono">{item.quantity} units</span>
+                                                <span className="font-mono text-stone-500">
+                                                    {item.quantity} units
+                                                </span>
                                                 <Button
                                                     type="button"
                                                     variant="ghost"
                                                     size="icon"
                                                     className="h-7 w-7 text-rose-500"
-                                                    onClick={() => removeItem(index)}
+                                                    onClick={() =>
+                                                        removeItem(index)
+                                                    }
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
@@ -349,29 +439,40 @@ export function NewOrderDialog({
 
                     {/* Calculated Path Display */}
                     <div className="space-y-4 rounded-lg border border-indigo-200 bg-indigo-50/50 p-4 dark:border-indigo-900/30 dark:bg-indigo-900/20">
-                        <Label className="text-indigo-900 dark:text-indigo-300">Logistics Path</Label>
+                        <Label className="text-indigo-900 dark:text-indigo-300">
+                            Logistics Path
+                        </Label>
 
                         {loadingPath ? (
-                            <div className="text-sm text-indigo-500 animate-pulse">Finding best route...</div>
+                            <div className="animate-pulse text-sm text-indigo-500">
+                                Finding best route...
+                            </div>
                         ) : calculatedPath ? (
                             <div className="space-y-3">
-                                <div className="flex justify-between items-center text-sm font-medium">
+                                <div className="flex items-center justify-between text-sm font-medium">
                                     <span className="text-indigo-700 dark:text-indigo-400">
-                                        Total Transit: {calculatedPath.total_days} days
+                                        Total Transit:{' '}
+                                        {calculatedPath.total_days} days
                                     </span>
                                     <span className="text-indigo-700 dark:text-indigo-400">
-                                        Capacity: {calculatedPath.min_capacity.toLocaleString()} units
+                                        Capacity:{' '}
+                                        {calculatedPath.min_capacity.toLocaleString()}{' '}
+                                        units
                                     </span>
                                 </div>
 
                                 <div className="space-y-1">
                                     {calculatedPath.path.map((leg, i) => (
-                                        <div key={i} className="flex items-center gap-2 text-xs text-indigo-600 dark:text-indigo-400">
-                                            <div className="w-5 h-5 rounded-full bg-indigo-200 flex items-center justify-center text-[10px] font-bold">
+                                        <div
+                                            key={i}
+                                            className="flex items-center gap-2 text-xs text-indigo-600 dark:text-indigo-400"
+                                        >
+                                            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-200 text-[10px] font-bold">
                                                 {i + 1}
                                             </div>
                                             <span>
-                                                {leg.source} → {leg.target} ({leg.transport_mode})
+                                                {leg.source} → {leg.target} (
+                                                {leg.transport_mode})
                                             </span>
                                         </div>
                                     ))}
@@ -379,25 +480,31 @@ export function NewOrderDialog({
                             </div>
                         ) : (
                             <div className="text-sm text-stone-500 italic">
-                                {selectedSourceId && data.location_id ? "No route available." : "Select departure and destination to view route."}
+                                {selectedSourceId && data.location_id
+                                    ? 'No route available.'
+                                    : 'Select departure and destination to view route.'}
                             </div>
                         )}
                     </div>
 
                     {/* Validation Errors & Summary */}
                     <div className="rounded-lg bg-stone-100 p-4 dark:bg-stone-800">
-                        <div className="flex flex-col gap-2 border-b border-stone-200 pb-2 mb-2 dark:border-stone-700">
+                        <div className="mb-2 flex flex-col gap-2 border-b border-stone-200 pb-2 dark:border-stone-700">
                             <div className="flex justify-between text-sm">
-                                <span className="text-stone-500">Items Subtotal</span>
+                                <span className="text-stone-500">
+                                    Items Subtotal
+                                </span>
                                 <span>${formatCurrency(itemsSubtotal)}</span>
                             </div>
                             <div className="flex justify-between text-sm">
-                                <span className="text-stone-500">Shipping Cost</span>
+                                <span className="text-stone-500">
+                                    Shipping Cost
+                                </span>
                                 <span>${formatCurrency(shippingCost)}</span>
                             </div>
                         </div>
 
-                        <div className="flex justify-between font-bold text-lg">
+                        <div className="flex justify-between text-lg font-bold">
                             <span>Total Cost</span>
                             <span>${formatCurrency(totalCost)}</span>
                         </div>
@@ -405,8 +512,12 @@ export function NewOrderDialog({
                         {/* Error Messages */}
                         {(errors.vendor_id || errors.items) && (
                             <div className="mt-3 rounded border border-rose-200 bg-rose-50 p-2 text-xs text-rose-600 dark:border-rose-900/30 dark:bg-rose-900/20">
-                                {errors.vendor_id && <div>Vendor Error: {errors.vendor_id}</div>}
-                                {typeof errors.items === 'string' && <div>{errors.items}</div>}
+                                {errors.vendor_id && (
+                                    <div>Vendor Error: {errors.vendor_id}</div>
+                                )}
+                                {typeof errors.items === 'string' && (
+                                    <div>{errors.items}</div>
+                                )}
                             </div>
                         )}
                     </div>
@@ -419,24 +530,36 @@ export function NewOrderDialog({
                                 capacity={calculatedPath.min_capacity}
                             />
                             {excess > 0 && (
-                                <p className="text-xs text-rose-600 font-medium text-right">
-                                    Reduce order by {excess.toLocaleString()} units
+                                <p className="text-right text-xs font-medium text-rose-600">
+                                    Reduce order by {excess.toLocaleString()}{' '}
+                                    units
                                 </p>
                             )}
                         </div>
                     )}
                 </form>
 
-                <DialogFooter className="p-6 pt-2 border-t border-stone-100 dark:border-stone-800">
-                    <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={processing}>
+                <DialogFooter className="border-t border-stone-100 p-6 pt-2 dark:border-stone-800">
+                    <Button
+                        variant="ghost"
+                        onClick={() => onOpenChange(false)}
+                        disabled={processing}
+                    >
                         Cancel
                     </Button>
                     <Button
                         onClick={handleSubmit}
-                        disabled={processing || data.items.length === 0 || !calculatedPath || isOverCapacity}
-                        className={`bg-amber-600 hover:bg-amber-700 w-full sm:w-auto ${processing ? 'opacity-80' : ''}`}
+                        disabled={
+                            processing ||
+                            data.items.length === 0 ||
+                            !calculatedPath ||
+                            isOverCapacity
+                        }
+                        className={`w-full bg-amber-600 hover:bg-amber-700 sm:w-auto ${processing ? 'opacity-80' : ''}`}
                     >
-                        {processing ? 'Placing Order...' : `Confirm Order ($${formatCurrency(totalCost)})`}
+                        {processing
+                            ? 'Placing Order...'
+                            : `Confirm Order ($${formatCurrency(totalCost)})`}
                     </Button>
                 </DialogFooter>
             </DialogContent>

@@ -3,7 +3,6 @@
 namespace App\Listeners;
 
 use App\Events\TimeAdvanced;
-use App\Models\GameState;
 use App\Services\StorageFeeCalculator;
 
 /**

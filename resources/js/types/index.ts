@@ -1,2 +1,2 @@
-export * from './index.d';
 export * from './game';
+export * from './index.d';

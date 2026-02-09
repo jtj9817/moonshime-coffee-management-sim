@@ -1,16 +1,16 @@
 <?php
 
-use App\Services\SimulationService;
-use App\Models\GameState;
 use App\Events\TimeAdvanced;
-use Illuminate\Support\Facades\Event;
+use App\Models\GameState;
 use App\Models\User;
+use App\Services\SimulationService;
+use Illuminate\Support\Facades\Event;
 
 test('advanceTime increments the day in GameState', function () {
     $user = User::factory()->create();
     $gameState = GameState::factory()->create([
         'user_id' => $user->id,
-        'day' => 1
+        'day' => 1,
     ]);
 
     $service = new SimulationService($gameState);
@@ -25,7 +25,7 @@ test('advanceTime fires TimeAdvanced event', function () {
     $user = User::factory()->create();
     $gameState = GameState::factory()->create([
         'user_id' => $user->id,
-        'day' => 1
+        'day' => 1,
     ]);
 
     $service = new SimulationService($gameState);

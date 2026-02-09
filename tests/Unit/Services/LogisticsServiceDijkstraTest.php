@@ -23,7 +23,7 @@ test('findBestRoute returns cheapest path', function () {
     $r3 = Route::factory()->create(['source_id' => $a->id, 'target_id' => $d->id, 'cost' => 50, 'is_active' => true]);
     $r4 = Route::factory()->create(['source_id' => $d->id, 'target_id' => $c->id, 'cost' => 5, 'is_active' => true]);
 
-    $service = new LogisticsService();
+    $service = new LogisticsService;
     $path = $service->findBestRoute($a, $c);
 
     expect($path)->not->toBeNull();
@@ -48,7 +48,7 @@ test('findBestRoute avoids inactive routes', function () {
     $r3 = Route::factory()->create(['source_id' => $a->id, 'target_id' => $d->id, 'cost' => 50, 'is_active' => true]);
     $r4 = Route::factory()->create(['source_id' => $d->id, 'target_id' => $c->id, 'cost' => 50, 'is_active' => true]);
 
-    $service = new LogisticsService();
+    $service = new LogisticsService;
     $path = $service->findBestRoute($a, $c);
 
     expect($path)->toHaveCount(2);

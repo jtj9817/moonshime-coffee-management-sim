@@ -3,8 +3,6 @@
 namespace App\Http\Requests;
 
 use App\Models\GameState;
-use App\Models\Route;
-use App\Models\SpikeEvent;
 use App\Services\LogisticsService;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
@@ -18,7 +16,7 @@ class StoreOrderRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-        if (!$this->has('items')) {
+        if (! $this->has('items')) {
             return;
         }
 
@@ -76,8 +74,9 @@ class StoreOrderRequest extends FormRequest
 
             if ($sourceLocationId) {
                 $sourceLocation = \App\Models\Location::find($sourceLocationId);
-                if (!$sourceLocation) {
+                if (! $sourceLocation) {
                     $validator->errors()->add('source_location_id', 'Selected source location is invalid.');
+
                     return;
                 }
             } else {
@@ -118,44 +117,48 @@ class StoreOrderRequest extends FormRequest
             // For now, let's assume we search for a Location with the same name as the Vendor?
             // OR, given the implementation plan didn't address linking Vendor->Location,
             // I should find the best matching location.
-            if (!$sourceLocation) {
+            if (! $sourceLocation) {
                 $vendor = \App\Models\Vendor::find($vendorId);
-                if (!$vendor) {
+                if (! $vendor) {
                     $validator->errors()->add('vendor_id', 'Selected vendor is invalid.');
+
                     return;
                 }
 
                 $sourceLocation = \App\Models\Location::where('type', 'vendor')
-                    ->where('name', 'like', '%' . $vendor->name . '%') // Fuzzy match
+                    ->where('name', 'like', '%'.$vendor->name.'%') // Fuzzy match
                     ->first();
             }
 
-            if (!$sourceLocation) {
+            if (! $sourceLocation) {
                 // Fallback to any vendor location
                 $sourceLocation = \App\Models\Location::where('type', 'vendor')->first();
             }
 
-            if (!$sourceLocation) {
+            if (! $sourceLocation) {
                 $validator->errors()->add('vendor_id', 'No distribution center found for this vendor.');
+
                 return;
             }
 
             $targetLocation = \App\Models\Location::find($locationId);
-            if (!$targetLocation) {
+            if (! $targetLocation) {
                 $validator->errors()->add('location_id', 'Selected destination is invalid.');
+
                 return;
             }
 
             $path = $logistics->findBestRoute($sourceLocation, $targetLocation);
 
-            if (!$path || $path->isEmpty()) {
+            if (! $path || $path->isEmpty()) {
                 $validator->errors()->add('location_id', 'No valid route found to this destination.');
+
                 return;
             }
 
             // 2. Validate Capacity (Bottleneck)
             $items = collect($this->input('items', []));
-            $totalQuantity = $items->sum(fn($item) => $item['quantity'] ?? 0);
+            $totalQuantity = $items->sum(fn ($item) => $item['quantity'] ?? 0);
             $minCapacity = $path->min('capacity');
 
             if ($minCapacity !== null && $totalQuantity > $minCapacity) {
@@ -163,7 +166,7 @@ class StoreOrderRequest extends FormRequest
             }
 
             // 3. Validate Funds
-            $shippingCost = (int) $path->sum(fn($r) => $logistics->calculateCost($r));
+            $shippingCost = (int) $path->sum(fn ($r) => $logistics->calculateCost($r));
             $pricing = app(\App\Services\PricingService::class);
             $user = $this->user();
             $vendorId = $this->input('vendor_id');

@@ -16,8 +16,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-require __DIR__ . '/../../vendor/autoload.php';
-$app = require __DIR__ . '/../../bootstrap/app.php';
+require __DIR__.'/../../vendor/autoload.php';
+$app = require __DIR__.'/../../bootstrap/app.php';
 $app->make(Kernel::class)->bootstrap();
 
 echo "--- Regression: Reset Game Missing Seed Data ---\n";
@@ -73,7 +73,7 @@ $runResetExpectFailure = function (string $label, User $user, string $expectedSu
         $result = str_contains($message, $expectedSubstring) ? 'PASS' : 'FAIL';
         echo "    {$result}: {$message}\n\n";
     } catch (\Throwable $e) {
-        echo "    FAIL: unexpected exception type " . get_class($e) . " - {$e->getMessage()}\n\n";
+        echo '    FAIL: unexpected exception type '.get_class($e)." - {$e->getMessage()}\n\n";
     }
 };
 
@@ -89,15 +89,15 @@ $runResetExpectSuccess = function (string $label, User $user) use ($runReset): v
         $dayOk = $gameState && $gameState->day === 1;
         $inventoryOk = $inventoryCount > 0;
 
-        echo "    Day reset to 1: " . ($dayOk ? 'PASS' : 'FAIL') . "\n";
-        echo "    Inventory seeded: " . ($inventoryOk ? 'PASS' : "FAIL ({$inventoryCount})") . "\n\n";
+        echo '    Day reset to 1: '.($dayOk ? 'PASS' : 'FAIL')."\n";
+        echo '    Inventory seeded: '.($inventoryOk ? 'PASS' : "FAIL ({$inventoryCount})")."\n\n";
     } catch (\Throwable $e) {
         echo "    FAIL: reset failed unexpectedly - {$e->getMessage()}\n\n";
     }
 };
 
 $user = User::factory()->create([
-    'email' => 'reset_regress_' . uniqid() . '@example.com',
+    'email' => 'reset_regress_'.uniqid().'@example.com',
 ]);
 
 echo "User ID: {$user->id}\n\n";

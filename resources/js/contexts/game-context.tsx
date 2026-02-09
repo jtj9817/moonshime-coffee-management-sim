@@ -43,7 +43,9 @@ export function GameProvider({ children }: GameProviderProps) {
     const [currentLocationId, setCurrentLocationId] = useState('all');
 
     if (!game) {
-        throw new Error('GameProvider requires authenticated user with game state');
+        throw new Error(
+            'GameProvider requires authenticated user with game state',
+        );
     }
 
     const advanceDay = () => {
@@ -87,7 +89,9 @@ export function GameProvider({ children }: GameProviderProps) {
         markAlertRead,
     };
 
-    return <GameContext.Provider value={value}>{children}</GameContext.Provider>;
+    return (
+        <GameContext.Provider value={value}>{children}</GameContext.Provider>
+    );
 }
 
 export function useGame(): GameContextType {

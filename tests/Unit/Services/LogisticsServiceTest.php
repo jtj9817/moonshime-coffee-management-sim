@@ -10,7 +10,7 @@ uses(RefreshDatabase::class);
 test('getValidRoutes returns only active routes between source and target', function () {
     $source = Location::factory()->create();
     $target = Location::factory()->create();
-    
+
     // Create active route
     $activeRoute = Route::factory()->create([
         'source_id' => $source->id,
@@ -34,7 +34,7 @@ test('getValidRoutes returns only active routes between source and target', func
         'is_active' => true,
     ]);
 
-    $service = new LogisticsService();
+    $service = new LogisticsService;
     $routes = $service->getValidRoutes($source, $target);
 
     expect($routes)->toHaveCount(1);
@@ -46,7 +46,7 @@ test('calculateCost returns correct cost from route base cost', function () {
         'cost' => 150,
     ]);
 
-    $service = new LogisticsService();
+    $service = new LogisticsService;
     $cost = $service->calculateCost($route);
 
     expect($cost)->toBe(150);

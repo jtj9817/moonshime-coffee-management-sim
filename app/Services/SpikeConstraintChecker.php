@@ -13,6 +13,7 @@ use App\Models\SpikeEvent;
 class SpikeConstraintChecker
 {
     public const MAX_ACTIVE_SPIKES = 2;
+
     public const TYPE_COOLDOWN_DAYS = 2;
 
     public const ALL_SPIKE_TYPES = ['demand', 'delay', 'price', 'breakdown', 'blizzard'];

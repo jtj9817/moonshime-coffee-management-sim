@@ -13,13 +13,13 @@ class DelaySpike implements SpikeTypeInterface
 {
     /**
      * Apply the delay spike effect.
-     * 
+     *
      * Delays all pending/shipped orders owned by the spike's user.
      * Stores original delivery dates in spike.meta for rollback.
      */
     public function apply(SpikeEvent $event): void
     {
-        if (!$event->user_id) {
+        if (! $event->user_id) {
             return;
         }
 
@@ -38,7 +38,7 @@ class DelaySpike implements SpikeTypeInterface
             // If spike targets a specific product, only affect orders containing that product
             if ($event->product_id) {
                 $hasProduct = $order->items()->where('product_id', $event->product_id)->exists();
-                if (!$hasProduct) {
+                if (! $hasProduct) {
                     continue;
                 }
             }
@@ -51,16 +51,16 @@ class DelaySpike implements SpikeTypeInterface
 
             // Apply the delay
             $updates = [];
-            
+
             if ($order->delivery_day !== null) {
                 $updates['delivery_day'] = $order->delivery_day + $delayDays;
             }
-            
+
             if ($order->delivery_date) {
                 $updates['delivery_date'] = Carbon::parse($order->delivery_date)->addDays($delayDays);
             }
 
-            if (!empty($updates)) {
+            if (! empty($updates)) {
                 $order->update($updates);
             }
         }
@@ -78,7 +78,7 @@ class DelaySpike implements SpikeTypeInterface
 
     /**
      * Rollback the delay spike effect.
-     * 
+     *
      * Restores original delivery dates from spike.meta.
      */
     public function rollback(SpikeEvent $event): void
@@ -88,8 +88,8 @@ class DelaySpike implements SpikeTypeInterface
 
         foreach ($affectedOrders as $orderId => $originals) {
             $order = Order::find($orderId);
-            
-            if (!$order) {
+
+            if (! $order) {
                 continue;
             }
 
@@ -100,12 +100,12 @@ class DelaySpike implements SpikeTypeInterface
             }
 
             if (isset($originals['original_delivery_date'])) {
-                $updates['delivery_date'] = $originals['original_delivery_date'] 
-                    ? Carbon::parse($originals['original_delivery_date']) 
+                $updates['delivery_date'] = $originals['original_delivery_date']
+                    ? Carbon::parse($originals['original_delivery_date'])
                     : null;
             }
 
-            if (!empty($updates)) {
+            if (! empty($updates)) {
                 $order->update($updates);
             }
         }

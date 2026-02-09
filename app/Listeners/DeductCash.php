@@ -2,10 +2,9 @@
 
 namespace App\Listeners;
 
-use App\Events\OrderPlaced;
 use App\Events\OrderCancelled;
+use App\Events\OrderPlaced;
 use App\Models\GameState;
-use Illuminate\Support\Facades\Auth;
 use RuntimeException;
 
 class DeductCash
@@ -29,13 +28,13 @@ class DeductCash
         $order = $event->order;
         $userId = $order->user_id;
 
-        if (!$userId) {
+        if (! $userId) {
             return;
         }
 
         $gameState = GameState::where('user_id', $userId)->first();
 
-        if (!$gameState) {
+        if (! $gameState) {
             throw new RuntimeException('Game state not found for user');
         }
 
@@ -52,7 +51,7 @@ class DeductCash
         $order = $event->order;
         $userId = $order->user_id;
 
-        if (!$userId) {
+        if (! $userId) {
             return;
         }
 

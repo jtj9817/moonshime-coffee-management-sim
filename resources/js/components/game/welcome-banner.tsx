@@ -17,22 +17,33 @@ export function WelcomeBanner() {
                             <h2 className="text-xl font-bold text-amber-900 dark:text-amber-100">
                                 Welcome, Manager! ☕
                             </h2>
-                            <p className="text-sm text-amber-800/80 dark:text-amber-200/60 leading-relaxed max-w-2xl">
-                                Your journey to coffee management excellence begins today. 
-                                Keep your inventory stocked, routes optimized, and customers happy. 
-                                <span className="block mt-1 font-medium italic">Hint: Your shelves are empty! Start by placing your first order.</span>
+                            <p className="max-w-2xl text-sm leading-relaxed text-amber-800/80 dark:text-amber-200/60">
+                                Your journey to coffee management excellence
+                                begins today. Keep your inventory stocked,
+                                routes optimized, and customers happy.
+                                <span className="mt-1 block font-medium italic">
+                                    Hint: Your shelves are empty! Start by
+                                    placing your first order.
+                                </span>
                             </p>
                         </div>
                     </div>
-                    
-                    <div className="flex flex-wrap gap-3 shrink-0">
-                        <Button variant="outline" className="gap-2 border-amber-200 hover:bg-amber-100 dark:border-amber-800 dark:hover:bg-amber-900/30" asChild>
+
+                    <div className="flex shrink-0 flex-wrap gap-3">
+                        <Button
+                            variant="outline"
+                            className="gap-2 border-amber-200 hover:bg-amber-100 dark:border-amber-800 dark:hover:bg-amber-900/30"
+                            asChild
+                        >
                             <Link href="/game/strategy">
                                 <Info className="h-4 w-4" />
                                 Strategy Guide
                             </Link>
                         </Button>
-                        <Button className="gap-2 bg-amber-600 text-white hover:bg-amber-700 shadow-md shadow-amber-600/20" asChild>
+                        <Button
+                            className="gap-2 bg-amber-600 text-white shadow-md shadow-amber-600/20 hover:bg-amber-700"
+                            asChild
+                        >
                             <Link href="/game/ordering">
                                 <ShoppingCart className="h-4 w-4" />
                                 Place First Order

@@ -34,12 +34,25 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 function getStockStatus(quantity: number) {
-    if (quantity === 0) return { label: 'Out of Stock', color: 'destructive' as const, icon: AlertTriangle };
-    if (quantity < 50) return { label: 'Low Stock', color: 'secondary' as const, icon: AlertTriangle };
+    if (quantity === 0)
+        return {
+            label: 'Out of Stock',
+            color: 'destructive' as const,
+            icon: AlertTriangle,
+        };
+    if (quantity < 50)
+        return {
+            label: 'Low Stock',
+            color: 'secondary' as const,
+            icon: AlertTriangle,
+        };
     return { label: 'In Stock', color: 'default' as const, icon: CheckCircle2 };
 }
 
-export default function Inventory({ inventory, currentLocation }: InventoryProps) {
+export default function Inventory({
+    inventory,
+    currentLocation,
+}: InventoryProps) {
     const { locations, setCurrentLocationId } = useGame();
 
     const handleLocationChange = (value: string) => {
@@ -62,14 +75,20 @@ export default function Inventory({ inventory, currentLocation }: InventoryProps
                             Track and manage stock across all locations
                         </p>
                     </div>
-                    <Select value={currentLocation} onValueChange={handleLocationChange}>
+                    <Select
+                        value={currentLocation}
+                        onValueChange={handleLocationChange}
+                    >
                         <SelectTrigger className="w-48">
                             <SelectValue placeholder="Select location" />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="all">All Locations</SelectItem>
                             {locations.map((location) => (
-                                <SelectItem key={location.id} value={location.id}>
+                                <SelectItem
+                                    key={location.id}
+                                    value={location.id}
+                                >
                                     {location.name}
                                 </SelectItem>
                             ))}
@@ -85,9 +104,13 @@ export default function Inventory({ inventory, currentLocation }: InventoryProps
                                 <TableHead>Product</TableHead>
                                 <TableHead>Category</TableHead>
                                 <TableHead>Location</TableHead>
-                                <TableHead className="text-right">Quantity</TableHead>
+                                <TableHead className="text-right">
+                                    Quantity
+                                </TableHead>
                                 <TableHead>Status</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
+                                <TableHead className="text-right">
+                                    Actions
+                                </TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -99,20 +122,27 @@ export default function Inventory({ inventory, currentLocation }: InventoryProps
                                         <TableCell className="font-medium">
                                             <div className="flex items-center gap-2">
                                                 <Package className="h-4 w-4 text-stone-400" />
-                                                {item.product?.name ?? 'Unknown Product'}
+                                                {item.product?.name ??
+                                                    'Unknown Product'}
                                             </div>
                                         </TableCell>
                                         <TableCell>
                                             <Badge variant="outline">
-                                                {item.product?.category ?? 'Unknown'}
+                                                {item.product?.category ??
+                                                    'Unknown'}
                                             </Badge>
                                         </TableCell>
-                                        <TableCell>{item.location?.name ?? 'Unknown'}</TableCell>
+                                        <TableCell>
+                                            {item.location?.name ?? 'Unknown'}
+                                        </TableCell>
                                         <TableCell className="text-right font-mono">
                                             {item.quantity}
                                         </TableCell>
                                         <TableCell>
-                                            <Badge variant={status.color} className="gap-1">
+                                            <Badge
+                                                variant={status.color}
+                                                className="gap-1"
+                                            >
                                                 <StatusIcon className="h-3 w-3" />
                                                 {status.label}
                                             </Badge>
@@ -121,7 +151,10 @@ export default function Inventory({ inventory, currentLocation }: InventoryProps
                                             <Link
                                                 href={`/game/sku/${item.location_id}/${item.product_id}`}
                                             >
-                                                <Button variant="ghost" size="sm">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                >
                                                     View
                                                 </Button>
                                             </Link>
@@ -131,19 +164,29 @@ export default function Inventory({ inventory, currentLocation }: InventoryProps
                             })}
                             {inventory.length === 0 && (
                                 <TableRow>
-                                    <TableCell colSpan={6} className="h-64 text-center">
+                                    <TableCell
+                                        colSpan={6}
+                                        className="h-64 text-center"
+                                    >
                                         <div className="flex flex-col items-center justify-center gap-4">
                                             <div className="rounded-full bg-stone-100 p-4 dark:bg-stone-900">
                                                 <Package className="h-8 w-8 text-stone-300" />
                                             </div>
                                             <div className="space-y-1">
-                                                <h3 className="font-semibold text-stone-900 dark:text-white">Pantry is empty</h3>
-                                                <p className="text-stone-500 dark:text-stone-400 text-sm max-w-xs mx-auto">
-                                                    You have no stock in this location. Visit Procurement to order supplies.
+                                                <h3 className="font-semibold text-stone-900 dark:text-white">
+                                                    Pantry is empty
+                                                </h3>
+                                                <p className="mx-auto max-w-xs text-sm text-stone-500 dark:text-stone-400">
+                                                    You have no stock in this
+                                                    location. Visit Procurement
+                                                    to order supplies.
                                                 </p>
                                             </div>
                                             <Link href="/game/ordering">
-                                                <Button variant="outline" className="mt-2 text-amber-600 hover:text-amber-700 hover:bg-amber-50">
+                                                <Button
+                                                    variant="outline"
+                                                    className="mt-2 text-amber-600 hover:bg-amber-50 hover:text-amber-700"
+                                                >
                                                     Go to Procurement
                                                 </Button>
                                             </Link>

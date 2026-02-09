@@ -21,14 +21,14 @@ class GenerateIsolationAlerts
         foreach ($stores as $store) {
             $isReachable = $this->logistics->checkReachability($store);
 
-            if (!$isReachable) {
+            if (! $isReachable) {
                 // Check if the SPECIFIC USER has low stock at this store
                 $hasLowStock = $store->inventories()
                     ->where('user_id', $userId)
                     ->where('quantity', '<', 10)
                     ->exists();
 
-                if (!$hasLowStock) {
+                if (! $hasLowStock) {
                     continue;
                 }
 
@@ -58,8 +58,8 @@ class GenerateIsolationAlerts
                     'spike_event_id' => $cause?->id,
                     'message' => "Store '{$store->name}' is isolated from supply chain and low on stock!",
                     'data' => [
-                        'reason' => $cause ? "Likely due to {$cause->type}" : "Unknown network failure"
-                    ]
+                        'reason' => $cause ? "Likely due to {$cause->type}" : 'Unknown network failure',
+                    ],
                 ]);
             } else {
                 // Store is reachable - RESOLVE existing isolation alerts for this user

@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Vendor;
 use Database\Seeders\CoreGameStateSeeder;
 use Database\Seeders\GraphSeeder;
+
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\post;
 
@@ -29,7 +30,7 @@ test('authenticated user can reset game', function () {
     actingAs($user)
         ->post('/game/reset')
         ->assertRedirect('/game/dashboard'); // Expect redirect back to dashboard
-    
+
     // Refresh user state
     $this->assertDatabaseHas('game_states', [
         'user_id' => $user->id,

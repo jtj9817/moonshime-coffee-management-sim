@@ -6,7 +6,6 @@ use App\Models\Location;
 use App\Models\Product;
 use App\Models\Transfer;
 use App\Models\User;
-use App\Models\Vendor;
 use Database\Seeders\CoreGameStateSeeder;
 use Database\Seeders\GraphSeeder;
 
@@ -14,16 +13,15 @@ uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 /**
  * Tests for InitializeNewGame validation behavior.
- * 
+ *
  * These tests verify that the action throws descriptive exceptions when
  * required dependencies are missing, rather than failing silently.
  */
-
 describe('Validation Errors', function () {
     test('throws exception when no stores exist', function () {
         $user = User::factory()->create();
 
-        expect(fn() => app(InitializeNewGame::class)->handle($user))
+        expect(fn () => app(InitializeNewGame::class)->handle($user))
             ->toThrow(\RuntimeException::class, 'Cannot initialize game: No stores found');
     });
 
@@ -33,7 +31,7 @@ describe('Validation Errors', function () {
 
         $user = User::factory()->create();
 
-        expect(fn() => app(InitializeNewGame::class)->handle($user))
+        expect(fn () => app(InitializeNewGame::class)->handle($user))
             ->toThrow(\RuntimeException::class, 'Cannot initialize game: No warehouse found');
     });
 
@@ -43,7 +41,7 @@ describe('Validation Errors', function () {
 
         $user = User::factory()->create();
 
-        expect(fn() => app(InitializeNewGame::class)->handle($user))
+        expect(fn () => app(InitializeNewGame::class)->handle($user))
             ->toThrow(\RuntimeException::class, 'Cannot initialize game: No products found');
     });
 
@@ -54,7 +52,7 @@ describe('Validation Errors', function () {
 
         $user = User::factory()->create();
 
-        expect(fn() => app(InitializeNewGame::class)->handle($user))
+        expect(fn () => app(InitializeNewGame::class)->handle($user))
             ->toThrow(\RuntimeException::class, 'Cannot initialize game: No vendor found');
     });
 });

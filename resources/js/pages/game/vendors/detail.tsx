@@ -1,5 +1,12 @@
 import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft, Package, ShoppingCart, Star, TrendingUp, Truck } from 'lucide-react';
+import {
+    ArrowLeft,
+    Package,
+    ShoppingCart,
+    Star,
+    TrendingUp,
+    Truck,
+} from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -15,7 +22,12 @@ import {
 } from '@/components/ui/table';
 import GameLayout from '@/layouts/game-layout';
 import { formatCurrency } from '@/lib/formatCurrency';
-import { OrderModel, ProductModel, VendorModel, type BreadcrumbItem } from '@/types';
+import {
+    OrderModel,
+    ProductModel,
+    VendorModel,
+    type BreadcrumbItem,
+} from '@/types';
 
 interface VendorDetailProps {
     vendor: VendorModel & {
@@ -87,7 +99,10 @@ export default function VendorDetail({ vendor, metrics }: VendorDetailProps) {
                                 {vendor.reliability_score}%
                             </div>
                             <div className="flex-1">
-                                <Progress value={vendor.reliability_score} className="h-3" />
+                                <Progress
+                                    value={vendor.reliability_score}
+                                    className="h-3"
+                                />
                                 <p className="mt-2 text-sm text-stone-500">
                                     {vendor.reliability_score >= 90
                                         ? 'Excellent - Highly reliable supplier'
@@ -110,7 +125,9 @@ export default function VendorDetail({ vendor, metrics }: VendorDetailProps) {
                             <ShoppingCart className="h-4 w-4 text-amber-500" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{metrics.totalOrders}</div>
+                            <div className="text-2xl font-bold">
+                                {metrics.totalOrders}
+                            </div>
                         </CardContent>
                     </Card>
                     <Card>
@@ -173,12 +190,16 @@ export default function VendorDetail({ vendor, metrics }: VendorDetailProps) {
                                             className="flex items-center justify-between rounded-lg border border-stone-200 p-3 dark:border-stone-700"
                                         >
                                             <div>
-                                                <p className="font-medium">{product.name}</p>
+                                                <p className="font-medium">
+                                                    {product.name}
+                                                </p>
                                                 <p className="text-sm text-stone-500">
                                                     {product.category}
                                                 </p>
                                             </div>
-                                            <Badge variant="outline">In Stock</Badge>
+                                            <Badge variant="outline">
+                                                In Stock
+                                            </Badge>
                                         </div>
                                     ))}
                                 </div>
@@ -205,23 +226,35 @@ export default function VendorDetail({ vendor, metrics }: VendorDetailProps) {
                                         <TableRow>
                                             <TableHead>Order ID</TableHead>
                                             <TableHead>Status</TableHead>
-                                            <TableHead className="text-right">Total</TableHead>
+                                            <TableHead className="text-right">
+                                                Total
+                                            </TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {vendor.orders.slice(0, 5).map((order) => (
-                                            <TableRow key={order.id}>
-                                                <TableCell className="font-mono text-sm">
-                                                    {order.id.substring(0, 8)}
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Badge variant="outline">{order.status}</Badge>
-                                                </TableCell>
-                                                <TableCell className="text-right">
-                                                    ${formatCurrency(order.total_cost)}
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
+                                        {vendor.orders
+                                            .slice(0, 5)
+                                            .map((order) => (
+                                                <TableRow key={order.id}>
+                                                    <TableCell className="font-mono text-sm">
+                                                        {order.id.substring(
+                                                            0,
+                                                            8,
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Badge variant="outline">
+                                                            {order.status}
+                                                        </Badge>
+                                                    </TableCell>
+                                                    <TableCell className="text-right">
+                                                        $
+                                                        {formatCurrency(
+                                                            order.total_cost,
+                                                        )}
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
                                     </TableBody>
                                 </Table>
                             ) : (

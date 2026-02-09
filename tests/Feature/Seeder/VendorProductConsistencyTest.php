@@ -19,7 +19,7 @@ describe('Vendor-Product Relationships', function () {
         foreach ($seededProductNames as $name) {
             $product = Product::where('name', $name)->first();
 
-            if (!$product) {
+            if (! $product) {
                 continue; // Skip if product not found
             }
 
@@ -45,7 +45,7 @@ describe('Vendor Category Matching', function () {
         foreach ($vendorsConfig as $vendorData) {
             $vendor = Vendor::where('name', $vendorData['name'])->first();
 
-            if (!$vendor) {
+            if (! $vendor) {
                 continue;
             }
 

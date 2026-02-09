@@ -1,15 +1,12 @@
 <?php
 
 use App\Actions\InitializeNewGame;
-use App\Models\GameState;
 use App\Models\Inventory;
 use App\Models\Location;
-use App\Models\Order;
 use App\Models\Product;
 use App\Models\SpikeEvent;
 use App\Models\Transfer;
 use App\Models\User;
-use App\Models\Vendor;
 use App\Services\SimulationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -160,7 +157,7 @@ test('transfer completion dispatches TransferCompleted event and updates invento
         ->where('delivery_day', 2)
         ->first();
 
-    if (!$transfer) {
+    if (! $transfer) {
         $this->markTestSkipped('No transfer for this product arriving Day 2');
     }
 

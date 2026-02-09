@@ -18,7 +18,7 @@ class FulfillmentMetricsTest extends TestCase
     {
         $user = User::factory()->create();
         \App\Models\GameState::factory()->create(['user_id' => $user->id]);
-        
+
         // Order 1: Delivered, took 2 days (1 to 3)
         \App\Models\Order::factory()->create([
             'user_id' => $user->id,
@@ -26,7 +26,7 @@ class FulfillmentMetricsTest extends TestCase
             'created_day' => 1,
             'delivery_day' => 3,
         ]);
-        
+
         // Order 2: Delivered, took 5 days (5 to 10)
         \App\Models\Order::factory()->create([
             'user_id' => $user->id,
@@ -34,7 +34,7 @@ class FulfillmentMetricsTest extends TestCase
             'created_day' => 5,
             'delivery_day' => 10,
         ]);
-        
+
         // Order 3: Pending
         \App\Models\Order::factory()->create([
             'user_id' => $user->id,
@@ -48,7 +48,7 @@ class FulfillmentMetricsTest extends TestCase
             'status' => Cancelled::class,
             'created_day' => 10,
         ]);
-        
+
         // Other user's order (should be ignored)
         $otherUser = User::factory()->create();
         \App\Models\GameState::factory()->create(['user_id' => $otherUser->id]);

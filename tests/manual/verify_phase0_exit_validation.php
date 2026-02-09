@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Manual Test Runner: Phase 0 Exit Validation Matrix
  * Track: conductor/tracks/arch_remediation_20260207/plan.md
@@ -25,7 +26,7 @@ if (app()->environment('production')) {
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
-$testRunId = 'phase0_exit_' . Carbon::now()->format('Y_m_d_His');
+$testRunId = 'phase0_exit_'.Carbon::now()->format('Y_m_d_His');
 $logFile = storage_path("logs/manual_tests/{$testRunId}.log");
 
 if (! is_dir(dirname($logFile))) {
@@ -63,7 +64,7 @@ function runPhpScript(string $scriptPath): int
         echo "    {$line}\n";
     }
 
-    logInfo("Script completed", ['script' => $scriptPath, 'exit_code' => $exitCode]);
+    logInfo('Script completed', ['script' => $scriptPath, 'exit_code' => $exitCode]);
 
     return $exitCode;
 }
@@ -81,6 +82,7 @@ function staticGuardCheck(): array
         $contents = file_get_contents($path);
         if ($contents === false) {
             $violations[] = "Unable to read {$path}";
+
             continue;
         }
 

@@ -1,19 +1,18 @@
 <?php
 
+use App\Events\OrderPlaced;
+use App\Events\SpikeOccurred;
 use App\Models\GameState;
 use App\Models\Location;
-use App\Models\Route;
-use App\Models\SpikeEvent;
-use App\Models\User;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\Route;
 use App\Models\Shipment;
+use App\Models\SpikeEvent;
+use App\Models\User;
 use App\Models\Vendor;
-use App\Services\SimulationService;
 use App\Services\LogisticsService;
-use App\Events\SpikeOccurred;
-use App\Events\OrderPlaced;
 use App\States\Order\Pending;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -26,9 +25,9 @@ test('scenario b: "the decision stressor" stress test', function () {
     $gameState = GameState::factory()->create([
         'user_id' => $user->id,
         'day' => 1,
-        'cash' => 100000
+        'cash' => 100000,
     ]);
-    
+
     $vendorLoc = Location::factory()->create(['type' => 'vendor', 'name' => 'Supplier Hub']);
     $warehouse = Location::factory()->create(['type' => 'warehouse', 'name' => 'Main Warehouse']);
     $product = Product::factory()->create(['name' => 'Raw Beans', 'storage_cost' => 5]);
@@ -69,7 +68,7 @@ test('scenario b: "the decision stressor" stress test', function () {
         'ends_at_day' => 4,
         'is_active' => true,
     ]);
-    
+
     // B. Blizzard on the Cheap Route
     $blizzard = SpikeEvent::create([
         'user_id' => $user->id,
@@ -85,7 +84,7 @@ test('scenario b: "the decision stressor" stress test', function () {
 
     // --- 3. VERIFY PATHFINDING UNDER STRESS ---
     expect($cheapRoute->fresh()->is_active)->toBeFalse();
-    
+
     $bestPath = $logistics->findBestRoute($vendorLoc, $warehouse);
     expect($bestPath->count())->toBe(1);
     expect($bestPath->first()->id)->toBe($premiumRoute->id);
@@ -93,7 +92,7 @@ test('scenario b: "the decision stressor" stress test', function () {
 
     // --- 4. VERIFY PLAYER DECISION PERSISTENCE ---
     $vendor = Vendor::factory()->create();
-    
+
     // Player places an order via the premium route due to breakdown
     $order = Order::create([
         'user_id' => $user->id,
@@ -102,7 +101,7 @@ test('scenario b: "the decision stressor" stress test', function () {
         'total_cost' => 10000,
         'status' => 'draft',
     ]);
-    
+
     OrderItem::create([
         'order_id' => $order->id,
         'product_id' => $product->id,
@@ -123,7 +122,7 @@ test('scenario b: "the decision stressor" stress test', function () {
 
     // Verify order is tied to premium route
     expect($order->shipments()->value('route_id'))->toBe($premiumRoute->id);
-    
+
     // Verify cash impact (100000 - 10000 = 90000 cents)
     expect($gameState->fresh()->cash)->toBe(90000);
 });

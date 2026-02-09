@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\Route;
 use App\Models\Location;
+use App\Models\Route;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -13,7 +13,7 @@ test('route model has expected attributes', function () {
         'transit_days' => 2,
         'capacity' => 1000,
         'is_active' => true,
-        'weather_vulnerability' => true
+        'weather_vulnerability' => true,
     ]);
 
     expect($route->transport_mode)->toBe('Truck');

@@ -17,7 +17,7 @@ describe('Multi-hop Connectivity', function () {
 
         // Count vendors that have at least one hub connection
         $connectedVendors = Location::where('type', 'vendor')
-            ->whereHas('outgoingRoutes', fn($q) => $q->whereIn('target_id', $hubs->pluck('id')))
+            ->whereHas('outgoingRoutes', fn ($q) => $q->whereIn('target_id', $hubs->pluck('id')))
             ->count();
 
         expect($connectedVendors)->toBeGreaterThanOrEqual(3);
@@ -28,7 +28,7 @@ describe('Multi-hop Connectivity', function () {
 
         // Count hubs that have at least one store connection
         $connectedHubs = Location::where('type', 'hub')
-            ->whereHas('outgoingRoutes', fn($q) => $q->whereIn('target_id', $stores->pluck('id')))
+            ->whereHas('outgoingRoutes', fn ($q) => $q->whereIn('target_id', $stores->pluck('id')))
             ->count();
 
         expect($connectedHubs)->toBeGreaterThanOrEqual(3);
@@ -37,18 +37,18 @@ describe('Multi-hop Connectivity', function () {
     test('vendor to warehouse to store multi-hop path exists', function () {
         // Just verify at least one complete path exists
         $vendor = Location::where('type', 'vendor')
-            ->whereHas('outgoingRoutes', fn($q) => $q->whereHas('target', fn($t) => $t->where('type', 'warehouse')))
+            ->whereHas('outgoingRoutes', fn ($q) => $q->whereHas('target', fn ($t) => $t->where('type', 'warehouse')))
             ->first();
 
         expect($vendor)->not->toBeNull('At least one vendor should connect to a warehouse');
 
         $warehouse = Route::where('source_id', $vendor->id)
-            ->whereHas('target', fn($q) => $q->where('type', 'warehouse'))
+            ->whereHas('target', fn ($q) => $q->where('type', 'warehouse'))
             ->first()
             ->target;
 
         $storeConnection = Route::where('source_id', $warehouse->id)
-            ->whereHas('target', fn($q) => $q->where('type', 'store'))
+            ->whereHas('target', fn ($q) => $q->where('type', 'store'))
             ->exists();
 
         expect($storeConnection)->toBeTrue('Warehouse should connect to a store');
@@ -63,7 +63,7 @@ describe('Path Diversity', function () {
             ->first();
         $mainStore = Location::where('name', 'Moonshine Central')->first();
 
-        if (!$vendor || !$mainStore) {
+        if (! $vendor || ! $mainStore) {
             $this->markTestSkipped('Vendor or main store not found');
         }
 
@@ -72,7 +72,7 @@ describe('Path Diversity', function () {
 
         // Path via warehouses
         $warehouseRoutes = Route::where('source_id', $vendor->id)
-            ->whereHas('target', fn($q) => $q->where('type', 'warehouse'))
+            ->whereHas('target', fn ($q) => $q->where('type', 'warehouse'))
             ->get();
 
         foreach ($warehouseRoutes as $route) {
@@ -86,7 +86,7 @@ describe('Path Diversity', function () {
 
         // Path via hubs
         $hubRoutes = Route::where('source_id', $vendor->id)
-            ->whereHas('target', fn($q) => $q->where('type', 'hub'))
+            ->whereHas('target', fn ($q) => $q->where('type', 'hub'))
             ->get();
 
         foreach ($hubRoutes as $route) {

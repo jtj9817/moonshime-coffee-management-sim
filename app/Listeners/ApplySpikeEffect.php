@@ -4,8 +4,6 @@ namespace App\Listeners;
 
 use App\Events\SpikeOccurred;
 use App\Services\SpikeEventFactory;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
 
 class ApplySpikeEffect
 {

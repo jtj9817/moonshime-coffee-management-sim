@@ -1,9 +1,8 @@
 <?php
 
-use App\Models\SpikeEvent;
 use App\Models\Location;
 use App\Models\Product;
-use App\Models\Vendor;
+use App\Models\SpikeEvent;
 
 test('spike event model can be created', function () {
     $location = Location::factory()->create();
@@ -29,7 +28,7 @@ test('spike event model can be created', function () {
 test('spike event factory generates events', function () {
     Location::factory()->count(3)->create();
     Product::factory()->count(3)->create();
-    
+
     // Create at least one vulnerable route for blizzard spikes
     $locations = Location::all();
     \App\Models\Route::factory()->create([
@@ -38,7 +37,7 @@ test('spike event factory generates events', function () {
         'weather_vulnerability' => true,
     ]);
 
-    $factory = new \App\Services\SpikeEventFactory();
+    $factory = new \App\Services\SpikeEventFactory;
     $spike = $factory->generate(1);
 
     expect($spike)->toBeInstanceOf(SpikeEvent::class);
@@ -47,7 +46,7 @@ test('spike event factory generates events', function () {
 
 test('breakdown spike reduces location capacity and rolls back', function () {
     $location = Location::factory()->create(['max_storage' => 1000]);
-    
+
     $spike = SpikeEvent::create([
         'type' => 'breakdown',
         'magnitude' => 0.4, // 40% reduction
@@ -57,18 +56,18 @@ test('breakdown spike reduces location capacity and rolls back', function () {
         'ends_at_day' => 7,
     ]);
 
-    $factory = new \App\Services\SpikeEventFactory();
-    
+    $factory = new \App\Services\SpikeEventFactory;
+
     // Apply
     $factory->apply($spike);
-    
+
     $location->refresh();
     expect($location->max_storage)->toBe(600); // 1000 * (1 - 0.4)
     expect($spike->refresh()->meta['original_max_storage'])->toBe(1000);
 
     // Rollback
     $factory->rollback($spike);
-    
+
     $location->refresh();
     expect($location->max_storage)->toBe(1000);
 });

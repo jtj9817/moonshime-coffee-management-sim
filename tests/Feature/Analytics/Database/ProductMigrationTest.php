@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Analytics\Database;
 
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 class ProductMigrationTest extends TestCase
@@ -33,8 +33,8 @@ class ProductMigrationTest extends TestCase
 
     public function test_daily_reports_table_has_user_id_day_index(): void
     {
-         // Check for composite index existence.
-         $hasIndex = count(\DB::select("
+        // Check for composite index existence.
+        $hasIndex = count(\DB::select("
             SELECT 1
             FROM pg_indexes
             WHERE tablename = 'daily_reports'

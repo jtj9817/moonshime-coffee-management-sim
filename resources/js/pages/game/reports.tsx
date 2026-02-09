@@ -41,7 +41,10 @@ export default function Reports({
     wasteByLocation,
 }: ReportsProps) {
     const totalWasteValue = wasteEvents.reduce((sum, e) => sum + e.value, 0);
-    const totalWasteQuantity = wasteEvents.reduce((sum, e) => sum + e.quantity, 0);
+    const totalWasteQuantity = wasteEvents.reduce(
+        (sum, e) => sum + e.quantity,
+        0,
+    );
 
     return (
         <GameLayout breadcrumbs={breadcrumbs}>
@@ -81,7 +84,9 @@ export default function Reports({
                             <AlertTriangle className="h-4 w-4 text-amber-500" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{totalWasteQuantity}</div>
+                            <div className="text-2xl font-bold">
+                                {totalWasteQuantity}
+                            </div>
                         </CardContent>
                     </Card>
                     <Card>
@@ -92,7 +97,9 @@ export default function Reports({
                             <PieChart className="h-4 w-4 text-blue-500" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{wasteEvents.length}</div>
+                            <div className="text-2xl font-bold">
+                                {wasteEvents.length}
+                            </div>
                         </CardContent>
                     </Card>
                 </div>
@@ -114,7 +121,10 @@ export default function Reports({
                                                     {item.cause}
                                                 </span>
                                                 <span className="text-stone-500">
-                                                    ${formatCurrency(item.amount)}
+                                                    $
+                                                    {formatCurrency(
+                                                        item.amount,
+                                                    )}
                                                 </span>
                                             </div>
                                             <div className="h-2 w-full overflow-hidden rounded-full bg-stone-200 dark:bg-stone-700">
@@ -147,9 +157,14 @@ export default function Reports({
                                     {wasteByLocation.map((item, i) => (
                                         <div key={i}>
                                             <div className="mb-1 flex items-center justify-between text-sm">
-                                                <span className="font-medium">{item.location}</span>
+                                                <span className="font-medium">
+                                                    {item.location}
+                                                </span>
                                                 <span className="text-stone-500">
-                                                    ${formatCurrency(item.amount)}
+                                                    $
+                                                    {formatCurrency(
+                                                        item.amount,
+                                                    )}
                                                 </span>
                                             </div>
                                             <div className="h-2 w-full overflow-hidden rounded-full bg-stone-200 dark:bg-stone-700">
@@ -185,22 +200,34 @@ export default function Reports({
                                 <TableHead>Product</TableHead>
                                 <TableHead>Location</TableHead>
                                 <TableHead>Cause</TableHead>
-                                <TableHead className="text-right">Quantity</TableHead>
-                                <TableHead className="text-right">Value</TableHead>
+                                <TableHead className="text-right">
+                                    Quantity
+                                </TableHead>
+                                <TableHead className="text-right">
+                                    Value
+                                </TableHead>
                                 <TableHead>Date</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {wasteEvents.map((event) => (
                                 <TableRow key={event.id}>
-                                    <TableCell className="font-medium">{event.product}</TableCell>
+                                    <TableCell className="font-medium">
+                                        {event.product}
+                                    </TableCell>
                                     <TableCell>{event.location}</TableCell>
-                                    <TableCell className="capitalize">{event.cause}</TableCell>
-                                    <TableCell className="text-right">{event.quantity}</TableCell>
+                                    <TableCell className="capitalize">
+                                        {event.cause}
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        {event.quantity}
+                                    </TableCell>
                                     <TableCell className="text-right text-rose-600">
                                         ${formatCurrency(event.value)}
                                     </TableCell>
-                                    <TableCell className="text-stone-500">{event.date}</TableCell>
+                                    <TableCell className="text-stone-500">
+                                        {event.date}
+                                    </TableCell>
                                 </TableRow>
                             ))}
                             {wasteEvents.length === 0 && (

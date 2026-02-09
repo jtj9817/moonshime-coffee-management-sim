@@ -3,10 +3,8 @@
 namespace App\Listeners;
 
 use App\Events\TimeAdvanced;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Support\Facades\DB;
 use App\Models\Inventory;
+use Illuminate\Support\Facades\DB;
 
 class SnapshotInventoryLevels
 {

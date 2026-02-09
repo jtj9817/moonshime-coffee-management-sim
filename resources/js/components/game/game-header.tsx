@@ -56,19 +56,27 @@ export function GameHeader() {
                     {/* Location Selector */}
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="sm" className="gap-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="gap-2"
+                            >
                                 <MapPin className="h-4 w-4" />
                                 {currentLocation?.name ?? 'All Locations'}
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="start">
-                            <DropdownMenuItem onClick={() => setCurrentLocationId('all')}>
+                            <DropdownMenuItem
+                                onClick={() => setCurrentLocationId('all')}
+                            >
                                 All Locations
                             </DropdownMenuItem>
                             {locations.map((location) => (
                                 <DropdownMenuItem
                                     key={location.id}
-                                    onClick={() => setCurrentLocationId(location.id)}
+                                    onClick={() =>
+                                        setCurrentLocationId(location.id)
+                                    }
                                 >
                                     {location.name}
                                 </DropdownMenuItem>
@@ -78,7 +86,10 @@ export function GameHeader() {
 
                     {/* Active Spike Indicator */}
                     {currentSpike && (
-                        <Badge variant="destructive" className="animate-pulse gap-1">
+                        <Badge
+                            variant="destructive"
+                            className="animate-pulse gap-1"
+                        >
                             <Zap className="h-3 w-3" />
                             {currentSpike.name}
                         </Badge>
@@ -109,7 +120,9 @@ export function GameHeader() {
                             </div>
                         </TooltipTrigger>
                         <TooltipContent>
-                            <p>Experience: {gameState.xp.toLocaleString()} XP</p>
+                            <p>
+                                Experience: {gameState.xp.toLocaleString()} XP
+                            </p>
                             <p className="text-xs text-stone-400">
                                 {1000 - (gameState.xp % 1000)} XP to next level
                             </p>
@@ -124,7 +137,9 @@ export function GameHeader() {
                                 <div className="h-1.5 w-16 overflow-hidden rounded-full bg-stone-200 dark:bg-stone-700">
                                     <div
                                         className={`h-full transition-all ${getReputationColor(gameState.reputation)}`}
-                                        style={{ width: `${gameState.reputation}%` }}
+                                        style={{
+                                            width: `${gameState.reputation}%`,
+                                        }}
                                     />
                                 </div>
                                 <span className="text-sm text-stone-500 dark:text-stone-400">
@@ -148,18 +163,17 @@ export function GameHeader() {
                                     {[...Array(3)].map((_, i) => (
                                         <AlertTriangle
                                             key={i}
-                                            className={`h-4 w-4 ${i < gameState.strikes
-                                                ? 'text-rose-500'
-                                                : 'text-stone-300 dark:text-stone-600'
-                                                }`}
+                                            className={`h-4 w-4 ${
+                                                i < gameState.strikes
+                                                    ? 'text-rose-500'
+                                                    : 'text-stone-300 dark:text-stone-600'
+                                            }`}
                                         />
                                     ))}
                                 </div>
                             </TooltipTrigger>
                             <TooltipContent>
-                                <p>
-                                    {gameState.strikes} of 3 Strikes
-                                </p>
+                                <p>{gameState.strikes} of 3 Strikes</p>
                                 <p className="text-xs text-stone-400">
                                     Critical alerts that need attention
                                 </p>
@@ -173,7 +187,11 @@ export function GameHeader() {
                     {/* Alerts Dropdown */}
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="relative">
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className="relative"
+                            >
                                 <Bell className="h-4 w-4" />
                                 {alerts.length > 0 && (
                                     <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white">
@@ -183,44 +201,68 @@ export function GameHeader() {
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-80">
-                            <div className="flex items-center justify-between px-3 py-2 border-b">
-                                <span className="text-xs font-semibold uppercase text-stone-500">Comms Log</span>
+                            <div className="flex items-center justify-between border-b px-3 py-2">
+                                <span className="text-xs font-semibold text-stone-500 uppercase">
+                                    Comms Log
+                                </span>
                                 {alerts.length > 0 && (
-                                    <Badge variant="destructive" className="text-[10px]">{alerts.length} new</Badge>
+                                    <Badge
+                                        variant="destructive"
+                                        className="text-[10px]"
+                                    >
+                                        {alerts.length} new
+                                    </Badge>
                                 )}
                             </div>
                             {alerts.length === 0 ? (
-                                <div className="p-4 text-center text-sm text-stone-500">No signals received.</div>
+                                <div className="p-4 text-center text-sm text-stone-500">
+                                    No signals received.
+                                </div>
                             ) : (
                                 alerts.map((alert) => (
                                     <DropdownMenuItem
                                         key={alert.id}
-                                        className="flex items-start gap-3 p-3 cursor-pointer"
+                                        className="flex cursor-pointer items-start gap-3 p-3"
                                         onClick={() => {
                                             // Navigate based on alert type
                                             const destination = (() => {
                                                 switch (alert.type) {
-                                                    case 'order_placed': return '/game/ordering';
-                                                    case 'transfer_completed': return '/game/transfers';
-                                                    case 'spike_occurred': return '/game/spike-history';
-                                                    case 'isolation': return alert.location_id
-                                                        ? `/game/dashboard?location=${alert.location_id}`
-                                                        : '/game/dashboard';
-                                                    default: return '/game/dashboard';
+                                                    case 'order_placed':
+                                                        return '/game/ordering';
+                                                    case 'transfer_completed':
+                                                        return '/game/transfers';
+                                                    case 'spike_occurred':
+                                                        return '/game/spike-history';
+                                                    case 'isolation':
+                                                        return alert.location_id
+                                                            ? `/game/dashboard?location=${alert.location_id}`
+                                                            : '/game/dashboard';
+                                                    default:
+                                                        return '/game/dashboard';
                                                 }
                                             })();
                                             window.location.href = destination;
                                         }}
                                     >
-                                        <div className={`mt-1 h-2 w-2 rounded-full flex-shrink-0 ${alert.severity === 'critical'
-                                            ? 'bg-rose-500'
-                                            : alert.severity === 'warning'
-                                                ? 'bg-amber-500'
-                                                : 'bg-blue-500'
-                                            }`} />
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-medium truncate">{alert.message}</p>
-                                            <p className="text-xs text-stone-500">{new Date(alert.created_at).toLocaleTimeString()}</p>
+                                        <div
+                                            className={`mt-1 h-2 w-2 flex-shrink-0 rounded-full ${
+                                                alert.severity === 'critical'
+                                                    ? 'bg-rose-500'
+                                                    : alert.severity ===
+                                                        'warning'
+                                                      ? 'bg-amber-500'
+                                                      : 'bg-blue-500'
+                                            }`}
+                                        />
+                                        <div className="min-w-0 flex-1">
+                                            <p className="truncate text-sm font-medium">
+                                                {alert.message}
+                                            </p>
+                                            <p className="text-xs text-stone-500">
+                                                {new Date(
+                                                    alert.created_at,
+                                                ).toLocaleTimeString()}
+                                            </p>
                                         </div>
                                     </DropdownMenuItem>
                                 ))

@@ -29,6 +29,7 @@ class InventorySeeder extends Seeder
                 $logger->warning('InventorySeeder: No stores found, skipping inventory seeding', [
                     'hint' => 'Run GraphSeeder first to create locations',
                 ]);
+
                 return;
             }
 
@@ -36,6 +37,7 @@ class InventorySeeder extends Seeder
                 $logger->warning('InventorySeeder: No products found, skipping inventory seeding', [
                     'hint' => 'Run CoreGameStateSeeder first to create products',
                 ]);
+
                 return;
             }
 

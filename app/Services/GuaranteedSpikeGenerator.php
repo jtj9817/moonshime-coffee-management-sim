@@ -30,7 +30,7 @@ class GuaranteedSpikeGenerator
         // 1. Check if we can generate (under cap)
         // NOTE: cap must be enforced against the spike's *full window* to avoid future overlap
         $duration = rand(2, 5);
-        if (!$this->constraintChecker->canScheduleSpike($gameState, $currentDay, $duration)) {
+        if (! $this->constraintChecker->canScheduleSpike($gameState, $currentDay, $duration)) {
             return null; // At capacity
         }
 

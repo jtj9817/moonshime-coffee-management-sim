@@ -1,14 +1,14 @@
 <?php
 
-use App\Models\Route;
 use App\Models\Location;
+use App\Models\Route;
 use Illuminate\Support\Facades\Schema;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 test('routes table has explicit columns instead of JSON weights', function () {
     $columns = Schema::getColumnListing('routes');
-    
+
     expect($columns)->toContain('cost')
         ->toContain('transit_days')
         ->toContain('capacity')
@@ -26,7 +26,7 @@ test('routes table has strict foreign key constraints and unique index', functio
         'transport_mode' => 'Truck',
         'cost' => 100,
         'transit_days' => 2,
-        'capacity' => 1000
+        'capacity' => 1000,
     ]);
 
     $this->expectException(\Illuminate\Database\QueryException::class);
@@ -37,6 +37,6 @@ test('routes table has strict foreign key constraints and unique index', functio
         'transport_mode' => 'Truck',
         'cost' => 200,
         'transit_days' => 3,
-        'capacity' => 2000
+        'capacity' => 2000,
     ]);
 });

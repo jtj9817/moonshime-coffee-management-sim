@@ -1,14 +1,24 @@
 import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/react';
-import React, { type ReactNode } from 'react';
+import { type ReactNode } from 'react';
 import { afterEach, vi } from 'vitest';
 
-import { buildUseFormState, getMockGameContext, getMockPage, inertiaRouterMock, resetTestMocks } from '@/tests/support/mocks';
+import {
+    buildUseFormState,
+    getMockGameContext,
+    getMockPage,
+    inertiaRouterMock,
+    resetTestMocks,
+} from '@/tests/support/mocks';
 
 vi.mock('@inertiajs/react', () => ({
     Head: ({ children }: { children?: ReactNode }) =>
         children ? <>{children}</> : null,
-    Link: ({ children, href, ...props }: { children?: ReactNode; href?: unknown } & Record<string, unknown>) => (
+    Link: ({
+        children,
+        href,
+        ...props
+    }: { children?: ReactNode; href?: unknown } & Record<string, unknown>) => (
         <a href={typeof href === 'string' ? href : '#'} {...props}>
             {children}
         </a>
@@ -53,9 +63,9 @@ if (!window.matchMedia) {
 
 if (!globalThis.ResizeObserver) {
     globalThis.ResizeObserver = class {
-        observe(): void { }
-        unobserve(): void { }
-        disconnect(): void { }
+        observe(): void {}
+        unobserve(): void {}
+        disconnect(): void {}
     };
 }
 

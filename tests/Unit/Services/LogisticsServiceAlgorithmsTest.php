@@ -17,8 +17,8 @@ test('checkReachability returns true if supply source is reachable', function ()
     Route::factory()->create(['source_id' => $warehouse->id, 'target_id' => $nodeB->id, 'is_active' => true]);
     Route::factory()->create(['source_id' => $nodeB->id, 'target_id' => $target->id, 'is_active' => true]);
 
-    $service = new LogisticsService();
-    
+    $service = new LogisticsService;
+
     // Reverse BFS from Target should find Warehouse
     expect($service->checkReachability($target))->toBeTrue();
 });
@@ -29,8 +29,8 @@ test('checkReachability returns false if isolated from supply', function () {
     $warehouse = Location::factory()->create(['type' => 'warehouse']);
     $target = Location::factory()->create(['type' => 'store']);
 
-    $service = new LogisticsService();
-    
+    $service = new LogisticsService;
+
     expect($service->checkReachability($target))->toBeFalse();
 });
 
@@ -43,7 +43,7 @@ test('checkReachability returns false if path is inactive', function () {
     Route::factory()->create(['source_id' => $warehouse->id, 'target_id' => $nodeB->id, 'is_active' => false]);
     Route::factory()->create(['source_id' => $nodeB->id, 'target_id' => $target->id, 'is_active' => true]);
 
-    $service = new LogisticsService();
-    
+    $service = new LogisticsService;
+
     expect($service->checkReachability($target))->toBeFalse();
 });

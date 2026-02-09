@@ -7,9 +7,8 @@ use App\Models\Location;
 use App\Models\Product;
 use App\Models\Route;
 use App\Models\SpikeEvent;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
@@ -19,7 +18,7 @@ test('it generates isolation alert only when unreachable and stock is low', func
     $warehouse = Location::factory()->create(['type' => 'warehouse']);
     $store = Location::factory()->create(['type' => 'store']);
     $product = Product::factory()->create();
-    
+
     // Create an inactive route (store is isolated)
     Route::factory()->create([
         'source_id' => $warehouse->id,
@@ -53,7 +52,7 @@ test('it generates isolation alert only when unreachable and stock is low', func
     $action->handle($user->id);
 
     expect(Alert::where('type', 'isolation')->count())->toBe(1);
-    
+
     $alert = Alert::where('type', 'isolation')->first();
     expect($alert->location_id)->toBe($store->id);
     expect($alert->spike_event_id)->toBe($spike->id);
@@ -65,7 +64,7 @@ test('it does not generate alert if reachable even if stock is low', function ()
     $warehouse = Location::factory()->create(['type' => 'warehouse']);
     $store = Location::factory()->create(['type' => 'store']);
     $product = Product::factory()->create();
-    
+
     // Create an ACTIVE route
     Route::factory()->create([
         'source_id' => $warehouse->id,

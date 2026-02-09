@@ -2,20 +2,18 @@
 
 namespace App\Models;
 
+use App\States\OrderState;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-
 use Illuminate\Database\Eloquent\Relations\HasMany;
-
-use App\States\OrderState;
 use Spatie\ModelStates\HasStates;
 
 class Order extends Model
 {
     /** @use HasFactory<\Database\Factories\OrderFactory> */
-    use HasFactory, HasUuids, HasStates;
+    use HasFactory, HasStates, HasUuids;
 
     protected $fillable = [
         'user_id',

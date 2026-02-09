@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Manual Verification Script: Phase 1 - Visibility & Consequences
  *
@@ -12,25 +13,25 @@
  * Usage: ./vendor/bin/sail php tests/manual/verify_phase1_visibility.php
  */
 
-require_once __DIR__ . '/../../vendor/autoload.php';
-$app = require_once __DIR__ . '/../../bootstrap/app.php';
+require_once __DIR__.'/../../vendor/autoload.php';
+$app = require_once __DIR__.'/../../bootstrap/app.php';
 $kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
 $kernel->bootstrap();
 
+use App\Events\TimeAdvanced;
+use App\Listeners\CreateDailySummaryAlert;
+use App\Listeners\CreateLocationDailyMetrics;
+use App\Models\Alert;
+use App\Models\DemandEvent;
 use App\Models\GameState;
 use App\Models\Inventory;
 use App\Models\Location;
 use App\Models\LocationDailyMetric;
 use App\Models\LostSale;
 use App\Models\Product;
-use App\Models\Alert;
-use App\Models\DemandEvent;
 use App\Models\User;
 use App\Services\DemandForecastService;
 use App\Services\DemandSimulationService;
-use App\Listeners\CreateLocationDailyMetrics;
-use App\Listeners\CreateDailySummaryAlert;
-use App\Events\TimeAdvanced;
 use Illuminate\Support\Facades\DB;
 
 echo "=========================================\n";
@@ -41,13 +42,14 @@ echo "=========================================\n\n";
 $passed = 0;
 $failed = 0;
 
-function check(string $label, bool $condition, string $detail = ''): void {
+function check(string $label, bool $condition, string $detail = ''): void
+{
     global $passed, $failed;
     if ($condition) {
         echo "  [PASS] {$label}\n";
         $passed++;
     } else {
-        echo "  [FAIL] {$label}" . ($detail ? " — {$detail}" : '') . "\n";
+        echo "  [FAIL] {$label}".($detail ? " — {$detail}" : '')."\n";
         $failed++;
     }
 }
@@ -94,7 +96,7 @@ echo "--- Feature 2: Financial Granularity (P&L per Location) ---\n";
 // Reset inventory for P&L test
 Inventory::where('user_id', $user->id)->update(['quantity' => 50]);
 
-$listener = new CreateLocationDailyMetrics();
+$listener = new CreateLocationDailyMetrics;
 $listener->handle(new TimeAdvanced(5, $gameState));
 
 $metric = LocationDailyMetric::where('user_id', $user->id)->where('day', 5)->first();
@@ -131,7 +133,7 @@ echo "\n";
 // ============ FEATURE 4: Daily Summary Notifications ============
 echo "--- Feature 4: Daily Summary Notifications ---\n";
 
-$summaryListener = new CreateDailySummaryAlert();
+$summaryListener = new CreateDailySummaryAlert;
 $summaryListener->handle(new TimeAdvanced(5, $gameState));
 
 $summaryAlert = Alert::where('user_id', $user->id)->where('type', 'summary')->where('created_day', 5)->first();
@@ -175,7 +177,7 @@ if ($cheapDemand) {
     echo "  INFO: Demand at cheap store: requested={$cheapDemand->requested_quantity}, fulfilled={$cheapDemand->fulfilled_quantity}\n";
 }
 
-check('Location model has sell_price in fillable', in_array('sell_price', (new Location())->getFillable()));
+check('Location model has sell_price in fillable', in_array('sell_price', (new Location)->getFillable()));
 check('Location model casts sell_price as integer', true); // verified by factory test above
 echo "\n";
 

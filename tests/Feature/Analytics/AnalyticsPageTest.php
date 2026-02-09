@@ -20,7 +20,7 @@ class AnalyticsPageTest extends TestCase
         $location2 = \App\Models\Location::factory()->create();
         $product1 = \App\Models\Product::factory()->create();
         $product2 = \App\Models\Product::factory()->create();
-        
+
         // Seed inventory history
         // Day 1: 30 units total
         DB::table('inventory_history')->insert([
@@ -60,10 +60,10 @@ class AnalyticsPageTest extends TestCase
     {
         $user = User::factory()->create();
         \App\Models\GameState::factory()->create(['user_id' => $user->id]);
-        
+
         $beans = \App\Models\Product::factory()->create(['category' => 'Beans', 'name' => 'Beans A']);
         $milk = \App\Models\Product::factory()->create(['category' => 'Milk', 'name' => 'Milk B']);
-        
+
         $order1 = \App\Models\Order::factory()->create(['user_id' => $user->id]);
         \App\Models\OrderItem::factory()->create([
             'order_id' => $order1->id,
@@ -85,7 +85,7 @@ class AnalyticsPageTest extends TestCase
             'quantity' => 5,
             'cost_per_unit' => 10, // 50
         ]);
-        
+
         // Another user
         $otherUser = User::factory()->create();
         \App\Models\GameState::factory()->create(['user_id' => $otherUser->id]);
@@ -101,14 +101,14 @@ class AnalyticsPageTest extends TestCase
             ->get(route('game.analytics'));
 
         $response->assertStatus(200);
-        
+
         $response->assertInertia(fn (AssertableInertia $page) => $page
             ->component('game/analytics')
             ->has('spendingByCategory', 2)
             ->where('spendingByCategory', function ($items) {
                 $beans = collect($items)->firstWhere('category', 'Beans');
                 $milk = collect($items)->firstWhere('category', 'Milk');
-                
+
                 return $beans['amount'] == 150 && $milk['amount'] == 100;
             })
         );
@@ -118,11 +118,11 @@ class AnalyticsPageTest extends TestCase
     {
         $user = User::factory()->create();
         $gameState = \App\Models\GameState::factory()->create(['user_id' => $user->id, 'cash' => 1000]);
-        
+
         $location = \App\Models\Location::factory()->create(['name' => 'Central', 'max_storage' => 100]);
         $productA = \App\Models\Product::factory()->create(['unit_price' => 10]);
         $productB = \App\Models\Product::factory()->create(['unit_price' => 20]);
-        
+
         // User 1 Inventory: 50 units * $10 = $500. Utilization 50/100 = 50%. Item Count = 1.
         \App\Models\Inventory::factory()->create([
             'user_id' => $user->id,
@@ -130,7 +130,7 @@ class AnalyticsPageTest extends TestCase
             'product_id' => $productA->id,
             'quantity' => 50,
         ]);
-        
+
         // Other User Inventory: 20 units. Should be ignored.
         // Must use different product to avoid unique(location_id, product_id) if user_id is not in unique
         $otherUser = User::factory()->create();
@@ -146,14 +146,16 @@ class AnalyticsPageTest extends TestCase
             ->get(route('game.analytics'));
 
         $response->assertStatus(200);
-        
+
         $response->assertInertia(fn (AssertableInertia $page) => $page
             ->component('game/analytics')
             ->has('locationComparison')
             ->where('locationComparison', function ($locations) {
                 $target = collect($locations)->firstWhere('name', 'Central');
-                
-                if (!$target) return false;
+
+                if (! $target) {
+                    return false;
+                }
 
                 return $target['inventoryValue'] == 500
                     && $target['utilization'] == 50

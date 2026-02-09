@@ -13,7 +13,7 @@ beforeEach(function () {
         'xp' => 0,
         'day' => 1,
     ]);
-    $this->checker = new SpikeConstraintChecker();
+    $this->checker = new SpikeConstraintChecker;
 });
 
 test('canScheduleSpike returns false when window would exceed cap', function () {

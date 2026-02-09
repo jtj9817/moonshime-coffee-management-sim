@@ -100,7 +100,10 @@ export default function Analytics({
         (sum, loc) => sum + loc.inventoryValue,
         0,
     );
-    const totalSpending = spendingByCategory.reduce((sum, cat) => sum + cat.amount, 0);
+    const totalSpending = spendingByCategory.reduce(
+        (sum, cat) => sum + cat.amount,
+        0,
+    );
 
     return (
         <GameLayout breadcrumbs={breadcrumbs}>
@@ -113,22 +116,32 @@ export default function Analytics({
                         Analytics Dashboard
                     </h1>
                     <p className="text-stone-500 dark:text-stone-400">
-                        Insights and performance metrics across your supply chain
+                        Insights and performance metrics across your supply
+                        chain
                     </p>
                 </div>
 
                 {/* Tabbed Interface */}
                 <Tabs defaultValue="overview" className="w-full">
-                    <TabsList className="grid w-full grid-cols-3 lg:w-auto lg:grid-cols-none lg:inline-flex">
-                        <TabsTrigger value="overview" className="flex items-center gap-2">
+                    <TabsList className="grid w-full grid-cols-3 lg:inline-flex lg:w-auto lg:grid-cols-none">
+                        <TabsTrigger
+                            value="overview"
+                            className="flex items-center gap-2"
+                        >
                             <BarChart3 className="h-4 w-4" />
                             <span>Overview</span>
                         </TabsTrigger>
-                        <TabsTrigger value="logistics" className="flex items-center gap-2">
+                        <TabsTrigger
+                            value="logistics"
+                            className="flex items-center gap-2"
+                        >
                             <Boxes className="h-4 w-4" />
                             <span>Logistics</span>
                         </TabsTrigger>
-                        <TabsTrigger value="financials" className="flex items-center gap-2">
+                        <TabsTrigger
+                            value="financials"
+                            className="flex items-center gap-2"
+                        >
                             <DollarSign className="h-4 w-4" />
                             <span>Financials</span>
                         </TabsTrigger>

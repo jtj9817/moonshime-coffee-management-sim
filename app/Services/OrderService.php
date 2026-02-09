@@ -9,7 +9,6 @@ use App\Models\User;
 use App\Models\Vendor;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use App\States\OrderState;
 
 class OrderService
 {
@@ -23,40 +22,37 @@ class OrderService
     /**
      * Create a new order with multi-hop shipments.
      *
-     * @param User $user
-     * @param Vendor $vendor
-     * @param Location $targetLocation
-     * @param array $items Array of ['product_id', 'quantity', 'cost_per_unit']
-     * @param Collection|null $path Pre-calculated path or null to calculate
-     * @return Order
+     * @param  array  $items  Array of ['product_id', 'quantity', 'cost_per_unit']
+     * @param  Collection|null  $path  Pre-calculated path or null to calculate
+     *
      * @throws \Exception
      */
     public function createOrder(User $user, Vendor $vendor, Location $targetLocation, array $items, ?Collection $path = null): Order
     {
         // 1. Calculate Path if not provided
-        if (!$path) {
+        if (! $path) {
             // Vendors are not locations in the graph directly usually, but their source_location is?
             // Wait, GraphSeeder: source_id => vendor->id.
             // So Vendor IS a location type.
             $vendorLocation = Location::where('id', $vendor->id)->first();
-            if (!$vendorLocation) {
-                 // Fallback: Check if Vendor has a 'location' relation or if the ID matches
-                 // In this app, Vendor seems to strictly be a Vendor model, and Location is separate?
-                 // Checking GraphSeeder: $vendors = Location::factory()->...->create(['type' => 'vendor']);
-                 // So "Vendor" in the graph is a Location with type 'vendor'.
-                 // But the 'Vendor' model (App\Models\Vendor) might be different.
-                 // CoreGameStateSeeder creates App\Models\Vendor.
-                 // The graph links Location IDs.
-                 // We need to map App\Models\Vendor to App\Models\Location of type 'vendor'.
-                 // Assuming for now they might not be the same ID.
-                 // Let's assume the caller passes the correct Location for the vendor.
-                 throw new \Exception("Vendor location mapping required.");
+            if (! $vendorLocation) {
+                // Fallback: Check if Vendor has a 'location' relation or if the ID matches
+                // In this app, Vendor seems to strictly be a Vendor model, and Location is separate?
+                // Checking GraphSeeder: $vendors = Location::factory()->...->create(['type' => 'vendor']);
+                // So "Vendor" in the graph is a Location with type 'vendor'.
+                // But the 'Vendor' model (App\Models\Vendor) might be different.
+                // CoreGameStateSeeder creates App\Models\Vendor.
+                // The graph links Location IDs.
+                // We need to map App\Models\Vendor to App\Models\Location of type 'vendor'.
+                // Assuming for now they might not be the same ID.
+                // Let's assume the caller passes the correct Location for the vendor.
+                throw new \Exception('Vendor location mapping required.');
             }
             $path = $this->logistics->findBestRoute($vendorLocation, $targetLocation);
         }
 
-        if (!$path || $path->isEmpty()) {
-            throw new \Exception("No valid route found between vendor and target location.");
+        if (! $path || $path->isEmpty()) {
+            throw new \Exception('No valid route found between vendor and target location.');
         }
 
         return DB::transaction(function () use ($user, $vendor, $targetLocation, $items, $path) {
@@ -76,11 +72,11 @@ class OrderService
             }
 
             // Add Logistics Cost (integer cents)
-            $logisticsCost = (int) $path->sum(fn($route) => $this->logistics->calculateCost($route));
+            $logisticsCost = (int) $path->sum(fn ($route) => $this->logistics->calculateCost($route));
             $totalCost = $totalCost + $logisticsCost;
 
             // Transits
-            $totalDays = $path->sum('transit_days'); 
+            $totalDays = $path->sum('transit_days');
             // Note: Actual delivery day depends on when order is placed + total days.
             // Assuming order is placed 'now' (today).
             // We need GameState to know 'today', but Order usually stores relative or absolute?

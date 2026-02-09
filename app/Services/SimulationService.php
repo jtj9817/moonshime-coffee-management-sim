@@ -2,15 +2,15 @@
 
 namespace App\Services;
 
-use App\Models\GameState;
+use App\Actions\GenerateIsolationAlerts;
+use App\Events\SpikeEnded;
+use App\Events\SpikeOccurred;
 use App\Events\TimeAdvanced;
+use App\Models\GameState;
 use App\Models\SpikeEvent;
 use App\Models\Transfer;
-use App\States\Transfer\InTransit;
 use App\States\Transfer\Completed;
-use App\Actions\GenerateIsolationAlerts;
-use App\Events\SpikeOccurred;
-use App\Events\SpikeEnded;
+use App\States\Transfer\InTransit;
 
 class SimulationService
 {
@@ -35,7 +35,7 @@ class SimulationService
             $this->processPhysicsTick($day);
             $this->processConsumptionTick($day);
             $this->processAnalysisTick($day);
-            
+
             event(new TimeAdvanced($day, $this->gameState));
         });
     }
@@ -74,7 +74,7 @@ class SimulationService
             ->each(function (SpikeEvent $spike) use ($constraintChecker, $day) {
                 $spike->update(['is_active' => true]);
                 event(new SpikeOccurred($spike));
-                
+
                 // Record cooldown when spike actually starts
                 $constraintChecker->recordSpikeStarted($this->gameState, $spike->type, $day);
             });
@@ -100,7 +100,7 @@ class SimulationService
             ->where('ends_at_day', '>', $day)
             ->exists();
 
-        if (!$hasSpikeCoveringToday) {
+        if (! $hasSpikeCoveringToday) {
             // Generate a guaranteed spike for today
             app(GuaranteedSpikeGenerator::class)->generate($this->gameState, $day);
         }
@@ -114,7 +114,7 @@ class SimulationService
         $startDay = $day + 1;
         $duration = rand(2, 5);
 
-        if (!$constraintChecker->canScheduleSpike($this->gameState, $startDay, $duration)) {
+        if (! $constraintChecker->canScheduleSpike($this->gameState, $startDay, $duration)) {
             return;
         }
 

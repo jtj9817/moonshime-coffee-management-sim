@@ -8,7 +8,10 @@ interface AdvanceDayButtonProps {
     label?: string;
 }
 
-export function AdvanceDayButton({ className = '', label = 'Next Day' }: AdvanceDayButtonProps) {
+export function AdvanceDayButton({
+    className = '',
+    label = 'Next Day',
+}: AdvanceDayButtonProps) {
     const { post, processing } = useForm({});
 
     const handleAdvanceDay = () => {

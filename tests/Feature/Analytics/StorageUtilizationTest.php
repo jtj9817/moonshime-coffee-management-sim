@@ -15,12 +15,12 @@ class StorageUtilizationTest extends TestCase
     {
         $user = User::factory()->create();
         \App\Models\GameState::factory()->create(['user_id' => $user->id]);
-        
+
         $location1 = \App\Models\Location::factory()->create(['name' => 'Warehouse A', 'max_storage' => 1000]);
         $location2 = \App\Models\Location::factory()->create(['name' => 'Store B', 'max_storage' => 500]);
-        
+
         $product = \App\Models\Product::factory()->create();
-        
+
         // Loc 1: 500 units / 1000 capacity = 50%
         \App\Models\Inventory::factory()->create([
             'user_id' => $user->id,
@@ -28,7 +28,7 @@ class StorageUtilizationTest extends TestCase
             'product_id' => $product->id,
             'quantity' => 500,
         ]);
-        
+
         // Loc 2: 400 units / 500 capacity = 80%
         \App\Models\Inventory::factory()->create([
             'user_id' => $user->id,
@@ -36,7 +36,7 @@ class StorageUtilizationTest extends TestCase
             'product_id' => $product->id,
             'quantity' => 400,
         ]);
-        
+
         // Other user data (should be ignored)
         $otherUser = User::factory()->create();
         \App\Models\GameState::factory()->create(['user_id' => $otherUser->id]);
@@ -58,7 +58,7 @@ class StorageUtilizationTest extends TestCase
             ->where('storageUtilization', function ($items) use ($location1, $location2) {
                 $loc1 = collect($items)->firstWhere('location_id', $location1->id);
                 $loc2 = collect($items)->firstWhere('location_id', $location2->id);
-                
+
                 return $loc1['name'] === 'Warehouse A'
                     && $loc1['capacity'] == 1000
                     && $loc1['used'] == 500

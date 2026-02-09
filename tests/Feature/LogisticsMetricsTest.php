@@ -1,8 +1,8 @@
 <?php
 
-use App\Models\User;
 use App\Models\GameState;
 use App\Models\SpikeEvent;
+use App\Models\User;
 use Inertia\Testing\AssertableInertia as Assert;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
@@ -20,12 +20,12 @@ test('dashboard includes explicit logistics metrics props', function () {
     // Act & Assert (check we have at least our created active spikes)
     $response = $this->actingAs($user)
         ->get(route('game.dashboard'));
-    
+
     $response->assertInertia(fn (Assert $page) => $page
         ->has('logistics_health')
         ->has('active_spikes_count')
     );
-    
+
     $activeSpikesCount = $response->original->getData()['page']['props']['active_spikes_count'];
     expect($activeSpikesCount)->toBeGreaterThanOrEqual(3);
 });

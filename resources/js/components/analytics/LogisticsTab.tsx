@@ -46,7 +46,10 @@ function getUtilizationStatus(percentage: number): string {
     return 'Low';
 }
 
-export function LogisticsTab({ storageUtilization, spikeImpactAnalysis }: LogisticsTabProps) {
+export function LogisticsTab({
+    storageUtilization,
+    spikeImpactAnalysis,
+}: LogisticsTabProps) {
     return (
         <div className="flex flex-col gap-6">
             {/* Storage Utilization */}
@@ -55,7 +58,10 @@ export function LogisticsTab({ storageUtilization, spikeImpactAnalysis }: Logist
                     <CardContent className="pt-6">
                         <div className="space-y-6">
                             {storageUtilization.map((loc) => (
-                                <div key={loc.location_id} className="space-y-2">
+                                <div
+                                    key={loc.location_id}
+                                    className="space-y-2"
+                                >
                                     <div className="flex items-center justify-between">
                                         <div className="font-medium text-stone-900 dark:text-white">
                                             {loc.name}
@@ -64,17 +70,22 @@ export function LogisticsTab({ storageUtilization, spikeImpactAnalysis }: Logist
                                             <span
                                                 className={`rounded-full px-2 py-0.5 text-xs font-medium text-white ${getUtilizationColor(loc.percentage)}`}
                                             >
-                                                {getUtilizationStatus(loc.percentage)}
+                                                {getUtilizationStatus(
+                                                    loc.percentage,
+                                                )}
                                             </span>
                                             <span className="text-sm text-stone-500">
-                                                {loc.used} / {loc.capacity} units
+                                                {loc.used} / {loc.capacity}{' '}
+                                                units
                                             </span>
                                         </div>
                                     </div>
                                     <div className="h-4 w-full overflow-hidden rounded-full bg-stone-200 dark:bg-stone-700">
                                         <div
                                             className={`h-full transition-all ${getUtilizationColor(loc.percentage)}`}
-                                            style={{ width: `${Math.min(loc.percentage, 100)}%` }}
+                                            style={{
+                                                width: `${Math.min(loc.percentage, 100)}%`,
+                                            }}
                                         />
                                     </div>
                                     <div className="text-right text-sm text-stone-500">
@@ -114,14 +125,17 @@ export function LogisticsTab({ storageUtilization, spikeImpactAnalysis }: Logist
                                                     </span>
                                                 </div>
                                                 <p className="mt-1 text-sm text-stone-500">
-                                                    Day {spike.start_day} - Day {spike.end_day}
+                                                    Day {spike.start_day} - Day{' '}
+                                                    {spike.end_day}
                                                 </p>
                                             </div>
                                             <div className="text-right text-sm">
                                                 <div className="text-stone-600 dark:text-stone-400">
                                                     {spike.product_name}
                                                 </div>
-                                                <div className="text-stone-500">{spike.location_name}</div>
+                                                <div className="text-stone-500">
+                                                    {spike.location_name}
+                                                </div>
                                             </div>
                                         </div>
                                         {spike.impact ? (
@@ -131,7 +145,10 @@ export function LogisticsTab({ storageUtilization, spikeImpactAnalysis }: Logist
                                                     <span className="text-sm text-stone-600 dark:text-stone-400">
                                                         Min Inventory:{' '}
                                                         <span className="font-medium text-stone-900 dark:text-white">
-                                                            {spike.impact.min_inventory}
+                                                            {
+                                                                spike.impact
+                                                                    .min_inventory
+                                                            }
                                                         </span>
                                                     </span>
                                                 </div>
@@ -140,14 +157,18 @@ export function LogisticsTab({ storageUtilization, spikeImpactAnalysis }: Logist
                                                     <span className="text-sm text-stone-600 dark:text-stone-400">
                                                         Avg Inventory:{' '}
                                                         <span className="font-medium text-stone-900 dark:text-white">
-                                                            {spike.impact.avg_inventory}
+                                                            {
+                                                                spike.impact
+                                                                    .avg_inventory
+                                                            }
                                                         </span>
                                                     </span>
                                                 </div>
                                             </div>
                                         ) : (
                                             <div className="mt-3 border-t border-stone-100 pt-3 text-sm text-stone-500 dark:border-stone-800">
-                                                No impact data available for this spike.
+                                                No impact data available for
+                                                this spike.
                                             </div>
                                         )}
                                     </div>
@@ -155,7 +176,8 @@ export function LogisticsTab({ storageUtilization, spikeImpactAnalysis }: Logist
                             </div>
                         ) : (
                             <div className="py-8 text-center text-stone-500">
-                                No spike events recorded yet. Spikes may occur as the game progresses.
+                                No spike events recorded yet. Spikes may occur
+                                as the game progresses.
                             </div>
                         )}
                     </CardContent>

@@ -100,7 +100,7 @@ class GraphSeeder extends Seeder
             for ($i = 0; $i < count($stores) - 1; $i++) {
                 Route::factory()->create([
                     'source_id' => $stores[$i]->id,
-                    'target_id' => $stores[$i+1]->id,
+                    'target_id' => $stores[$i + 1]->id,
                     'transport_mode' => 'Truck',
                     'cost' => 150, // cents
                     'transit_days' => 3,

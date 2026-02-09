@@ -1,6 +1,14 @@
 import { Head, useForm } from '@inertiajs/react';
-import { ArrowRight, ArrowRightLeft, MapPin, Plus, Truck, AlertTriangle, Info } from 'lucide-react';
-import { useMemo, useState, useEffect, type ReactNode } from 'react';
+import {
+    AlertTriangle,
+    ArrowRight,
+    ArrowRightLeft,
+    Info,
+    MapPin,
+    Plus,
+    Truck,
+} from 'lucide-react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -57,9 +65,17 @@ function getStatusBadge(status: string) {
         case 'pending':
             return <Badge variant="secondary">Pending</Badge>;
         case 'in_transit':
-            return <Badge variant="default" className="bg-blue-500">In Transit</Badge>;
+            return (
+                <Badge variant="default" className="bg-blue-500">
+                    In Transit
+                </Badge>
+            );
         case 'completed':
-            return <Badge variant="default" className="bg-emerald-500">Completed</Badge>;
+            return (
+                <Badge variant="default" className="bg-emerald-500">
+                    Completed
+                </Badge>
+            );
         case 'cancelled':
             return <Badge variant="destructive">Cancelled</Badge>;
         default:
@@ -111,9 +127,13 @@ export default function Transfers({ transfers, suggestions }: TransfersProps) {
     });
 
     // Determine if the current path contains any premium routes
-    const hasPremiumRoute = routeInfo?.path?.some(step => step.is_premium);
+    const hasPremiumRoute = routeInfo?.path?.some((step) => step.is_premium);
 
-    const shouldFetchRoute = !!(data.source_location_id && data.target_location_id && data.source_location_id !== data.target_location_id);
+    const shouldFetchRoute = !!(
+        data.source_location_id &&
+        data.target_location_id &&
+        data.source_location_id !== data.target_location_id
+    );
 
     // Reset route info when inputs become invalid (derived state)
     if (!shouldFetchRoute && routeInfo !== null) {
@@ -127,22 +147,28 @@ export default function Transfers({ transfers, suggestions }: TransfersProps) {
         let cancelled = false;
         const controller = new AbortController();
 
-        fetch(`/game/logistics/path?source_id=${data.source_location_id}&target_id=${data.target_location_id}`, { signal: controller.signal })
-            .then(res => res.json())
-            .then(result => {
+        fetch(
+            `/game/logistics/path?source_id=${data.source_location_id}&target_id=${data.target_location_id}`,
+            { signal: controller.signal },
+        )
+            .then((res) => res.json())
+            .then((result) => {
                 if (!cancelled) {
                     setRouteInfo(result);
                     setShowAlternative(false);
                     setLoadingRoute(false);
                 }
             })
-            .catch(error => {
+            .catch((error) => {
                 if (!cancelled && error.name !== 'AbortError') {
                     console.error('Failed to fetch route', error);
                     setLoadingRoute(false);
                 }
             });
-        return () => { cancelled = true; controller.abort(); };
+        return () => {
+            cancelled = true;
+            controller.abort();
+        };
     }, [data.source_location_id, data.target_location_id, shouldFetchRoute]);
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -170,7 +196,7 @@ export default function Transfers({ transfers, suggestions }: TransfersProps) {
                             Manage inter-location transfers
                         </p>
                     </div>
-                    
+
                     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                         <DialogTrigger asChild>
                             <Button className="gap-2 bg-amber-600 hover:bg-amber-700">
@@ -181,41 +207,68 @@ export default function Transfers({ transfers, suggestions }: TransfersProps) {
                         <DialogContent className="sm:max-w-[500px]">
                             <form onSubmit={handleSubmit}>
                                 <DialogHeader>
-                                    <DialogTitle>Create Inter-Location Transfer</DialogTitle>
+                                    <DialogTitle>
+                                        Create Inter-Location Transfer
+                                    </DialogTitle>
                                     <DialogDescription>
-                                        Move inventory between locations. Routes are affected by active weather events.
+                                        Move inventory between locations. Routes
+                                        are affected by active weather events.
                                     </DialogDescription>
                                 </DialogHeader>
                                 <div className="grid gap-4 py-4">
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-2">
-                                            <Label htmlFor="source">Source</Label>
-                                            <Select 
-                                                value={data.source_location_id} 
-                                                onValueChange={(val) => setData('source_location_id', val)}
+                                            <Label htmlFor="source">
+                                                Source
+                                            </Label>
+                                            <Select
+                                                value={data.source_location_id}
+                                                onValueChange={(val) =>
+                                                    setData(
+                                                        'source_location_id',
+                                                        val,
+                                                    )
+                                                }
                                             >
                                                 <SelectTrigger>
                                                     <SelectValue placeholder="Select source" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    {locations.map(loc => (
-                                                        <SelectItem key={loc.id} value={loc.id}>{loc.name}</SelectItem>
+                                                    {locations.map((loc) => (
+                                                        <SelectItem
+                                                            key={loc.id}
+                                                            value={loc.id}
+                                                        >
+                                                            {loc.name}
+                                                        </SelectItem>
                                                     ))}
                                                 </SelectContent>
                                             </Select>
                                         </div>
                                         <div className="space-y-2">
-                                            <Label htmlFor="target">Destination</Label>
-                                            <Select 
-                                                value={data.target_location_id} 
-                                                onValueChange={(val) => setData('target_location_id', val)}
+                                            <Label htmlFor="target">
+                                                Destination
+                                            </Label>
+                                            <Select
+                                                value={data.target_location_id}
+                                                onValueChange={(val) =>
+                                                    setData(
+                                                        'target_location_id',
+                                                        val,
+                                                    )
+                                                }
                                             >
                                                 <SelectTrigger>
                                                     <SelectValue placeholder="Select target" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    {locations.map(loc => (
-                                                        <SelectItem key={loc.id} value={loc.id}>{loc.name}</SelectItem>
+                                                    {locations.map((loc) => (
+                                                        <SelectItem
+                                                            key={loc.id}
+                                                            value={loc.id}
+                                                        >
+                                                            {loc.name}
+                                                        </SelectItem>
                                                     ))}
                                                 </SelectContent>
                                             </Select>
@@ -231,7 +284,9 @@ export default function Transfers({ transfers, suggestions }: TransfersProps) {
                                     )}
 
                                     {routeInfo && !loadingRoute && (
-                                        <div className={`space-y-3 rounded-lg border p-3 ${routeInfo.reachable ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-900 dark:bg-emerald-950/30' : 'border-rose-200 bg-rose-50 dark:border-rose-900 dark:bg-rose-950/30'}`}>
+                                        <div
+                                            className={`space-y-3 rounded-lg border p-3 ${routeInfo.reachable ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-900 dark:bg-emerald-950/30' : 'border-rose-200 bg-rose-50 dark:border-rose-900 dark:bg-rose-950/30'}`}
+                                        >
                                             <div className="flex items-start gap-2">
                                                 {routeInfo.reachable ? (
                                                     <Truck className="mt-0.5 h-4 w-4 text-emerald-600" />
@@ -239,32 +294,93 @@ export default function Transfers({ transfers, suggestions }: TransfersProps) {
                                                     <AlertTriangle className="mt-0.5 h-4 w-4 text-rose-600" />
                                                 )}
                                                 <div className="flex-1">
-                                                    <p className={`text-sm font-bold ${routeInfo.reachable ? 'text-emerald-800 dark:text-emerald-400' : 'text-rose-800 dark:text-rose-400'}`}>
-                                                        {routeInfo.reachable ? (hasPremiumRoute && !showAlternative ? 'Direct Route Blocked' : 'Route Active') : 'All Routes Blocked'}
+                                                    <p
+                                                        className={`text-sm font-bold ${routeInfo.reachable ? 'text-emerald-800 dark:text-emerald-400' : 'text-rose-800 dark:text-rose-400'}`}
+                                                    >
+                                                        {routeInfo.reachable
+                                                            ? hasPremiumRoute &&
+                                                              !showAlternative
+                                                                ? 'Direct Route Blocked'
+                                                                : 'Route Active'
+                                                            : 'All Routes Blocked'}
                                                     </p>
-                                                    
+
                                                     {routeInfo.reachable && (
                                                         <div className="mt-1">
                                                             <div className="flex items-center justify-between">
                                                                 <p className="text-xs text-stone-600 dark:text-stone-400">
-                                                                    Estimated cost: <span className="font-bold text-stone-900 dark:text-white">${routeInfo.total_cost !== undefined ? formatCurrency(routeInfo.total_cost) : '0.00'}</span>
+                                                                    Estimated
+                                                                    cost:{' '}
+                                                                    <span className="font-bold text-stone-900 dark:text-white">
+                                                                        $
+                                                                        {routeInfo.total_cost !==
+                                                                        undefined
+                                                                            ? formatCurrency(
+                                                                                  routeInfo.total_cost,
+                                                                              )
+                                                                            : '0.00'}
+                                                                    </span>
                                                                 </p>
                                                                 {hasPremiumRoute && (
-                                                                    <Badge variant="outline" className="text-[10px] bg-amber-100 border-amber-500 text-amber-700 dark:bg-amber-900/30">Premium Alternative</Badge>
+                                                                    <Badge
+                                                                        variant="outline"
+                                                                        className="border-amber-500 bg-amber-100 text-[10px] text-amber-700 dark:bg-amber-900/30"
+                                                                    >
+                                                                        Premium
+                                                                        Alternative
+                                                                    </Badge>
                                                                 )}
                                                             </div>
-                                                            
+
                                                             {routeInfo.path && (
                                                                 <div className="mt-2 flex flex-wrap items-center gap-1">
-                                                                    {routeInfo.path.map((step, i) => (
-                                                                        <span key={i} className="flex items-center gap-1 text-[10px] font-medium text-stone-500">
-                                                                            <span className={step.is_premium ? 'text-amber-600 font-bold' : ''}>{step.source}</span>
-                                                                            <ArrowRight size={10} />
-                                                                            {i === routeInfo.path!.length - 1 && (
-                                                                                <span className={step.is_premium ? 'text-amber-600 font-bold' : ''}>{step.target}</span>
-                                                                            )}
-                                                                        </span>
-                                                                    ))}
+                                                                    {routeInfo.path.map(
+                                                                        (
+                                                                            step,
+                                                                            i,
+                                                                        ) => (
+                                                                            <span
+                                                                                key={
+                                                                                    i
+                                                                                }
+                                                                                className="flex items-center gap-1 text-[10px] font-medium text-stone-500"
+                                                                            >
+                                                                                <span
+                                                                                    className={
+                                                                                        step.is_premium
+                                                                                            ? 'font-bold text-amber-600'
+                                                                                            : ''
+                                                                                    }
+                                                                                >
+                                                                                    {
+                                                                                        step.source
+                                                                                    }
+                                                                                </span>
+                                                                                <ArrowRight
+                                                                                    size={
+                                                                                        10
+                                                                                    }
+                                                                                />
+                                                                                {i ===
+                                                                                    routeInfo
+                                                                                        .path!
+                                                                                        .length -
+                                                                                        1 && (
+                                                                                    <span
+                                                                                        className={
+                                                                                            step.is_premium
+                                                                                                ? 'font-bold text-amber-600'
+                                                                                                : ''
+                                                                                        }
+                                                                                    >
+                                                                                        {
+                                                                                            step.target
+                                                                                        }
+                                                                                    </span>
+                                                                                )}
+                                                                            </span>
+                                                                        ),
+                                                                    )}
                                                                 </div>
                                                             )}
                                                         </div>
@@ -272,64 +388,105 @@ export default function Transfers({ transfers, suggestions }: TransfersProps) {
 
                                                     {!routeInfo.reachable && (
                                                         <p className="text-xs text-stone-600 dark:text-stone-400">
-                                                            {routeInfo.message || 'No available routes due to severe disruptions or distance.'}
+                                                            {routeInfo.message ||
+                                                                'No available routes due to severe disruptions or distance.'}
                                                         </p>
                                                     )}
                                                 </div>
                                             </div>
 
                                             {/* Informational Blocking for Premium Routes */}
-                                            {routeInfo.reachable && hasPremiumRoute && !showAlternative && (
-                                                <div className="mt-2 rounded border border-amber-200 bg-amber-50 p-2 dark:border-amber-900 dark:bg-amber-950/30">
-                                                    <div className="flex items-center justify-between gap-4">
-                                                        <div className="flex items-center gap-2 text-xs text-amber-800 dark:text-amber-400">
-                                                            <Info size={14} className="shrink-0" />
-                                                            Primary path is currently unavailable. An expensive alternative route is required.
+                                            {routeInfo.reachable &&
+                                                hasPremiumRoute &&
+                                                !showAlternative && (
+                                                    <div className="mt-2 rounded border border-amber-200 bg-amber-50 p-2 dark:border-amber-900 dark:bg-amber-950/30">
+                                                        <div className="flex items-center justify-between gap-4">
+                                                            <div className="flex items-center gap-2 text-xs text-amber-800 dark:text-amber-400">
+                                                                <Info
+                                                                    size={14}
+                                                                    className="shrink-0"
+                                                                />
+                                                                Primary path is
+                                                                currently
+                                                                unavailable. An
+                                                                expensive
+                                                                alternative
+                                                                route is
+                                                                required.
+                                                            </div>
+                                                            <Button
+                                                                type="button"
+                                                                size="sm"
+                                                                variant="outline"
+                                                                className="h-7 border-amber-500 bg-white text-[10px] font-bold text-amber-600 hover:bg-amber-100 dark:bg-stone-900"
+                                                                onClick={() =>
+                                                                    setShowAlternative(
+                                                                        true,
+                                                                    )
+                                                                }
+                                                            >
+                                                                Authorize
+                                                                Premium
+                                                            </Button>
                                                         </div>
-                                                        <Button 
-                                                            type="button"
-                                                            size="sm"
-                                                            variant="outline"
-                                                            className="h-7 border-amber-500 bg-white text-[10px] font-bold text-amber-600 hover:bg-amber-100 dark:bg-stone-900"
-                                                            onClick={() => setShowAlternative(true)}
-                                                        >
-                                                            Authorize Premium
-                                                        </Button>
                                                     </div>
-                                                </div>
-                                            )}
+                                                )}
                                         </div>
                                     )}
 
                                     <div className="space-y-2">
                                         <Label>Items</Label>
                                         {data.items.map((item, index) => (
-                                            <div key={index} className="flex gap-2">
-                                                <Select 
-                                                    value={item.product_id} 
+                                            <div
+                                                key={index}
+                                                className="flex gap-2"
+                                            >
+                                                <Select
+                                                    value={item.product_id}
                                                     onValueChange={(val) => {
-                                                        const newItems = [...data.items];
-                                                        newItems[index].product_id = val;
-                                                        setData('items', newItems);
+                                                        const newItems = [
+                                                            ...data.items,
+                                                        ];
+                                                        newItems[
+                                                            index
+                                                        ].product_id = val;
+                                                        setData(
+                                                            'items',
+                                                            newItems,
+                                                        );
                                                     }}
                                                 >
                                                     <SelectTrigger className="flex-1">
                                                         <SelectValue placeholder="Select product" />
                                                     </SelectTrigger>
                                                     <SelectContent>
-                                                        {products.map(p => (
-                                                            <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                                                        {products.map((p) => (
+                                                            <SelectItem
+                                                                key={p.id}
+                                                                value={p.id}
+                                                            >
+                                                                {p.name}
+                                                            </SelectItem>
                                                         ))}
                                                     </SelectContent>
                                                 </Select>
-                                                <Input 
-                                                    type="number" 
-                                                    className="w-20" 
+                                                <Input
+                                                    type="number"
+                                                    className="w-20"
                                                     value={item.quantity}
                                                     onChange={(e) => {
-                                                        const newItems = [...data.items];
-                                                        newItems[index].quantity = parseInt(e.target.value);
-                                                        setData('items', newItems);
+                                                        const newItems = [
+                                                            ...data.items,
+                                                        ];
+                                                        newItems[
+                                                            index
+                                                        ].quantity = parseInt(
+                                                            e.target.value,
+                                                        );
+                                                        setData(
+                                                            'items',
+                                                            newItems,
+                                                        );
                                                     }}
                                                 />
                                             </div>
@@ -337,19 +494,22 @@ export default function Transfers({ transfers, suggestions }: TransfersProps) {
                                     </div>
                                 </div>
                                 <DialogFooter>
-                                    <Button 
-                                        type="submit" 
+                                    <Button
+                                        type="submit"
                                         disabled={
-                                            processing || 
-                                            !routeInfo?.reachable || 
-                                            (hasPremiumRoute && !showAlternative)
+                                            processing ||
+                                            !routeInfo?.reachable ||
+                                            (hasPremiumRoute &&
+                                                !showAlternative)
                                         }
                                         className="bg-amber-600 hover:bg-amber-700"
                                     >
-                                        {processing 
-                                            ? 'Creating...' 
-                                            : (hasPremiumRoute && !showAlternative ? 'Authorization Required' : 'Confirm Transfer')
-                                        }
+                                        {processing
+                                            ? 'Creating...'
+                                            : hasPremiumRoute &&
+                                                !showAlternative
+                                              ? 'Authorization Required'
+                                              : 'Confirm Transfer'}
                                     </Button>
                                 </DialogFooter>
                             </form>
@@ -368,7 +528,11 @@ export default function Transfers({ transfers, suggestions }: TransfersProps) {
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">
-                                {transfers.filter((t) => t.status === 'in_transit').length}
+                                {
+                                    transfers.filter(
+                                        (t) => t.status === 'in_transit',
+                                    ).length
+                                }
                             </div>
                         </CardContent>
                     </Card>
@@ -381,7 +545,11 @@ export default function Transfers({ transfers, suggestions }: TransfersProps) {
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">
-                                {transfers.filter((t) => t.status === 'completed').length}
+                                {
+                                    transfers.filter(
+                                        (t) => t.status === 'completed',
+                                    ).length
+                                }
                             </div>
                         </CardContent>
                     </Card>
@@ -393,7 +561,9 @@ export default function Transfers({ transfers, suggestions }: TransfersProps) {
                             <MapPin className="h-4 w-4 text-amber-500" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{suggestions.length}</div>
+                            <div className="text-2xl font-bold">
+                                {suggestions.length}
+                            </div>
                         </CardContent>
                     </Card>
                 </div>
@@ -426,26 +596,32 @@ export default function Transfers({ transfers, suggestions }: TransfersProps) {
                                             <span className="font-medium">
                                                 {getLocationName(
                                                     transfer.source_location_id,
-                                                    transfer.source_location?.name
+                                                    transfer.source_location
+                                                        ?.name,
                                                 )}
                                             </span>
                                             <ArrowRight className="h-4 w-4 text-stone-400" />
                                             <span className="font-medium">
                                                 {getLocationName(
                                                     transfer.target_location_id,
-                                                    transfer.target_location?.name
+                                                    transfer.target_location
+                                                        ?.name,
                                                 )}
                                             </span>
                                         </div>
                                     </TableCell>
-                                    <TableCell>{getStatusBadge(transfer.status)}</TableCell>
+                                    <TableCell>
+                                        {getStatusBadge(transfer.status)}
+                                    </TableCell>
                                     <TableCell>
                                         {transfer.delivery_day
                                             ? `Day ${transfer.delivery_day}`
                                             : '-'}
                                     </TableCell>
                                     <TableCell className="text-stone-500">
-                                        {new Date(transfer.created_at).toLocaleDateString()}
+                                        {new Date(
+                                            transfer.created_at,
+                                        ).toLocaleDateString()}
                                     </TableCell>
                                 </TableRow>
                             ))}

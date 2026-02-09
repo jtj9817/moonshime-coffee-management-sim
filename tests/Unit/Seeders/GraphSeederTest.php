@@ -27,8 +27,8 @@ test('graph seeder creates expected topology', function () {
 
     // Verify multi-hop connectivity exists - at least one vendor connected to a hub via Air
     $vendorToHubRoute = Route::where('transport_mode', 'Air')
-        ->whereHas('source', fn($q) => $q->where('type', 'vendor'))
-        ->whereHas('target', fn($q) => $q->where('type', 'hub'))
+        ->whereHas('source', fn ($q) => $q->where('type', 'vendor'))
+        ->whereHas('target', fn ($q) => $q->where('type', 'hub'))
         ->first();
 
     expect($vendorToHubRoute)->not->toBeNull('At least one vendor should be connected to a hub via Air');

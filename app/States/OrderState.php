@@ -2,7 +2,6 @@
 
 namespace App\States;
 
-use App\States\Order;
 use App\States\Order\Transitions;
 use Spatie\ModelStates\State;
 use Spatie\ModelStates\StateConfig;

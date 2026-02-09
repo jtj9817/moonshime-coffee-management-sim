@@ -5,10 +5,10 @@ namespace App\Listeners;
 use App\Events\TimeAdvanced;
 use App\Models\Order;
 use App\Models\Transfer;
-use App\States\Order\Shipped;
 use App\States\Order\Delivered;
-use App\States\Transfer\InTransit;
+use App\States\Order\Shipped;
 use App\States\Transfer\Completed;
+use App\States\Transfer\InTransit;
 
 class ProcessDeliveries
 {

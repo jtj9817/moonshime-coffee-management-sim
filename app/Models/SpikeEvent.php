@@ -62,7 +62,7 @@ class SpikeEvent extends Model
      */
     public function getNameAttribute(): string
     {
-        if (!empty($this->attributes['name'])) {
+        if (! empty($this->attributes['name'])) {
             return $this->attributes['name'];
         }
 
@@ -72,7 +72,7 @@ class SpikeEvent extends Model
             'price' => 'Price Spike',
             'breakdown' => 'Equipment Breakdown',
             'blizzard' => 'Blizzard Warning',
-            default => ucfirst($this->type ?? 'Unknown') . ' Event',
+            default => ucfirst($this->type ?? 'Unknown').' Event',
         };
     }
 
@@ -82,7 +82,7 @@ class SpikeEvent extends Model
      */
     public function getDescriptionAttribute(): string
     {
-        if (!empty($this->attributes['description'])) {
+        if (! empty($this->attributes['description'])) {
             return $this->attributes['description'];
         }
 
@@ -114,10 +114,10 @@ class SpikeEvent extends Model
                 $parts[] = "Capacity reduced by {$reduction}%";
                 break;
             case 'blizzard':
-                $parts[] = "Severe weather affecting routes";
+                $parts[] = 'Severe weather affecting routes';
                 break;
             default:
-                $parts[] = "Unknown disruption";
+                $parts[] = 'Unknown disruption';
         }
 
         // Add context about affected location/product
@@ -132,7 +132,7 @@ class SpikeEvent extends Model
             $parts[] = "Duration: {$this->duration} days";
         }
 
-        return implode('. ', $parts) . '.';
+        return implode('. ', $parts).'.';
     }
 
     public function user(): BelongsTo
@@ -208,7 +208,7 @@ class SpikeEvent extends Model
      */
     public function getResolutionCostEstimateAttribute(): int
     {
-        if (!$this->isResolvable()) {
+        if (! $this->isResolvable()) {
             return 0;
         }
 

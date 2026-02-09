@@ -38,7 +38,8 @@ function getReliabilityBadge(score: number) {
 export default function Vendors({ vendors }: VendorsProps) {
     const avgReliability =
         vendors.length > 0
-            ? vendors.reduce((sum, v) => sum + v.reliability_score, 0) / vendors.length
+            ? vendors.reduce((sum, v) => sum + v.reliability_score, 0) /
+              vendors.length
             : 0;
 
     return (
@@ -66,7 +67,9 @@ export default function Vendors({ vendors }: VendorsProps) {
                             <Users className="h-4 w-4 text-amber-500" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{vendors.length}</div>
+                            <div className="text-2xl font-bold">
+                                {vendors.length}
+                            </div>
                         </CardContent>
                     </Card>
                     <Card>
@@ -77,7 +80,9 @@ export default function Vendors({ vendors }: VendorsProps) {
                             <TrendingUp className="h-4 w-4 text-emerald-500" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{avgReliability.toFixed(0)}%</div>
+                            <div className="text-2xl font-bold">
+                                {avgReliability.toFixed(0)}%
+                            </div>
                         </CardContent>
                     </Card>
                     <Card>
@@ -89,7 +94,11 @@ export default function Vendors({ vendors }: VendorsProps) {
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">
-                                {vendors.filter((v) => v.reliability_score >= 90).length}
+                                {
+                                    vendors.filter(
+                                        (v) => v.reliability_score >= 90,
+                                    ).length
+                                }
                             </div>
                         </CardContent>
                     </Card>
@@ -104,36 +113,54 @@ export default function Vendors({ vendors }: VendorsProps) {
                         >
                             <CardHeader className="pb-2">
                                 <div className="flex items-start justify-between">
-                                    <CardTitle className="text-lg">{vendor.name}</CardTitle>
-                                    {getReliabilityBadge(vendor.reliability_score)}
+                                    <CardTitle className="text-lg">
+                                        {vendor.name}
+                                    </CardTitle>
+                                    {getReliabilityBadge(
+                                        vendor.reliability_score,
+                                    )}
                                 </div>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 {/* Reliability Score */}
                                 <div>
                                     <div className="mb-1 flex items-center justify-between text-sm">
-                                        <span className="text-stone-500">Reliability</span>
+                                        <span className="text-stone-500">
+                                            Reliability
+                                        </span>
                                         <span
                                             className={`font-bold ${getReliabilityColor(vendor.reliability_score)}`}
                                         >
                                             {vendor.reliability_score}%
                                         </span>
                                     </div>
-                                    <Progress value={vendor.reliability_score} className="h-2" />
+                                    <Progress
+                                        value={vendor.reliability_score}
+                                        className="h-2"
+                                    />
                                 </div>
 
                                 {/* Stats */}
                                 <div className="grid grid-cols-2 gap-4 text-sm">
                                     <div>
-                                        <p className="text-stone-500">Total Orders</p>
-                                        <p className="font-bold">{vendor.orders_count ?? 0}</p>
+                                        <p className="text-stone-500">
+                                            Total Orders
+                                        </p>
+                                        <p className="font-bold">
+                                            {vendor.orders_count ?? 0}
+                                        </p>
                                     </div>
                                     <div>
-                                        <p className="text-stone-500">Avg Order</p>
+                                        <p className="text-stone-500">
+                                            Avg Order
+                                        </p>
                                         <p className="font-bold">
                                             $
-                                            {vendor.orders_avg_total_cost !== undefined
-                                                ? formatCurrency(vendor.orders_avg_total_cost)
+                                            {vendor.orders_avg_total_cost !==
+                                            undefined
+                                                ? formatCurrency(
+                                                      vendor.orders_avg_total_cost,
+                                                  )
                                                 : '0.00'}
                                         </p>
                                     </div>
@@ -141,7 +168,10 @@ export default function Vendors({ vendors }: VendorsProps) {
 
                                 {/* Action */}
                                 <Link href={`/game/vendors/${vendor.id}`}>
-                                    <Button variant="outline" className="w-full">
+                                    <Button
+                                        variant="outline"
+                                        className="w-full"
+                                    >
                                         View Details
                                     </Button>
                                 </Link>

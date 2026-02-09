@@ -36,7 +36,7 @@ class LocationFactory extends Factory
      */
     protected function generateName(string $type, bool $hasFaker = true): string
     {
-        if (!$hasFaker) {
+        if (! $hasFaker) {
             return match ($type) {
                 'store' => 'Default Coffee Shop',
                 'hub' => 'Central Distribution Hub',
@@ -47,10 +47,10 @@ class LocationFactory extends Factory
         }
 
         return match ($type) {
-            'store' => $this->faker->unique()->company() . ' Coffee',
-            'hub' => $this->faker->unique()->city() . ' Distribution Hub',
-            'warehouse' => $this->faker->unique()->city() . ' Depot',
-            'vendor' => $this->faker->unique()->lastName() . ' Imports',
+            'store' => $this->faker->unique()->company().' Coffee',
+            'hub' => $this->faker->unique()->city().' Distribution Hub',
+            'warehouse' => $this->faker->unique()->city().' Depot',
+            'vendor' => $this->faker->unique()->lastName().' Imports',
             default => $this->faker->unique()->company(),
         };
     }

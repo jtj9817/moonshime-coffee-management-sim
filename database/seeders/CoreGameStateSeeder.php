@@ -25,11 +25,11 @@ class CoreGameStateSeeder extends Seeder
             $productsConfig = config('game_data.products');
             $vendorsConfig = config('game_data.vendors');
 
-            if (empty($productsConfig) || !is_array($productsConfig)) {
+            if (empty($productsConfig) || ! is_array($productsConfig)) {
                 throw new RuntimeException('Config game_data.products is missing or empty');
             }
 
-            if (empty($vendorsConfig) || !is_array($vendorsConfig)) {
+            if (empty($vendorsConfig) || ! is_array($vendorsConfig)) {
                 throw new RuntimeException('Config game_data.vendors is missing or empty');
             }
 

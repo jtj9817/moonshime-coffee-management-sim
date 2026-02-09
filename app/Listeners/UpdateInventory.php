@@ -2,10 +2,9 @@
 
 namespace App\Listeners;
 
-use App\Events\TransferCompleted;
 use App\Events\OrderDelivered;
+use App\Events\TransferCompleted;
 use App\Models\Inventory;
-use App\Models\Location;
 
 class UpdateInventory
 {
@@ -47,7 +46,7 @@ class UpdateInventory
         $order = $event->order;
         $locationId = $order->location_id;
 
-        if (!$locationId) {
+        if (! $locationId) {
             // Fallback: If no location_id is set on the order, we can't update inventory reliably.
             // In a production app, we might log a warning or use a default.
             return;

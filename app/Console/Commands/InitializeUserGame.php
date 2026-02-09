@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use App\Actions\InitializeNewGame;
-use App\Models\GameState;
 use App\Models\Location;
 use App\Models\Product;
 use App\Models\Route;
@@ -38,8 +37,9 @@ class InitializeUserGame extends Command
 
         $user = User::where('email', $email)->first();
 
-        if (!$user) {
+        if (! $user) {
             $this->error("User with email '{$email}' not found.");
+
             return Command::FAILURE;
         }
 
@@ -51,6 +51,7 @@ class InitializeUserGame extends Command
         // 2. Initialize User State if needed
         if ($user->gameState) {
             $this->displayUserData($user);
+
             return Command::SUCCESS;
         }
 
@@ -66,11 +67,11 @@ class InitializeUserGame extends Command
         $locationCount = Location::count();
         $routeCount = Route::count();
 
-        $this->info("Checking global world data...");
+        $this->info('Checking global world data...');
 
         if ($productCount === 0 || $locationCount === 0 || $routeCount === 0) {
-            $this->warn("Global game data is incomplete or missing. Seeding world...");
-            
+            $this->warn('Global game data is incomplete or missing. Seeding world...');
+
             if ($productCount === 0) {
                 $this->info('- Seeding Products & Vendors (CoreGameStateSeeder)...');
                 $this->call('db:seed', [
@@ -86,8 +87,8 @@ class InitializeUserGame extends Command
                     '--force' => true,
                 ]);
             }
-            
-            $this->info("Global world data seeded successfully.");
+
+            $this->info('Global world data seeded successfully.');
         } else {
             $this->info("Global world data looks good (Products: {$productCount}, Locations: {$locationCount}, Routes: {$routeCount}).");
         }
@@ -102,14 +103,14 @@ class InitializeUserGame extends Command
 
         try {
             // Note: Global seeding is now handled by ensureGlobalDataExists()
-            
+
             // Run InitializeNewGame action
             $this->info('Running InitializeNewGame action...');
             $action = app(InitializeNewGame::class);
-            
+
             DB::transaction(function () use ($action, $user) {
                 $gameState = $action->handle($user);
-                
+
                 $this->info('Game initialized successfully!');
                 $this->table(
                     ['User ID', 'Cash', 'Day', 'XP'],
@@ -117,7 +118,7 @@ class InitializeUserGame extends Command
                         $user->id,
                         number_format($gameState->cash, 2),
                         $gameState->day,
-                        $gameState->xp
+                        $gameState->xp,
                     ]]
                 );
             });
@@ -125,8 +126,9 @@ class InitializeUserGame extends Command
             return Command::SUCCESS;
 
         } catch (\Exception $e) {
-            $this->error("Failed to initialize game: " . $e->getMessage());
-            Log::error("InitializeUserGame Command Failed: " . $e->getMessage(), ['exception' => $e]);
+            $this->error('Failed to initialize game: '.$e->getMessage());
+            Log::error('InitializeUserGame Command Failed: '.$e->getMessage(), ['exception' => $e]);
+
             return Command::FAILURE;
         }
     }
@@ -147,7 +149,7 @@ class InitializeUserGame extends Command
                 number_format($gameState->cash, 2),
                 $gameState->day,
                 $gameState->xp,
-                $gameState->created_at->toDateTimeString()
+                $gameState->created_at->toDateTimeString(),
             ]]
         );
 

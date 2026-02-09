@@ -12,7 +12,6 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Tests\TestCase;
-use Illuminate\Support\Facades\DB;
 
 class SnapshotInventoryLevelsTest extends TestCase
 {
@@ -34,7 +33,7 @@ class SnapshotInventoryLevelsTest extends TestCase
         $location = Location::factory()->create();
         $product = Product::factory()->create();
         $gameState = GameState::factory()->create(['user_id' => $user->id]);
-        
+
         // Create initial inventory
         Inventory::factory()->create([
             'user_id' => $user->id,
@@ -44,9 +43,9 @@ class SnapshotInventoryLevelsTest extends TestCase
         ]);
 
         $day = 5;
-        
+
         $event = new TimeAdvanced($day, $gameState);
-        $listener = new SnapshotInventoryLevels();
+        $listener = new SnapshotInventoryLevels;
         $listener->handle($event);
 
         // Assert
@@ -65,7 +64,7 @@ class SnapshotInventoryLevelsTest extends TestCase
         $location = Location::factory()->create();
         $product = Product::factory()->create();
         $gameState = GameState::factory()->create(['user_id' => $user->id]);
-        
+
         Inventory::factory()->create([
             'user_id' => $user->id,
             'location_id' => $location->id,
@@ -75,7 +74,7 @@ class SnapshotInventoryLevelsTest extends TestCase
 
         $day = 5;
         $event = new TimeAdvanced($day, $gameState);
-        $listener = new SnapshotInventoryLevels();
+        $listener = new SnapshotInventoryLevels;
 
         // First run
         $listener->handle($event);

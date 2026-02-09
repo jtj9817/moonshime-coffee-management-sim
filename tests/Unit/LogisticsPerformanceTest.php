@@ -13,7 +13,7 @@ test('dijkstra average time is within budget', function () {
     // Setup 5x5 grid
     $gridSize = 5;
     $nodes = [];
-    
+
     for ($y = 0; $y < $gridSize; $y++) {
         for ($x = 0; $x < $gridSize; $x++) {
             $nodes[$x][$y] = Location::factory()->create([
@@ -22,13 +22,13 @@ test('dijkstra average time is within budget', function () {
             ]);
         }
     }
-    
+
     for ($y = 0; $y < $gridSize; $y++) {
         for ($x = 0; $x < $gridSize; $x++) {
             if ($x < $gridSize - 1) {
                 Route::factory()->create([
                     'source_id' => $nodes[$x][$y]->id,
-                    'target_id' => $nodes[$x+1][$y]->id,
+                    'target_id' => $nodes[$x + 1][$y]->id,
                     'is_active' => true,
                     'cost' => mt_rand(10, 50),
                 ]);
@@ -36,7 +36,7 @@ test('dijkstra average time is within budget', function () {
             if ($y < $gridSize - 1) {
                 Route::factory()->create([
                     'source_id' => $nodes[$x][$y]->id,
-                    'target_id' => $nodes[$x][$y+1]->id,
+                    'target_id' => $nodes[$x][$y + 1]->id,
                     'is_active' => true,
                     'cost' => mt_rand(10, 50),
                 ]);
@@ -49,16 +49,16 @@ test('dijkstra average time is within budget', function () {
 
     $start = microtime(true);
     $iterations = 5;
-    
+
     for ($i = 0; $i < $iterations; $i++) {
         $path = $service->findBestRoute($source, $target);
     }
-    
+
     $end = microtime(true);
     $avgTimeMs = (($end - $start) / $iterations) * 1000;
-    
+
     // Log for visibility
-    fwrite(STDERR, "\nAverage Dijkstra Time: " . number_format($avgTimeMs, 4) . "ms\n");
+    fwrite(STDERR, "\nAverage Dijkstra Time: ".number_format($avgTimeMs, 4)."ms\n");
 
     expect($path)->not->toBeNull();
     expect($avgTimeMs)->toBeLessThan(10.0, "Dijkstra average time ($avgTimeMs ms) exceeds budget of 10ms");
