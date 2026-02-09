@@ -180,3 +180,58 @@ it('skips quests without trigger_class', function () {
 
     expect($result['completed'])->toBeEmpty();
 });
+
+it('getActiveQuestsForUser does not mark quest as completed to prevent reward loss', function () {
+    // This regression test verifies TICKET-001 fix:
+    // The display method should NOT persist is_completed=true, only checkTriggers() should.
+
+    $user = User::factory()->create();
+    $gameState = GameState::factory()->create([
+        'user_id' => $user->id,
+        'cash' => 1000000,
+        'xp' => 0,
+        'day' => 5,
+    ]);
+
+    $quest = Quest::factory()->create([
+        'type' => 'orders_placed',
+        'title' => 'Place 2 Orders',
+        'target_value' => 2,
+        'reward_cash_cents' => 25000,
+        'reward_xp' => 50,
+        'trigger_class' => OrdersPlacedTrigger::class,
+    ]);
+
+    // User meets the target
+    Order::factory()->count(2)->create(['user_id' => $user->id]);
+
+    $service = app(QuestService::class);
+
+    // View quests page (should NOT complete the quest in DB)
+    $displayPayload = $service->getActiveQuestsForUser($user);
+
+    // UI should show it as visually completable
+    expect($displayPayload[0]['isCompleted'])->toBeTrue();
+    expect($displayPayload[0]['currentValue'])->toBe(2);
+
+    // BUT the database record should NOT be marked complete yet
+    $userQuest = UserQuest::where('user_id', $user->id)->where('quest_id', $quest->id)->first();
+    expect($userQuest->is_completed)->toBeFalse();
+    expect($userQuest->completed_at)->toBeNull();
+
+    // AND no rewards should have been granted
+    $gameState->refresh();
+    expect($gameState->cash)->toBe(1000000); // unchanged
+    expect($gameState->xp)->toBe(0); // unchanged
+
+    // Now calling checkTriggers should complete AND grant rewards
+    $result = $service->checkTriggers($user);
+    expect($result['completed'])->toHaveCount(1);
+
+    $userQuest->refresh();
+    expect($userQuest->is_completed)->toBeTrue();
+
+    $gameState->refresh();
+    expect($gameState->cash)->toBe(1025000); // 1000000 + 25000
+    expect($gameState->xp)->toBe(50);
+});

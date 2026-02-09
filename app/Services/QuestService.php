@@ -130,19 +130,11 @@ class QuestService
             }
 
             $currentValue = $this->calculateProgress($quest, $user);
-            $updates = [];
 
+            // Only update progress tracking, NOT completion status.
+            // Completion and reward granting happen exclusively in checkTriggers().
             if ($userQuest->current_value !== $currentValue) {
-                $updates['current_value'] = $currentValue;
-            }
-
-            if (! $userQuest->is_completed && $currentValue >= $quest->target_value) {
-                $updates['is_completed'] = true;
-                $updates['completed_at'] = now();
-            }
-
-            if (! empty($updates)) {
-                $userQuest->update($updates);
+                $userQuest->update(['current_value' => $currentValue]);
             }
 
             $questPayloads[] = [

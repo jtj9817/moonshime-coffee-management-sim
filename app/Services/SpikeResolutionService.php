@@ -92,68 +92,70 @@ class SpikeResolutionService
             throw new \InvalidArgumentException('Spike is not currently active.');
         }
 
-        $actionLog = $spike->action_log ?? [];
-        $actionLog[] = [
-            'timestamp' => now()->toISOString(),
-            'action' => $action,
-        ];
+        DB::transaction(function () use ($spike, $action) {
+            $actionLog = $spike->action_log ?? [];
+            $actionLog[] = [
+                'timestamp' => now()->toISOString(),
+                'action' => $action,
+            ];
 
-        $meta = $spike->meta ?? [];
-        $meta['mitigation_count'] = ($meta['mitigation_count'] ?? 0) + 1;
+            $meta = $spike->meta ?? [];
+            $meta['mitigation_count'] = ($meta['mitigation_count'] ?? 0) + 1;
 
-        if (! isset($meta['original_magnitude'])) {
-            $meta['original_magnitude'] = (float) $spike->magnitude;
-        }
+            if (! isset($meta['original_magnitude'])) {
+                $meta['original_magnitude'] = (float) $spike->magnitude;
+            }
 
-        $updates = [
-            'mitigated_at' => now(),
-            'action_log' => $actionLog,
-            'meta' => $meta,
-        ];
+            $updates = [
+                'mitigated_at' => now(),
+                'action_log' => $actionLog,
+                'meta' => $meta,
+            ];
 
-        switch ($spike->type) {
-            case 'demand':
-            case 'price':
-                $newMagnitude = max(1.0, round(((float) $spike->magnitude) * 0.8, 2));
-                $updates['magnitude'] = $newMagnitude;
-                $meta['mitigated_magnitude'] = $newMagnitude;
-                break;
-            case 'delay':
-                $currentDelay = (int) round((float) $spike->magnitude);
-                $newDelay = max(0, $currentDelay - 1);
-                $this->applyDelayMitigation($spike, $newDelay);
-                $updates['magnitude'] = $newDelay;
-                $meta['delay_days'] = $newDelay;
-                break;
-            case 'breakdown':
-                $newMagnitude = max(0.0, round(((float) $spike->magnitude) * 0.8, 2));
-                $this->applyBreakdownMitigation($spike, $newMagnitude, $meta);
-                $updates['magnitude'] = $newMagnitude;
-                $meta['mitigated_magnitude'] = $newMagnitude;
-                break;
-            case 'blizzard':
-                $this->applyBlizzardMitigation($spike);
-                $meta['mitigated_route'] = true;
-                break;
-            default:
-                break;
-        }
+            switch ($spike->type) {
+                case 'demand':
+                case 'price':
+                    $newMagnitude = max(1.0, round(((float) $spike->magnitude) * 0.8, 2));
+                    $updates['magnitude'] = $newMagnitude;
+                    $meta['mitigated_magnitude'] = $newMagnitude;
+                    break;
+                case 'delay':
+                    $currentDelay = (int) round((float) $spike->magnitude);
+                    $newDelay = max(0, $currentDelay - 1);
+                    $this->applyDelayMitigation($spike, $newDelay);
+                    $updates['magnitude'] = $newDelay;
+                    $meta['delay_days'] = $newDelay;
+                    break;
+                case 'breakdown':
+                    $newMagnitude = max(0.0, round(((float) $spike->magnitude) * 0.8, 2));
+                    $this->applyBreakdownMitigation($spike, $newMagnitude, $meta);
+                    $updates['magnitude'] = $newMagnitude;
+                    $meta['mitigated_magnitude'] = $newMagnitude;
+                    break;
+                case 'blizzard':
+                    $this->applyBlizzardMitigation($spike);
+                    $meta['mitigated_route'] = true;
+                    break;
+                default:
+                    break;
+            }
 
-        $updates['meta'] = $meta;
+            $updates['meta'] = $meta;
 
-        $spike->update($updates);
+            $spike->update($updates);
 
-        // Create audit trail record
-        $gameState = GameState::where('user_id', $spike->user_id)->first();
-        SpikeResolution::create([
-            'user_id' => $spike->user_id,
-            'spike_event_id' => $spike->id,
-            'action_type' => 'mitigate',
-            'action_detail' => $action,
-            'cost_cents' => 0,
-            'effect' => ['type' => $spike->type, 'new_magnitude' => $spike->magnitude],
-            'game_day' => $gameState ? $gameState->day : 0,
-        ]);
+            // Create audit trail record
+            $gameState = GameState::where('user_id', $spike->user_id)->first();
+            SpikeResolution::create([
+                'user_id' => $spike->user_id,
+                'spike_event_id' => $spike->id,
+                'action_type' => 'mitigate',
+                'action_detail' => $action,
+                'cost_cents' => 0,
+                'effect' => ['type' => $spike->type, 'new_magnitude' => $spike->magnitude],
+                'game_day' => $gameState ? $gameState->day : 0,
+            ]);
+        });
     }
 
     /**
