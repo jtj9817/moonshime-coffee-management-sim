@@ -73,10 +73,12 @@ class StoreOrderRequest extends FormRequest
             $sourceLocationId = $this->input('source_location_id');
             $user = $this->user();
             $sourceLocation = null;
-            $ownedLocationIds = $user?->locations()
-                ->pluck('locations.id')
-                ->map(static fn (mixed $id): string => (string) $id)
-                ->all();
+            $ownedLocationIds = $user
+                ? $user->locations()
+                    ->pluck('locations.id')
+                    ->map(static fn (mixed $id): string => (string) $id)
+                    ->all()
+                : null;
             $destinationOwnershipRule = new OwnedByAuthenticatedUser(
                 'Selected destination location is not available for your game state.',
                 $ownedLocationIds

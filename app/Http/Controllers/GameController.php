@@ -368,10 +368,13 @@ class GameController extends Controller
      */
     public function storeScheduledOrder(Request $request): \Illuminate\Http\RedirectResponse
     {
-        $ownedLocationIds = auth()->user()?->locations()
-            ->pluck('locations.id')
-            ->map(static fn (mixed $id): string => (string) $id)
-            ->all();
+        $user = auth()->user();
+        $ownedLocationIds = $user
+            ? $user->locations()
+                ->pluck('locations.id')
+                ->map(static fn (mixed $id): string => (string) $id)
+                ->all()
+            : null;
 
         $cronFormatRule = function (string $attribute, mixed $value, \Closure $fail): void {
             if ($value === null || trim((string) $value) === '') {
