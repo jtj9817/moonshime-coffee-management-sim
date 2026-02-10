@@ -66,6 +66,10 @@ class User extends Authenticatable
      * Ensure owned locations include inventory locations plus all vendor locations.
      *
      * @return int Number of newly attached locations.
+     *
+     * @todo Performance: If the number of vendor locations grows significantly
+     *       (e.g., thousands), consider scoping to only active vendors or
+     *       implementing chunking to reduce memory usage.
      */
     public function syncLocations(): int
     {

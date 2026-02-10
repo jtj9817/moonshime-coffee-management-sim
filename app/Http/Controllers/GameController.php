@@ -367,37 +367,20 @@ class GameController extends Controller
      */
     public function storeScheduledOrder(Request $request): \Illuminate\Http\RedirectResponse
     {
-        $user = auth()->user();
-        $ownedLocationIds = $user->locations()
-            ->pluck('locations.id')
-            ->all();
-
-        $destinationOwnedByUser = function (string $attribute, mixed $value, \Closure $fail) use ($ownedLocationIds): void {
-            if (! in_array((string) $value, $ownedLocationIds, true)) {
-                $fail('The selected destination location is not available for your game state.');
-            }
-        };
-
-        $sourceAuthorizedForUser = function (string $attribute, mixed $value, \Closure $fail) use ($ownedLocationIds): void {
-            if (! in_array((string) $value, $ownedLocationIds, true)) {
-                $fail('The selected source location is not available for your game state.');
-            }
-        };
-
         $cronFormatRule = function (string $attribute, mixed $value, \Closure $fail): void {
             if ($value === null || trim((string) $value) === '') {
                 return;
             }
 
-            if (preg_match('/^@every\s+(\d+)d$/', trim((string) $value)) !== 1) {
+            if (! preg_match(ScheduledOrder::CRON_REGEX, trim((string) $value))) {
                 $fail('Cron expression must use the format "@every Nd" (example: "@every 3d").');
             }
         };
 
         $validated = $request->validate([
             'vendor_id' => ['required', 'exists:vendors,id'],
-            'location_id' => ['required', 'exists:locations,id', $destinationOwnedByUser],
-            'source_location_id' => ['required', 'exists:locations,id', 'different:location_id', $sourceAuthorizedForUser],
+            'location_id' => ['required', 'exists:locations,id', new \App\Rules\OwnedByAuthenticatedUser('The selected destination location is not available for your game state.')],
+            'source_location_id' => ['required', 'exists:locations,id', 'different:location_id', new \App\Rules\OwnedByAuthenticatedUser('The selected source location is not available for your game state.')],
             'items' => ['required', 'array', 'min:1'],
             'items.*.product_id' => ['required', 'exists:products,id'],
             'items.*.quantity' => ['required', 'integer', 'min:1'],
@@ -640,7 +623,7 @@ class GameController extends Controller
      */
     protected function getVendorProducts(): array
     {
-        return Vendor::with('products:id,name,category')
+        return Vendor::with('products:id,name,category,unit_price')
             ->get()
             ->map(fn ($v) => [
                 'vendor' => $v->only(['id', 'name', 'reliability_score']),

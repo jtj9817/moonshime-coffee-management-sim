@@ -12,6 +12,11 @@ class ScheduledOrder extends Model
     /** @use HasFactory<\Database\Factories\ScheduledOrderFactory> */
     use HasFactory, HasUuids;
 
+    /**
+     * Regex pattern for cron expressions in the format "@every Nd" (e.g., "@every 3d").
+     */
+    public const CRON_REGEX = '/^@every\s+(\d+)d$/';
+
     protected $fillable = [
         'user_id',
         'vendor_id',

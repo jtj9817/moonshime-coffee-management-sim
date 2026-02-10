@@ -9,6 +9,8 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
+use function preg_match;
+
 class ScheduledOrderService
 {
     public function __construct(
@@ -104,6 +106,7 @@ class ScheduledOrderService
             DB::transaction(function () use ($schedule, $user, $items, $path, $day, $nextRunDay): void {
                 $lockedSchedule = ScheduledOrder::query()
                     ->whereKey($schedule->id)
+                    ->with(['vendor', 'location'])
                     ->lockForUpdate()
                     ->first();
 
@@ -186,7 +189,7 @@ class ScheduledOrderService
             return null;
         }
 
-        if (preg_match('/^@every\\s+(\\d+)d$/', trim($cronExpression), $matches) === 1) {
+        if (preg_match(ScheduledOrder::CRON_REGEX, trim($cronExpression), $matches) === 1) {
             return max(1, (int) $matches[1]);
         }
 
