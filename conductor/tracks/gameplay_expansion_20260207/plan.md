@@ -75,23 +75,23 @@ All tasks in this track must preserve completed Phase 0 invariants (money in cen
 ## Phase 3: Strategic Planning Tools
 
 ### Task 1: "What-If" Scenario Calculator
-- [ ] Task: Implement Scenario Calculator frontend logic (initial scope).
-    - [ ] Implement reusable calculator logic shared with Demand Forecast formulas (frontend utility or shared computation module).
-    - [ ] Add tests for calculator outputs: time-to-stockout and reorder recommendation.
-- [ ] Task: Scenario Calculator UI components.
-    - [ ] Create `ScenarioPlanner.tsx` standalone tool (frontend-only initial implementation).
-    - [ ] Integrate "mini-calc" into Ordering and Transfer dialogs.
-    - [ ] Only add a backend/API endpoint if async constraints require it.
+- [x] Task: Implement Scenario Calculator frontend logic (initial scope).
+    - [x] Implement reusable calculator logic shared with Demand Forecast formulas (frontend utility or shared computation module).
+    - [x] Add tests for calculator outputs: time-to-stockout and reorder recommendation.
+- [x] Task: Scenario Calculator UI components.
+    - [x] Create `ScenarioPlanner.tsx` standalone tool (frontend-only initial implementation).
+    - [x] Integrate "mini-calc" into Ordering and Transfer dialogs.
+    - [x] Only add a backend/API endpoint if async constraints require it.
 
 ### Task 2: Bulk Order Scheduler
-- [ ] Task: Create migration and model for `ScheduledOrder`.
-    - [ ] Write migration for `scheduled_orders` table with `interval_days` or `cron_expression` plus auto-submit controls.
-- [ ] Task: Implement Order Scheduler logic.
-    - [ ] Write test for `ScheduledOrderService` to verify automatic order creation on `DayAdvanced`.
-    - [ ] Implement logic to process active schedules and create orders.
-    - [ ] Implement guarded auto-submit behavior (requires sufficient funds/capacity).
-- [ ] Task: Order Scheduler UI.
-    - [ ] Add "Schedule this order" option to the Ordering flow.
-    - [ ] Create a "Scheduled Orders" management interface.
+- [x] Task: Create migration and model for `ScheduledOrder`.
+    - [x] Write migration for `scheduled_orders` table with `interval_days` or `cron_expression` plus auto-submit controls.
+- [x] Task: Implement Order Scheduler logic.
+    - [x] Write test for `ScheduledOrderService` to verify automatic order creation on `DayAdvanced`.
+    - [x] Implement logic to process active schedules and create orders.
+    - [x] Implement guarded auto-submit behavior (requires sufficient funds/capacity).
+- [x] Task: Order Scheduler UI.
+    - [x] Add "Schedule this order" option to the Ordering flow.
+    - [x] Create a "Scheduled Orders" management interface.
 
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Strategic Planning Tools' (Protocol in workflow.md)

@@ -24,10 +24,18 @@ class OrderService
      *
      * @param  array  $items  Array of ['product_id', 'quantity', 'cost_per_unit']
      * @param  Collection|null  $path  Pre-calculated path or null to calculate
+     * @param  bool  $autoSubmit  When false, order is created in draft state for manual submission.
      *
      * @throws \Exception
      */
-    public function createOrder(User $user, Vendor $vendor, Location $targetLocation, array $items, ?Collection $path = null): Order
+    public function createOrder(
+        User $user,
+        Vendor $vendor,
+        Location $targetLocation,
+        array $items,
+        ?Collection $path = null,
+        bool $autoSubmit = true
+    ): Order
     {
         // 1. Calculate Path if not provided
         if (! $path) {
@@ -55,7 +63,7 @@ class OrderService
             throw new \Exception('No valid route found between vendor and target location.');
         }
 
-        return DB::transaction(function () use ($user, $vendor, $targetLocation, $items, $path) {
+        return DB::transaction(function () use ($user, $vendor, $targetLocation, $items, $path, $autoSubmit) {
             $pricing = app(\App\Services\PricingService::class);
 
             $pricedItems = collect($items)->map(function ($item) use ($pricing, $user, $vendor) {
@@ -89,7 +97,9 @@ class OrderService
                 'user_id' => $user->id,
                 'vendor_id' => $vendor->id,
                 'location_id' => $targetLocation->id,
-                'status' => \App\States\Order\Pending::class, // Initial status
+                'status' => $autoSubmit
+                    ? \App\States\Order\Pending::class
+                    : \App\States\Order\Draft::class,
                 'total_cost' => $totalCost,
                 'total_transit_days' => $totalDays,
                 'delivery_day' => $deliveryDay,

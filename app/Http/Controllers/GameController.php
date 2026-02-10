@@ -14,6 +14,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\Route;
+use App\Models\ScheduledOrder;
 use App\Models\SpikeEvent;
 use App\Models\Transfer;
 use App\Models\Vendor;
@@ -154,10 +155,16 @@ class GameController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
+        $scheduledOrders = ScheduledOrder::with(['vendor', 'sourceLocation', 'location'])
+            ->where('user_id', auth()->id())
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         $vendorProducts = $this->getVendorProducts();
 
         return Inertia::render('game/ordering', [
             'orders' => $orders,
+            'scheduledOrders' => $scheduledOrders,
             'vendorProducts' => $vendorProducts,
         ]);
     }
@@ -356,6 +363,86 @@ class GameController extends Controller
     }
 
     /**
+     * Create a recurring scheduled order.
+     */
+    public function storeScheduledOrder(Request $request): \Illuminate\Http\RedirectResponse
+    {
+        $validated = $request->validate([
+            'vendor_id' => ['required', 'exists:vendors,id'],
+            'location_id' => ['required', 'exists:locations,id'],
+            'source_location_id' => ['required', 'exists:locations,id', 'different:location_id'],
+            'items' => ['required', 'array', 'min:1'],
+            'items.*.product_id' => ['required', 'exists:products,id'],
+            'items.*.quantity' => ['required', 'integer', 'min:1'],
+            'items.*.unit_price' => ['required', 'integer', 'min:0'],
+            'interval_days' => ['nullable', 'integer', 'min:1'],
+            'cron_expression' => ['nullable', 'string', 'max:120'],
+            'auto_submit' => ['nullable', 'boolean'],
+            'start_day' => ['nullable', 'integer', 'min:1'],
+        ]);
+
+        if (empty($validated['interval_days']) && empty($validated['cron_expression'])) {
+            return back()->withErrors([
+                'interval_days' => 'Provide either interval_days or cron_expression.',
+            ]);
+        }
+
+        $gameState = GameState::where('user_id', auth()->id())->firstOrFail();
+        $defaultNextRunDay = $gameState->day + 1;
+        $requestedStartDay = (int) ($validated['start_day'] ?? $defaultNextRunDay);
+        $nextRunDay = max($defaultNextRunDay, $requestedStartDay);
+
+        ScheduledOrder::create([
+            'user_id' => auth()->id(),
+            'vendor_id' => $validated['vendor_id'],
+            'source_location_id' => $validated['source_location_id'],
+            'location_id' => $validated['location_id'],
+            'items' => $validated['items'],
+            'interval_days' => $validated['interval_days'] ?? null,
+            'cron_expression' => $validated['cron_expression'] ?? null,
+            'next_run_day' => $nextRunDay,
+            'auto_submit' => (bool) ($validated['auto_submit'] ?? false),
+            'is_active' => true,
+            'failure_reason' => null,
+        ]);
+
+        return back()->with('success', 'Scheduled order created successfully.');
+    }
+
+    /**
+     * Toggle active status for a scheduled order.
+     */
+    public function toggleScheduledOrder(ScheduledOrder $scheduledOrder): \Illuminate\Http\RedirectResponse
+    {
+        if ($scheduledOrder->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized');
+        }
+
+        $scheduledOrder->update([
+            'is_active' => ! $scheduledOrder->is_active,
+        ]);
+
+        return back()->with(
+            'success',
+            $scheduledOrder->is_active ? 'Scheduled order resumed.' : 'Scheduled order paused.'
+        );
+    }
+
+    /**
+     * Delete a scheduled order.
+     */
+    public function destroyScheduledOrder(ScheduledOrder $scheduledOrder): \Illuminate\Http\RedirectResponse
+    {
+        if ($scheduledOrder->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized');
+        }
+
+        $scheduledOrder->delete();
+
+        return back()->with('success', 'Scheduled order removed.');
+    }
+
+    /**
      * Create a new transfer.
      */
     public function createTransfer(Request $request): \Illuminate\Http\RedirectResponse
@@ -439,6 +526,7 @@ class GameController extends Controller
 
             // Clear all game data
             Order::where('user_id', $user->id)->delete();
+            ScheduledOrder::where('user_id', $user->id)->delete();
             Transfer::where('user_id', $user->id)->delete();
             Alert::where('user_id', $user->id)->delete();
             SpikeEvent::where('user_id', $user->id)->delete();

@@ -2,6 +2,7 @@ import { useForm } from '@inertiajs/react';
 import { Plus, ShoppingCart, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
+import ScenarioPlanner from '@/components/game/ScenarioPlanner';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -48,8 +49,8 @@ export function NewOrderDialog({
     const { locations } = useGame();
 
     const [selectedSourceId, setSelectedSourceId] = useState<string>('');
+    const [scheduleEnabled, setScheduleEnabled] = useState(false);
 
-    // State for calculated path
     const [calculatedPath, setCalculatedPath] = useState<{
         reachable: boolean;
         path: Array<{
@@ -68,7 +69,6 @@ export function NewOrderDialog({
 
     const [loadingPath, setLoadingPath] = useState(false);
 
-    // For adding a new item
     const [currentProductId, setCurrentProductId] = useState<string>('');
     const [currentQuantity, setCurrentQuantity] = useState<number>(100);
 
@@ -78,6 +78,8 @@ export function NewOrderDialog({
         source_location_id: '',
         route_id: 0,
         items: [] as OrderItemForm[],
+        interval_days: 7,
+        auto_submit: false,
     });
 
     const vendorOptions = (vendorProducts ?? []).map((vp) => vp.vendor);
@@ -97,12 +99,10 @@ export function NewOrderDialog({
         );
     }, [locations]);
 
-    // Clear path when inputs are missing (derived state, not an effect)
     if ((!selectedSourceId || !data.location_id) && calculatedPath !== null) {
         setCalculatedPath(null);
     }
 
-    // Track previous fetch inputs to detect changes
     const [prevFetchKey, setPrevFetchKey] = useState('');
     const fetchKey = `${selectedSourceId}|${data.location_id}`;
     if (selectedSourceId && data.location_id && fetchKey !== prevFetchKey) {
@@ -110,7 +110,6 @@ export function NewOrderDialog({
         setLoadingPath(true);
     }
 
-    // Fetch path when source or target changes
     useEffect(() => {
         if (!selectedSourceId || !data.location_id) {
             return;
@@ -165,7 +164,6 @@ export function NewOrderDialog({
         };
     }, [selectedSourceId, data.location_id]);
 
-    // Sync source_location_id with form data
     useEffect(() => {
         setData('source_location_id', selectedSourceId);
     }, [selectedSourceId, setData]);
@@ -183,7 +181,7 @@ export function NewOrderDialog({
             {
                 product_id: currentProductId,
                 quantity: currentQuantity,
-                unit_price: 250, // Placeholder price in cents ($2.50)
+                unit_price: 250,
             },
         ];
 
@@ -207,7 +205,6 @@ export function NewOrderDialog({
         ? totalQuantity > calculatedPath.min_capacity
         : false;
 
-    // Derived values for summary
     const itemsSubtotal = data.items.reduce(
         (sum, i) => sum + i.quantity * i.unit_price,
         0,
@@ -218,12 +215,22 @@ export function NewOrderDialog({
         ? Math.max(0, totalQuantity - calculatedPath.min_capacity)
         : 0;
 
+    const resetDraft = () => {
+        reset();
+        setCalculatedPath(null);
+        setSelectedSourceId('');
+        setScheduleEnabled(false);
+        setData('interval_days', 7);
+        setData('auto_submit', false);
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
         if (
             !data.vendor_id ||
             !data.location_id ||
+            !selectedSourceId ||
             !calculatedPath ||
             data.items.length === 0 ||
             isOverCapacity
@@ -231,39 +238,18 @@ export function NewOrderDialog({
             return;
         }
 
-        // We need to inject the fact that we have a calculated path implicitly via the backend
-        // Backend recalculates it.
-        // But the backend expects `route_id`?
-        // We removed `route_id` from StoreOrderRequest validation.
-        // We still have it in form "data" but it's 0.
+        if (scheduleEnabled && data.interval_days < 1) {
+            return;
+        }
 
-        // We need to make sure we send `_source_location` or something if we want to be explicit?
-        // No, StoreOrderRequest finds it from vendor_id.
-        // But wait, the frontend has `selectedSourceId`.
-        // If `selectedSourceId` != Vendor ID (which is likely true if Vendor != Vendor Location),
-        // we MUST send `selectedSourceId` to backend so it knows where to start!
-        // My previous update to StoreOrderRequest assumed it could find it.
-        // I should add `source_location_id` to the request payload!
-
-        post('/game/orders', {
+        post(scheduleEnabled ? '/game/orders/scheduled' : '/game/orders', {
             preserveScroll: true,
             onSuccess: () => {
                 onOpenChange(false);
-                reset();
-                setCalculatedPath(null);
-                setSelectedSourceId('');
+                resetDraft();
             },
         });
     };
-
-    // We need to fix the submit logic to include source location.
-    // I'll assume for now I can't easily change the hook state structure dymanically without re-declaring.
-    // I can stick `source_location_id` into `data` via `setData` when `selectedSourceId` changes?
-    // Better: Add it to initialization.
-
-    // For this tool call, I'm just restoring the file.
-    // I will use `transform` callback if available or just add it to `useForm`.
-    // Let's add `source_location_id` to `useForm`.
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -283,7 +269,6 @@ export function NewOrderDialog({
                     className="flex-1 space-y-6 overflow-y-auto px-6 py-2"
                 >
                     <div className="grid grid-cols-2 gap-4">
-                        {/* Vendor Selection */}
                         <div className="space-y-2">
                             <Label>Vendor</Label>
                             <Select
@@ -322,7 +307,6 @@ export function NewOrderDialog({
                         </div>
                     </div>
 
-                    {/* Logistics Source Selection */}
                     <div className="space-y-2">
                         <Label>Ship From (Vendor Hub)</Label>
                         <Select
@@ -342,7 +326,6 @@ export function NewOrderDialog({
                         </Select>
                     </div>
 
-                    {/* Item Selection */}
                     <div className="space-y-4 rounded-lg border border-stone-200 bg-stone-50/50 p-4 dark:border-stone-700 dark:bg-stone-900/50">
                         <div className="flex items-end gap-3">
                             <div className="flex-1 space-y-2">
@@ -382,7 +365,7 @@ export function NewOrderDialog({
                                     value={currentQuantity}
                                     onChange={(e) =>
                                         setCurrentQuantity(
-                                            parseInt(e.target.value),
+                                            Number.parseInt(e.target.value, 10),
                                         )
                                     }
                                     min={1}
@@ -408,7 +391,7 @@ export function NewOrderDialog({
                                         );
                                     return (
                                         <div
-                                            key={index}
+                                            key={`${item.product_id}-${index}`}
                                             className="flex items-center justify-between rounded-md bg-white p-2 text-sm shadow-sm dark:bg-stone-800"
                                         >
                                             <span className="font-medium">
@@ -437,7 +420,6 @@ export function NewOrderDialog({
                         )}
                     </div>
 
-                    {/* Calculated Path Display */}
                     <div className="space-y-4 rounded-lg border border-indigo-200 bg-indigo-50/50 p-4 dark:border-indigo-900/30 dark:bg-indigo-900/20">
                         <Label className="text-indigo-900 dark:text-indigo-300">
                             Logistics Path
@@ -464,7 +446,7 @@ export function NewOrderDialog({
                                 <div className="space-y-1">
                                     {calculatedPath.path.map((leg, i) => (
                                         <div
-                                            key={i}
+                                            key={`${leg.id}-${i}`}
                                             className="flex items-center gap-2 text-xs text-indigo-600 dark:text-indigo-400"
                                         >
                                             <div className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-200 text-[10px] font-bold">
@@ -487,7 +469,68 @@ export function NewOrderDialog({
                         )}
                     </div>
 
-                    {/* Validation Errors & Summary */}
+                    <ScenarioPlanner
+                        compact
+                        title="Order Mini-Calc"
+                        initialValues={{
+                            leadTimeDays: calculatedPath?.total_days ?? 3,
+                            reorderPoint: Math.max(
+                                10,
+                                Math.round(totalQuantity / 2),
+                            ),
+                        }}
+                    />
+
+                    <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/40 dark:bg-amber-900/10">
+                        <label className="flex items-center gap-2 text-sm font-medium text-stone-800 dark:text-stone-200">
+                            <input
+                                type="checkbox"
+                                checked={scheduleEnabled}
+                                onChange={(event) =>
+                                    setScheduleEnabled(event.target.checked)
+                                }
+                            />
+                            Schedule this order
+                        </label>
+
+                        {scheduleEnabled && (
+                            <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                <div className="space-y-1">
+                                    <Label className="text-xs">
+                                        Repeat every (days)
+                                    </Label>
+                                    <Input
+                                        type="number"
+                                        min={1}
+                                        value={data.interval_days}
+                                        onChange={(event) =>
+                                            setData(
+                                                'interval_days',
+                                                Number.parseInt(
+                                                    event.target.value,
+                                                    10,
+                                                ) || 1,
+                                            )
+                                        }
+                                    />
+                                </div>
+                                <label className="mt-6 flex items-center gap-2 text-sm text-stone-700 dark:text-stone-300">
+                                    <input
+                                        type="checkbox"
+                                        checked={data.auto_submit}
+                                        onChange={(event) =>
+                                            setData(
+                                                'auto_submit',
+                                                event.target.checked,
+                                            )
+                                        }
+                                    />
+                                    Auto-submit when valid
+                                </label>
+                            </div>
+                        )}
+                    </div>
+
                     <div className="rounded-lg bg-stone-100 p-4 dark:bg-stone-800">
                         <div className="mb-2 flex flex-col gap-2 border-b border-stone-200 pb-2 dark:border-stone-700">
                             <div className="flex justify-between text-sm">
@@ -509,7 +552,6 @@ export function NewOrderDialog({
                             <span>${formatCurrency(totalCost)}</span>
                         </div>
 
-                        {/* Error Messages */}
                         {(errors.vendor_id || errors.items) && (
                             <div className="mt-3 rounded border border-rose-200 bg-rose-50 p-2 text-xs text-rose-600 dark:border-rose-900/30 dark:bg-rose-900/20">
                                 {errors.vendor_id && (
@@ -522,7 +564,6 @@ export function NewOrderDialog({
                         )}
                     </div>
 
-                    {/* Capacity Validation */}
                     {calculatedPath && (
                         <div className="space-y-1">
                             <RouteCapacityMeter
@@ -558,8 +599,12 @@ export function NewOrderDialog({
                         className={`w-full bg-amber-600 hover:bg-amber-700 sm:w-auto ${processing ? 'opacity-80' : ''}`}
                     >
                         {processing
-                            ? 'Placing Order...'
-                            : `Confirm Order ($${formatCurrency(totalCost)})`}
+                            ? scheduleEnabled
+                                ? 'Scheduling...'
+                                : 'Placing Order...'
+                            : scheduleEnabled
+                              ? 'Save Schedule'
+                              : `Confirm Order ($${formatCurrency(totalCost)})`}
                     </Button>
                 </DialogFooter>
             </DialogContent>

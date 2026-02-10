@@ -29,6 +29,9 @@ Route::middleware(['auth', 'verified'])->prefix('game')->name('game.')->group(fu
     // Actions
     Route::post('/advance-day', [GameController::class, 'advanceDay'])->name('advance-day');
     Route::post('/orders', [GameController::class, 'placeOrder'])->name('orders.store');
+    Route::post('/orders/scheduled', [GameController::class, 'storeScheduledOrder'])->name('orders.scheduled.store');
+    Route::patch('/orders/scheduled/{scheduledOrder}/toggle', [GameController::class, 'toggleScheduledOrder'])->name('orders.scheduled.toggle');
+    Route::delete('/orders/scheduled/{scheduledOrder}', [GameController::class, 'destroyScheduledOrder'])->name('orders.scheduled.destroy');
     Route::get('/orders/capacity-check', [GameController::class, 'capacityCheck'])->name('orders.capacity-check');
     Route::post('/orders/{order}/cancel', [GameController::class, 'cancelOrder'])->name('orders.cancel');
     Route::post('/transfers', [GameController::class, 'createTransfer'])->name('transfers.store');

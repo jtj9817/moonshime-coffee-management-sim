@@ -32,6 +32,7 @@ class SimulationService
             $day = $this->gameState->day;
 
             $this->processEventTick($day);
+            $this->processPlanningTick($day);
             $this->processPhysicsTick($day);
             $this->processConsumptionTick($day);
             $this->processAnalysisTick($day);
@@ -151,6 +152,14 @@ class SimulationService
             ->where('delivery_day', '<=', $day)
             ->get()
             ->each(fn ($order) => $order->status->transitionTo(\App\States\Order\Delivered::class));
+    }
+
+    /**
+     * Planning Tick: execute recurring procurement schedules.
+     */
+    protected function processPlanningTick(int $day): void
+    {
+        app(ScheduledOrderService::class)->processDueSchedules($this->gameState, $day);
     }
 
     /**

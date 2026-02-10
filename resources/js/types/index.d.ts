@@ -191,6 +191,31 @@ export interface OrderItemModel {
     product?: ProductModel;
 }
 
+export interface ScheduledOrderItemModel {
+    product_id: string;
+    quantity: number;
+    unit_price: number;
+}
+
+export interface ScheduledOrderModel {
+    id: string;
+    vendor_id: string;
+    source_location_id: string;
+    location_id: string;
+    items: ScheduledOrderItemModel[];
+    interval_days: number | null;
+    cron_expression: string | null;
+    next_run_day: number;
+    last_run_day: number | null;
+    auto_submit: boolean;
+    is_active: boolean;
+    failure_reason: string | null;
+    created_at: string;
+    vendor?: VendorModel;
+    source_location?: LocationModel;
+    location?: LocationModel;
+}
+
 // Transfer Types (for page props)
 export interface TransferModel {
     id: string;

@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 
+import ScenarioPlanner from '@/components/game/ScenarioPlanner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -433,6 +434,16 @@ export default function Transfers({ transfers, suggestions }: TransfersProps) {
                                                 )}
                                         </div>
                                     )}
+
+                                    <ScenarioPlanner
+                                        compact
+                                        title="Transfer Mini-Calc"
+                                        initialValues={{
+                                            leadTimeDays: 1,
+                                            targetCoverageDays: 5,
+                                            reorderPoint: 8,
+                                        }}
+                                    />
 
                                     <div className="space-y-2">
                                         <Label>Items</Label>
