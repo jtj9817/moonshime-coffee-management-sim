@@ -367,21 +367,68 @@ class GameController extends Controller
      */
     public function storeScheduledOrder(Request $request): \Illuminate\Http\RedirectResponse
     {
+        $userId = auth()->id();
+
+        $destinationOwnedByUser = function (string $attribute, mixed $value, \Closure $fail) use ($userId): void {
+            $hasAccess = Inventory::query()
+                ->where('user_id', $userId)
+                ->where('location_id', (string) $value)
+                ->exists();
+
+            if (! $hasAccess) {
+                $fail('The selected destination location is not available for your game state.');
+            }
+        };
+
+        $sourceAuthorizedForUser = function (string $attribute, mixed $value, \Closure $fail) use ($userId): void {
+            $sourceId = (string) $value;
+
+            $isVendor = Location::query()
+                ->whereKey($sourceId)
+                ->where('type', 'vendor')
+                ->exists();
+            $hasInventoryAccess = Inventory::query()
+                ->where('user_id', $userId)
+                ->where('location_id', $sourceId)
+                ->exists();
+
+            if (! $isVendor && ! $hasInventoryAccess) {
+                $fail('The selected source location is not available for your game state.');
+            }
+        };
+
+        $cronFormatRule = function (string $attribute, mixed $value, \Closure $fail): void {
+            if ($value === null || trim((string) $value) === '') {
+                return;
+            }
+
+            if (preg_match('/^@every\s+(\d+)d$/', trim((string) $value)) !== 1) {
+                $fail('Cron expression must use the format "@every Nd" (example: "@every 3d").');
+            }
+        };
+
         $validated = $request->validate([
             'vendor_id' => ['required', 'exists:vendors,id'],
-            'location_id' => ['required', 'exists:locations,id'],
-            'source_location_id' => ['required', 'exists:locations,id', 'different:location_id'],
+            'location_id' => ['required', 'exists:locations,id', $destinationOwnedByUser],
+            'source_location_id' => ['required', 'exists:locations,id', 'different:location_id', $sourceAuthorizedForUser],
             'items' => ['required', 'array', 'min:1'],
             'items.*.product_id' => ['required', 'exists:products,id'],
             'items.*.quantity' => ['required', 'integer', 'min:1'],
             'items.*.unit_price' => ['required', 'integer', 'min:0'],
             'interval_days' => ['nullable', 'integer', 'min:1'],
-            'cron_expression' => ['nullable', 'string', 'max:120'],
+            'cron_expression' => ['nullable', 'string', 'max:120', $cronFormatRule],
             'auto_submit' => ['nullable', 'boolean'],
             'start_day' => ['nullable', 'integer', 'min:1'],
         ]);
 
-        if (empty($validated['interval_days']) && empty($validated['cron_expression'])) {
+        $cronExpression = isset($validated['cron_expression'])
+            ? trim((string) $validated['cron_expression'])
+            : null;
+        if ($cronExpression === '') {
+            $cronExpression = null;
+        }
+
+        if (empty($validated['interval_days']) && empty($cronExpression)) {
             return back()->withErrors([
                 'interval_days' => 'Provide either interval_days or cron_expression.',
             ]);
@@ -399,7 +446,7 @@ class GameController extends Controller
             'location_id' => $validated['location_id'],
             'items' => $validated['items'],
             'interval_days' => $validated['interval_days'] ?? null,
-            'cron_expression' => $validated['cron_expression'] ?? null,
+            'cron_expression' => $cronExpression,
             'next_run_day' => $nextRunDay,
             'auto_submit' => (bool) ($validated['auto_submit'] ?? false),
             'is_active' => true,

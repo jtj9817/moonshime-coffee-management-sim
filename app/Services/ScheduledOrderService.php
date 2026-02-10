@@ -4,10 +4,9 @@ namespace App\Services;
 
 use App\Events\OrderPlaced;
 use App\Models\GameState;
-use App\Models\Location;
 use App\Models\ScheduledOrder;
 use App\Models\User;
-use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class ScheduledOrderService
@@ -15,7 +14,6 @@ class ScheduledOrderService
     public function __construct(
         protected LogisticsService $logistics,
         protected OrderService $orderService,
-        protected PricingService $pricingService,
     ) {}
 
     /**
@@ -84,7 +82,12 @@ class ScheduledOrderService
         }
 
         if ($schedule->auto_submit) {
-            $estimatedTotal = $this->estimateTotalCost($user, $schedule, $path, $items);
+            $estimatedTotal = $this->orderService->calculateOrderTotalCost(
+                $user,
+                $schedule->vendor,
+                $items,
+                $path,
+            );
             if ($gameState->cash < $estimatedTotal) {
                 $this->markFailure(
                     $schedule,
@@ -98,24 +101,43 @@ class ScheduledOrderService
         }
 
         try {
-            $order = $this->orderService->createOrder(
-                user: $user,
-                vendor: $schedule->vendor,
-                targetLocation: $schedule->location,
-                items: $items,
-                path: $path,
-                autoSubmit: $schedule->auto_submit,
-            );
+            DB::transaction(function () use ($schedule, $user, $items, $path, $day, $nextRunDay): void {
+                $lockedSchedule = ScheduledOrder::query()
+                    ->whereKey($schedule->id)
+                    ->lockForUpdate()
+                    ->first();
 
-            if ($schedule->auto_submit) {
-                event(new OrderPlaced($order));
-            }
+                if (! $lockedSchedule instanceof ScheduledOrder) {
+                    return;
+                }
 
-            $schedule->update([
-                'last_run_day' => $day,
-                'next_run_day' => $nextRunDay,
-                'failure_reason' => null,
-            ]);
+                if (! $lockedSchedule->is_active || $lockedSchedule->next_run_day > $day) {
+                    return;
+                }
+
+                if (! $lockedSchedule->vendor || ! $lockedSchedule->location) {
+                    throw new \RuntimeException('Scheduled order references missing vendor/source/destination.');
+                }
+
+                $order = $this->orderService->createOrder(
+                    user: $user,
+                    vendor: $lockedSchedule->vendor,
+                    targetLocation: $lockedSchedule->location,
+                    items: $items,
+                    path: $path,
+                    autoSubmit: $lockedSchedule->auto_submit,
+                );
+
+                if ($lockedSchedule->auto_submit) {
+                    event(new OrderPlaced($order));
+                }
+
+                $lockedSchedule->update([
+                    'last_run_day' => $day,
+                    'next_run_day' => $nextRunDay,
+                    'failure_reason' => null,
+                ]);
+            });
         } catch (\Throwable $throwable) {
             $this->markFailure($schedule, $day, $nextRunDay, $throwable->getMessage());
         }
@@ -139,32 +161,6 @@ class ScheduledOrderService
             ->filter(fn (array $item) => $item['quantity'] > 0)
             ->values()
             ->all();
-    }
-
-    /**
-     * Estimate total in cents, including pricing multipliers and logistics.
-     *
-     * @param  array<int, array{product_id: string, quantity: int, cost_per_unit: int}>  $items
-     */
-    protected function estimateTotalCost(
-        User $user,
-        ScheduledOrder $schedule,
-        Collection $path,
-        array $items
-    ): int {
-        $itemsCost = collect($items)->sum(function (array $item) use ($user, $schedule) {
-            $multiplier = $this->pricingService->getPriceMultiplierFor(
-                $user,
-                $item['product_id'],
-                $schedule->vendor_id,
-            );
-
-            return (int) round($item['quantity'] * $item['cost_per_unit'] * $multiplier);
-        });
-
-        $shippingCost = (int) $path->sum(fn ($route) => $this->logistics->calculateCost($route));
-
-        return (int) $itemsCost + $shippingCost;
     }
 
     /**

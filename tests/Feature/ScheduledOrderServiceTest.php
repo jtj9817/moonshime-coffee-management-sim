@@ -8,10 +8,12 @@ use App\Models\Route;
 use App\Models\ScheduledOrder;
 use App\Models\User;
 use App\Models\Vendor;
+use App\Services\ScheduledOrderService;
 use App\Services\SimulationService;
 use App\States\Order\Draft;
 use App\States\Order\Pending;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Event;
 
 uses(RefreshDatabase::class);
 
@@ -153,4 +155,40 @@ it('creates draft orders for non-auto-submit schedules', function () {
     expect($order)->not()->toBeNull()
         ->and($order->status)->toBeInstanceOf(Draft::class)
         ->and($world['gameState']->fresh()->cash)->toBe(500);
+});
+
+it('rolls back scheduled auto-submit orders when execution fails after createOrder', function () {
+    $world = buildScheduledOrderWorld(100000);
+
+    ScheduledOrder::create([
+        'user_id' => $world['user']->id,
+        'vendor_id' => $world['vendor']->id,
+        'source_location_id' => $world['sourceLocation']->id,
+        'location_id' => $world['targetLocation']->id,
+        'items' => [
+            [
+                'product_id' => $world['product']->id,
+                'quantity' => 2,
+                'unit_price' => 200,
+            ],
+        ],
+        'interval_days' => 3,
+        'next_run_day' => 2,
+        'auto_submit' => true,
+        'is_active' => true,
+    ]);
+
+    Event::listen(\App\Events\OrderPlaced::class, function (): void {
+        throw new RuntimeException('forced schedule failure');
+    });
+
+    app(ScheduledOrderService::class)->processDueSchedules($world['gameState'], 2);
+
+    $schedule = ScheduledOrder::where('user_id', $world['user']->id)->firstOrFail()->fresh();
+
+    expect(Order::where('user_id', $world['user']->id)->count())->toBe(0)
+        ->and($world['gameState']->fresh()->cash)->toBe(100000)
+        ->and($schedule->last_run_day)->toBe(2)
+        ->and($schedule->next_run_day)->toBe(5)
+        ->and($schedule->failure_reason)->toContain('forced schedule failure');
 });

@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\GameState;
+use App\Models\Inventory;
 use App\Models\Location;
 use App\Models\Product;
 use App\Models\ScheduledOrder;
@@ -23,6 +24,12 @@ function buildSchedulePayloadWorld(): array
     $sourceLocation = Location::factory()->create(['type' => 'vendor']);
     $targetLocation = Location::factory()->create(['type' => 'store']);
     $product = Product::factory()->create();
+    Inventory::factory()->create([
+        'user_id' => $user->id,
+        'location_id' => $targetLocation->id,
+        'product_id' => $product->id,
+        'quantity' => 0,
+    ]);
 
     return compact('user', 'vendor', 'sourceLocation', 'targetLocation', 'product');
 }
@@ -55,6 +62,60 @@ it('stores scheduled orders from ordering flow', function () {
         ->and($schedule->next_run_day)->toBe(5)
         ->and($schedule->interval_days)->toBe(7)
         ->and($schedule->auto_submit)->toBeTrue();
+});
+
+it('rejects scheduled orders for destination locations not in user inventory scope', function () {
+    $world = buildSchedulePayloadWorld();
+    $otherUser = User::factory()->create();
+    $foreignLocation = Location::factory()->create(['type' => 'store']);
+    Inventory::factory()->create([
+        'user_id' => $otherUser->id,
+        'location_id' => $foreignLocation->id,
+        'product_id' => $world['product']->id,
+        'quantity' => 10,
+    ]);
+
+    $response = $this->actingAs($world['user'])
+        ->from('/game/ordering')
+        ->post('/game/orders/scheduled', [
+            'vendor_id' => $world['vendor']->id,
+            'source_location_id' => $world['sourceLocation']->id,
+            'location_id' => $foreignLocation->id,
+            'interval_days' => 7,
+            'items' => [
+                [
+                    'product_id' => $world['product']->id,
+                    'quantity' => 5,
+                    'unit_price' => 180,
+                ],
+            ],
+        ]);
+
+    $response->assertSessionHasErrors('location_id');
+    expect(ScheduledOrder::where('user_id', $world['user']->id)->count())->toBe(0);
+});
+
+it('rejects unsupported cron expressions for scheduled orders', function () {
+    $world = buildSchedulePayloadWorld();
+
+    $response = $this->actingAs($world['user'])
+        ->from('/game/ordering')
+        ->post('/game/orders/scheduled', [
+            'vendor_id' => $world['vendor']->id,
+            'source_location_id' => $world['sourceLocation']->id,
+            'location_id' => $world['targetLocation']->id,
+            'cron_expression' => '0 0 * * *',
+            'items' => [
+                [
+                    'product_id' => $world['product']->id,
+                    'quantity' => 5,
+                    'unit_price' => 180,
+                ],
+            ],
+        ]);
+
+    $response->assertSessionHasErrors('cron_expression');
+    expect(ScheduledOrder::where('user_id', $world['user']->id)->count())->toBe(0);
 });
 
 it('enforces user isolation for schedule toggles and deletes', function () {

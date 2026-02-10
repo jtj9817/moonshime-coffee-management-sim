@@ -14,9 +14,12 @@ class OrderService
 {
     protected LogisticsService $logistics;
 
-    public function __construct(LogisticsService $logistics)
+    protected PricingService $pricingService;
+
+    public function __construct(LogisticsService $logistics, PricingService $pricingService)
     {
         $this->logistics = $logistics;
+        $this->pricingService = $pricingService;
     }
 
     /**
@@ -35,8 +38,7 @@ class OrderService
         array $items,
         ?Collection $path = null,
         bool $autoSubmit = true
-    ): Order
-    {
+    ): Order {
         // 1. Calculate Path if not provided
         if (! $path) {
             // Vendors are not locations in the graph directly usually, but their source_location is?
@@ -64,24 +66,8 @@ class OrderService
         }
 
         return DB::transaction(function () use ($user, $vendor, $targetLocation, $items, $path, $autoSubmit) {
-            $pricing = app(\App\Services\PricingService::class);
-
-            $pricedItems = collect($items)->map(function ($item) use ($pricing, $user, $vendor) {
-                $multiplier = $pricing->getPriceMultiplierFor($user, $item['product_id'], $vendor->id);
-                $item['cost_per_unit'] = (int) round(((int) $item['cost_per_unit']) * $multiplier);
-
-                return $item;
-            })->all();
-
-            // 2. Calculate totals (integer cents)
-            $totalCost = 0;
-            foreach ($pricedItems as $item) {
-                $totalCost += $item['quantity'] * (int) $item['cost_per_unit'];
-            }
-
-            // Add Logistics Cost (integer cents)
-            $logisticsCost = (int) $path->sum(fn ($route) => $this->logistics->calculateCost($route));
-            $totalCost = $totalCost + $logisticsCost;
+            $pricedItems = $this->applyPricingToItems($user, $vendor, $items);
+            $totalCost = $this->sumItemTotals($pricedItems) + $this->calculateShippingCost($path);
 
             // Transits
             $totalDays = $path->sum('transit_days');
@@ -121,6 +107,49 @@ class OrderService
 
             return $order;
         });
+    }
+
+    /**
+     * Calculate the final order total in cents using the same pricing logic as createOrder.
+     *
+     * @param  array<int, array{product_id: string, quantity: int, cost_per_unit: int}>  $items
+     */
+    public function calculateOrderTotalCost(User $user, Vendor $vendor, array $items, Collection $path): int
+    {
+        $pricedItems = $this->applyPricingToItems($user, $vendor, $items);
+
+        return $this->sumItemTotals($pricedItems) + $this->calculateShippingCost($path);
+    }
+
+    /**
+     * Apply dynamic pricing to each line item.
+     *
+     * @param  array<int, array{product_id: string, quantity: int, cost_per_unit: int}>  $items
+     * @return array<int, array{product_id: string, quantity: int, cost_per_unit: int}>
+     */
+    protected function applyPricingToItems(User $user, Vendor $vendor, array $items): array
+    {
+        return collect($items)->map(function (array $item) use ($user, $vendor): array {
+            $multiplier = $this->pricingService->getPriceMultiplierFor($user, $item['product_id'], $vendor->id);
+            $item['cost_per_unit'] = (int) round(((int) $item['cost_per_unit']) * $multiplier);
+
+            return $item;
+        })->all();
+    }
+
+    /**
+     * Sum line-item totals in integer cents.
+     *
+     * @param  array<int, array{product_id: string, quantity: int, cost_per_unit: int}>  $items
+     */
+    protected function sumItemTotals(array $items): int
+    {
+        return (int) collect($items)->sum(fn (array $item): int => $item['quantity'] * (int) $item['cost_per_unit']);
+    }
+
+    protected function calculateShippingCost(Collection $path): int
+    {
+        return (int) $path->sum(fn ($route) => $this->logistics->calculateCost($route));
     }
 
     protected function createShipmentsForOrder(Order $order, Collection $path, int $currentDay): void
