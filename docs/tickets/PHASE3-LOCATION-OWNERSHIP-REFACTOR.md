@@ -1,7 +1,7 @@
 # Ticket: Refactor and Optimize Location Ownership Logic
 
 **Priority:** High
-**Status:** Open
+**Status:** Completed
 **Assignee:** Unassigned
 **Created:** 2026-02-09
 **Related Commit:** e1082b7
@@ -41,18 +41,26 @@ The current implementation checks `if ($alreadyOwned) { return; }`. This means i
 
 ### Refactoring Tasks
 
-- [ ] **Centralize Logic:** Move the location synchronization logic into the `User` model (e.g., `public function syncLocations(): void`) or a dedicated service.
-- [ ] **Remove Side Effects:**
+- [x] **Centralize Logic:** Move the location synchronization logic into the `User` model (e.g., `public function syncLocations(): void`) or a dedicated service.
+- [x] **Remove Side Effects:**
     - Remove calls to `ensureLocationOwnership` from `HandleInertiaRequests.php`.
     - Remove calls to `ensureLocationOwnership` from `StoreOrderRequest.php`.
     - Rely on the migration for backfilling existing users and `InitializeNewGame` for new users.
-- [ ] **Fix Sync Logic:** Update the centralized method to use `syncWithoutDetaching` or `insertOrIgnore` without the early `if ($exists)` return, ensuring new locations are picked up.
-- [ ] **Optimize Validation:** In `StoreOrderRequest.php`, replace raw `UserLocation` queries with the `User::locations()` relationship check.
+- [x] **Fix Sync Logic:** Update the centralized method to use `syncWithoutDetaching` or `insertOrIgnore` without the early `if ($exists)` return, ensuring new locations are picked up.
+- [x] **Optimize Validation:** In `StoreOrderRequest.php`, replace raw `UserLocation` queries with the `User::locations()` relationship check.
+
+## Implementation Notes (2026-02-10)
+
+- Added `User::syncLocations()` and migrated all location ownership sync behavior to this single method.
+- Removed runtime `Schema::hasTable('user_locations')` checks and duplicated sync methods from middleware, request validation, and controller.
+- Removed write side effects from `HandleInertiaRequests` and `StoreOrderRequest`.
+- Updated ownership checks in order/scheduled-order validation to use `User::locations()` relationship lookups.
+- Added `tests/Unit/Models/UserTest.php` to cover idempotent sync behavior and incremental sync when users gain new locations later.
 
 ### Example Implementation (User Model)
 
 ```php
-public function syncLocations(): void
+public function syncLocations(): int
 {
     $inventoryLocationIds = \App\Models\Inventory::query()
         ->where('user_id', $this->id)
@@ -65,9 +73,11 @@ public function syncLocations(): void
 
     $locationIds = $inventoryLocationIds
         ->merge($vendorLocationIds)
-        ->unique();
+        ->unique()
+        ->values();
 
-    // Efficient idempotent sync
-    $this->locations()->syncWithoutDetaching($locationIds);
+    $changes = $this->locations()->syncWithoutDetaching($locationIds->all());
+
+    return count($changes['attached'] ?? []);
 }
 ```

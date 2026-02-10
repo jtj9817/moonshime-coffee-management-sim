@@ -3,11 +3,8 @@
 namespace App\Http\Requests;
 
 use App\Models\GameState;
-use App\Models\UserLocation;
 use App\Services\LogisticsService;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Validator;
 
 class StoreOrderRequest extends FormRequest
@@ -73,10 +70,7 @@ class StoreOrderRequest extends FormRequest
             $vendorId = $this->input('vendor_id');
             $locationId = $this->input('location_id');
             $sourceLocationId = $this->input('source_location_id');
-            $userId = $this->user()?->id;
-            if ($userId !== null) {
-                $this->ensureLocationOwnership((int) $userId);
-            }
+            $user = $this->user();
             $sourceLocation = null;
 
             if ($sourceLocationId) {
@@ -155,21 +149,19 @@ class StoreOrderRequest extends FormRequest
                 return;
             }
 
-            if ($userId !== null) {
-                $sourceIsOwned = UserLocation::query()
-                    ->where('user_id', $userId)
-                    ->where('location_id', $sourceLocation->id)
-                    ->exists();
+            if ($user !== null) {
+                $ownedLocationIds = $user->locations()
+                    ->pluck('locations.id')
+                    ->all();
+
+                $sourceIsOwned = in_array($sourceLocation->id, $ownedLocationIds, true);
                 if (! $sourceIsOwned) {
                     $validator->errors()->add('source_location_id', 'Selected source location is not available for your game state.');
 
                     return;
                 }
 
-                $targetIsOwned = UserLocation::query()
-                    ->where('user_id', $userId)
-                    ->where('location_id', $targetLocation->id)
-                    ->exists();
+                $targetIsOwned = in_array($targetLocation->id, $ownedLocationIds, true);
                 if (! $targetIsOwned) {
                     $validator->errors()->add('location_id', 'Selected destination location is not available for your game state.');
 
@@ -197,7 +189,6 @@ class StoreOrderRequest extends FormRequest
             // 3. Validate Funds
             $shippingCost = (int) $path->sum(fn ($r) => $logistics->calculateCost($r));
             $pricing = app(\App\Services\PricingService::class);
-            $user = $this->user();
             $vendorId = $this->input('vendor_id');
             $itemsCost = (int) $items->sum(function ($item) use ($pricing, $user, $vendorId) {
                 $quantity = (int) ($item['quantity'] ?? 0);
@@ -222,45 +213,5 @@ class StoreOrderRequest extends FormRequest
             $this->merge(['_calculated_path' => $path]);
             $this->merge(['_source_location' => $sourceLocation]);
         });
-    }
-
-    protected function ensureLocationOwnership(int $userId): void
-    {
-        if (! Schema::hasTable('user_locations')) {
-            return;
-        }
-
-        $alreadyOwned = DB::table('user_locations')
-            ->where('user_id', $userId)
-            ->exists();
-        if ($alreadyOwned) {
-            return;
-        }
-
-        $inventoryLocationIds = \App\Models\Inventory::query()
-            ->where('user_id', $userId)
-            ->distinct()
-            ->pluck('location_id');
-        $vendorLocationIds = \App\Models\Location::query()
-            ->where('type', 'vendor')
-            ->pluck('id');
-        $locationIds = $inventoryLocationIds
-            ->merge($vendorLocationIds)
-            ->unique()
-            ->values();
-
-        if ($locationIds->isEmpty()) {
-            return;
-        }
-
-        $now = now();
-        $rows = $locationIds->map(fn (string $locationId): array => [
-            'user_id' => $userId,
-            'location_id' => $locationId,
-            'created_at' => $now,
-            'updated_at' => $now,
-        ])->all();
-
-        DB::table('user_locations')->insertOrIgnore($rows);
     }
 }

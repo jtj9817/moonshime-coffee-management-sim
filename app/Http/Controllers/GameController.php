@@ -25,7 +25,6 @@ use App\States\Order\Delivered;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -368,27 +367,19 @@ class GameController extends Controller
      */
     public function storeScheduledOrder(Request $request): \Illuminate\Http\RedirectResponse
     {
-        $userId = auth()->id();
-        $this->ensureLocationOwnership((int) $userId);
+        $user = auth()->user();
+        $ownedLocationIds = $user->locations()
+            ->pluck('locations.id')
+            ->all();
 
-        $destinationOwnedByUser = function (string $attribute, mixed $value, \Closure $fail) use ($userId): void {
-            $hasAccess = DB::table('user_locations')
-                ->where('user_id', $userId)
-                ->where('location_id', (string) $value)
-                ->exists();
-
-            if (! $hasAccess) {
+        $destinationOwnedByUser = function (string $attribute, mixed $value, \Closure $fail) use ($ownedLocationIds): void {
+            if (! in_array((string) $value, $ownedLocationIds, true)) {
                 $fail('The selected destination location is not available for your game state.');
             }
         };
 
-        $sourceAuthorizedForUser = function (string $attribute, mixed $value, \Closure $fail) use ($userId): void {
-            $hasAccess = DB::table('user_locations')
-                ->where('user_id', $userId)
-                ->where('location_id', (string) $value)
-                ->exists();
-
-            if (! $hasAccess) {
+        $sourceAuthorizedForUser = function (string $attribute, mixed $value, \Closure $fail) use ($ownedLocationIds): void {
+            if (! in_array((string) $value, $ownedLocationIds, true)) {
                 $fail('The selected source location is not available for your game state.');
             }
         };
@@ -450,46 +441,6 @@ class GameController extends Controller
         ]);
 
         return back()->with('success', 'Scheduled order created successfully.');
-    }
-
-    protected function ensureLocationOwnership(int $userId): void
-    {
-        if (! Schema::hasTable('user_locations')) {
-            return;
-        }
-
-        $alreadyOwned = DB::table('user_locations')
-            ->where('user_id', $userId)
-            ->exists();
-        if ($alreadyOwned) {
-            return;
-        }
-
-        $inventoryLocationIds = Inventory::query()
-            ->where('user_id', $userId)
-            ->distinct()
-            ->pluck('location_id');
-        $vendorLocationIds = Location::query()
-            ->where('type', 'vendor')
-            ->pluck('id');
-        $locationIds = $inventoryLocationIds
-            ->merge($vendorLocationIds)
-            ->unique()
-            ->values();
-
-        if ($locationIds->isEmpty()) {
-            return;
-        }
-
-        $now = now();
-        $rows = $locationIds->map(fn (string $locationId): array => [
-            'user_id' => $userId,
-            'location_id' => $locationId,
-            'created_at' => $now,
-            'updated_at' => $now,
-        ])->all();
-
-        DB::table('user_locations')->insertOrIgnore($rows);
     }
 
     /**

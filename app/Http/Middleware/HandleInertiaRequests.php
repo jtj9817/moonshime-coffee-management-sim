@@ -4,7 +4,6 @@ namespace App\Http\Middleware;
 
 use App\Models\Alert;
 use App\Models\GameState;
-use App\Models\Inventory;
 use App\Models\Location;
 use App\Models\Order;
 use App\Models\Product;
@@ -12,8 +11,6 @@ use App\Models\SpikeEvent;
 use App\Models\User;
 use App\Models\Vendor;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -73,8 +70,6 @@ class HandleInertiaRequests extends Middleware
      */
     protected function getGameData(User $user): array
     {
-        $this->ensureLocationOwnership($user);
-
         $activeSpikes = SpikeEvent::forUser($user->id)
             ->active()
             ->with(['location', 'product', 'affectedRoute'])
@@ -102,49 +97,6 @@ class HandleInertiaRequests extends Middleware
                 ->get(),
             'activeSpikes' => $activeSpikes,
         ];
-    }
-
-    /**
-     * Ensure legacy users have explicit location ownership rows.
-     */
-    protected function ensureLocationOwnership(User $user): void
-    {
-        if (! Schema::hasTable('user_locations')) {
-            return;
-        }
-
-        $alreadyOwned = DB::table('user_locations')
-            ->where('user_id', $user->id)
-            ->exists();
-        if ($alreadyOwned) {
-            return;
-        }
-
-        $inventoryLocationIds = Inventory::query()
-            ->where('user_id', $user->id)
-            ->distinct()
-            ->pluck('location_id');
-        $vendorLocationIds = Location::query()
-            ->where('type', 'vendor')
-            ->pluck('id');
-        $locationIds = $inventoryLocationIds
-            ->merge($vendorLocationIds)
-            ->unique()
-            ->values();
-
-        if ($locationIds->isEmpty()) {
-            return;
-        }
-
-        $now = now();
-        $rows = $locationIds->map(fn (string $locationId): array => [
-            'user_id' => $user->id,
-            'location_id' => $locationId,
-            'created_at' => $now,
-            'updated_at' => $now,
-        ])->all();
-
-        DB::table('user_locations')->insertOrIgnore($rows);
     }
 
     /**

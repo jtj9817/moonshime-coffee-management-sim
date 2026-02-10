@@ -61,4 +61,34 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Location::class, 'user_locations')->withTimestamps();
     }
+
+    /**
+     * Ensure owned locations include inventory locations plus all vendor locations.
+     *
+     * @return int Number of newly attached locations.
+     */
+    public function syncLocations(): int
+    {
+        $inventoryLocationIds = Inventory::query()
+            ->where('user_id', $this->id)
+            ->distinct()
+            ->pluck('location_id');
+
+        $vendorLocationIds = Location::query()
+            ->where('type', 'vendor')
+            ->pluck('id');
+
+        $locationIds = $inventoryLocationIds
+            ->merge($vendorLocationIds)
+            ->unique()
+            ->values();
+
+        if ($locationIds->isEmpty()) {
+            return 0;
+        }
+
+        $changes = $this->locations()->syncWithoutDetaching($locationIds->all());
+
+        return count($changes['attached'] ?? []);
+    }
 }
