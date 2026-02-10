@@ -5,6 +5,7 @@ use App\Models\Location;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\Shipment;
+use App\Models\UserLocation;
 use App\Models\User;
 use App\Models\Vendor;
 use App\Services\LogisticsService;
@@ -372,6 +373,18 @@ it('processes multihop order scenarios', function (array $scenario) {
     $this->createVendorPath($scenario['locations']);
     $this->createRoutes($scenario['routes']);
     $this->createProductBundle($scenario['products']);
+    $ownedLocationIds = collect($scenario['locations'])
+        ->filter(fn ($loc) => is_string($loc))
+        ->map(fn (string $alias) => $this->resolveId($alias, Location::class))
+        ->values()
+        ->all();
+
+    foreach ($ownedLocationIds as $locationId) {
+        UserLocation::query()->firstOrCreate([
+            'user_id' => $user->id,
+            'location_id' => $locationId,
+        ]);
+    }
 
     // 2. Resolve Aliases
     $vendorId = $this->resolveId($scenario['order']['vendor_alias'], Vendor::class);

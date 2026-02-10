@@ -36,10 +36,12 @@ function buildScheduledOrderWorld(int $cash = 100000): array
     Route::factory()->create([
         'source_id' => $sourceLocation->id,
         'target_id' => $targetLocation->id,
+        'transport_mode' => 'Ship',
         'cost' => 250,
         'capacity' => 100,
         'transit_days' => 2,
         'is_active' => true,
+        'weather_vulnerability' => false,
     ]);
 
     return compact(
