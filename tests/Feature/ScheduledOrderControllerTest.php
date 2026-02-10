@@ -1,11 +1,11 @@
 <?php
 
 use App\Models\GameState;
-use App\Models\Inventory;
 use App\Models\Location;
 use App\Models\Product;
 use App\Models\ScheduledOrder;
 use App\Models\User;
+use App\Models\UserLocation;
 use App\Models\Vendor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -24,11 +24,13 @@ function buildSchedulePayloadWorld(): array
     $sourceLocation = Location::factory()->create(['type' => 'vendor']);
     $targetLocation = Location::factory()->create(['type' => 'store']);
     $product = Product::factory()->create();
-    Inventory::factory()->create([
+    UserLocation::create([
         'user_id' => $user->id,
         'location_id' => $targetLocation->id,
-        'product_id' => $product->id,
-        'quantity' => 0,
+    ]);
+    UserLocation::create([
+        'user_id' => $user->id,
+        'location_id' => $sourceLocation->id,
     ]);
 
     return compact('user', 'vendor', 'sourceLocation', 'targetLocation', 'product');
@@ -64,15 +66,13 @@ it('stores scheduled orders from ordering flow', function () {
         ->and($schedule->auto_submit)->toBeTrue();
 });
 
-it('rejects scheduled orders for destination locations not in user inventory scope', function () {
+it('rejects scheduled orders for destination locations outside ownership scope', function () {
     $world = buildSchedulePayloadWorld();
     $otherUser = User::factory()->create();
     $foreignLocation = Location::factory()->create(['type' => 'store']);
-    Inventory::factory()->create([
+    UserLocation::create([
         'user_id' => $otherUser->id,
         'location_id' => $foreignLocation->id,
-        'product_id' => $world['product']->id,
-        'quantity' => 10,
     ]);
 
     $response = $this->actingAs($world['user'])

@@ -7,6 +7,7 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\Route;
 use App\Models\User;
+use App\Models\UserLocation;
 use App\Models\Vendor;
 
 function buildOrderRequestWorld(int $cashInCents = 200000): array
@@ -21,6 +22,14 @@ function buildOrderRequestWorld(int $cashInCents = 200000): array
     $sourceLocation = Location::factory()->create(['type' => 'vendor']);
     $targetLocation = Location::factory()->create(['type' => 'store']);
     $product = Product::factory()->create(['unit_price' => 175]);
+    UserLocation::create([
+        'user_id' => $user->id,
+        'location_id' => $sourceLocation->id,
+    ]);
+    UserLocation::create([
+        'user_id' => $user->id,
+        'location_id' => $targetLocation->id,
+    ]);
 
     return compact('user', 'vendor', 'sourceLocation', 'targetLocation', 'product');
 }
@@ -160,4 +169,38 @@ test('store order request reports no-route errors when no valid path exists', fu
             ->whereHas('order', fn ($query) => $query->where('user_id', $world['user']->id))
             ->count()
     )->toBe(0);
+});
+
+test('store order request rejects destination locations outside ownership scope', function () {
+    $world = buildOrderRequestWorld(100000);
+    $foreignTarget = Location::factory()->create(['type' => 'store']);
+
+    Route::factory()->create([
+        'source_id' => $world['sourceLocation']->id,
+        'target_id' => $foreignTarget->id,
+        'transport_mode' => 'Truck',
+        'capacity' => 100,
+        'cost' => 250,
+        'is_active' => true,
+    ]);
+
+    $response = $this->actingAs($world['user'])
+        ->from('/game/ordering')
+        ->post('/game/orders', [
+            'vendor_id' => $world['vendor']->id,
+            'location_id' => $foreignTarget->id,
+            'source_location_id' => $world['sourceLocation']->id,
+            'items' => [
+                [
+                    'product_id' => $world['product']->id,
+                    'quantity' => 1,
+                    'unit_price' => 175,
+                ],
+            ],
+        ]);
+
+    $response->assertSessionHasErrors('location_id');
+    expect(session('errors')->first('location_id'))
+        ->toBe('Selected destination location is not available for your game state.');
+    expect(Order::where('user_id', $world['user']->id)->count())->toBe(0);
 });

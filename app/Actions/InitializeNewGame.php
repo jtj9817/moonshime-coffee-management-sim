@@ -13,6 +13,7 @@ use App\Models\Vendor;
 use Database\Seeders\SpikeSeeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use RuntimeException;
 
 /**
@@ -59,10 +60,13 @@ class InitializeNewGame
                             'existing_transfer_count' => $existingTransferCount,
                         ]);
 
+                        $this->syncLocationOwnership($user, $logger);
+
                         return $gameState;
                     }
 
                     $this->seedInitialInventory($user, $logger);
+                    $this->syncLocationOwnership($user, $logger);
                     $this->seedPipelineActivity($user, $gameState, $logger);
                     app(SpikeSeeder::class)->seedInitialSpikes($gameState);
 
@@ -70,6 +74,8 @@ class InitializeNewGame
                         'user_id' => $user->id,
                     ]);
                 } else {
+                    $this->syncLocationOwnership($user, $logger);
+
                     $logger->info('InitializeNewGame: Game already initialized, skipping seeding', [
                         'user_id' => $user->id,
                         'current_day' => $gameState->day,
@@ -325,6 +331,47 @@ class InitializeNewGame
 
         $logger->info('InitializeNewGame: Pipeline activity seeding completed', [
             'user_id' => $user->id,
+        ]);
+    }
+
+    /**
+     * Ensure user has explicit access rows for owned gameplay locations.
+     */
+    protected function syncLocationOwnership(User $user, $logger): void
+    {
+        if (! Schema::hasTable('user_locations')) {
+            return;
+        }
+
+        $inventoryLocationIds = Inventory::query()
+            ->where('user_id', $user->id)
+            ->distinct()
+            ->pluck('location_id');
+        $vendorLocationIds = Location::query()
+            ->where('type', 'vendor')
+            ->pluck('id');
+        $locationIds = $inventoryLocationIds
+            ->merge($vendorLocationIds)
+            ->unique()
+            ->values();
+
+        if ($locationIds->isEmpty()) {
+            return;
+        }
+
+        $now = now();
+        $rows = $locationIds->map(fn (string $locationId): array => [
+            'user_id' => $user->id,
+            'location_id' => $locationId,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ])->all();
+
+        DB::table('user_locations')->insertOrIgnore($rows);
+
+        $logger->info('InitializeNewGame: Synced location ownership', [
+            'user_id' => $user->id,
+            'locations_granted' => count($rows),
         ]);
     }
 }

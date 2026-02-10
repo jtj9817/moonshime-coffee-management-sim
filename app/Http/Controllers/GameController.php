@@ -25,6 +25,7 @@ use App\States\Order\Delivered;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -368,9 +369,10 @@ class GameController extends Controller
     public function storeScheduledOrder(Request $request): \Illuminate\Http\RedirectResponse
     {
         $userId = auth()->id();
+        $this->ensureLocationOwnership((int) $userId);
 
         $destinationOwnedByUser = function (string $attribute, mixed $value, \Closure $fail) use ($userId): void {
-            $hasAccess = Inventory::query()
+            $hasAccess = DB::table('user_locations')
                 ->where('user_id', $userId)
                 ->where('location_id', (string) $value)
                 ->exists();
@@ -381,18 +383,12 @@ class GameController extends Controller
         };
 
         $sourceAuthorizedForUser = function (string $attribute, mixed $value, \Closure $fail) use ($userId): void {
-            $sourceId = (string) $value;
-
-            $isVendor = Location::query()
-                ->whereKey($sourceId)
-                ->where('type', 'vendor')
-                ->exists();
-            $hasInventoryAccess = Inventory::query()
+            $hasAccess = DB::table('user_locations')
                 ->where('user_id', $userId)
-                ->where('location_id', $sourceId)
+                ->where('location_id', (string) $value)
                 ->exists();
 
-            if (! $isVendor && ! $hasInventoryAccess) {
+            if (! $hasAccess) {
                 $fail('The selected source location is not available for your game state.');
             }
         };
@@ -454,6 +450,46 @@ class GameController extends Controller
         ]);
 
         return back()->with('success', 'Scheduled order created successfully.');
+    }
+
+    protected function ensureLocationOwnership(int $userId): void
+    {
+        if (! Schema::hasTable('user_locations')) {
+            return;
+        }
+
+        $alreadyOwned = DB::table('user_locations')
+            ->where('user_id', $userId)
+            ->exists();
+        if ($alreadyOwned) {
+            return;
+        }
+
+        $inventoryLocationIds = Inventory::query()
+            ->where('user_id', $userId)
+            ->distinct()
+            ->pluck('location_id');
+        $vendorLocationIds = Location::query()
+            ->where('type', 'vendor')
+            ->pluck('id');
+        $locationIds = $inventoryLocationIds
+            ->merge($vendorLocationIds)
+            ->unique()
+            ->values();
+
+        if ($locationIds->isEmpty()) {
+            return;
+        }
+
+        $now = now();
+        $rows = $locationIds->map(fn (string $locationId): array => [
+            'user_id' => $userId,
+            'location_id' => $locationId,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ])->all();
+
+        DB::table('user_locations')->insertOrIgnore($rows);
     }
 
     /**

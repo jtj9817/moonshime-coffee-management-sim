@@ -94,4 +94,16 @@ All tasks in this track must preserve completed Phase 0 invariants (money in cen
     - [x] Add "Schedule this order" option to the Ordering flow.
     - [x] Create a "Scheduled Orders" management interface.
 
+### Task 3: Strict Location Ownership Enforcement
+- [x] Task: Introduce explicit location ownership mapping.
+    - [x] Create migration/model for `user_locations` (`user_id`, `location_id`, unique composite).
+    - [x] Backfill ownership from existing user inventory and vendor access.
+- [x] Task: Enforce ownership in ordering/scheduling flows.
+    - [x] Validate destination/source locations against authenticated user's owned locations.
+    - [x] Remove inventory-proxy ownership checks for scheduled orders.
+- [x] Task: Scope shared game location props by ownership.
+    - [x] Return only owned locations from Inertia shared props to keep UI aligned with backend validation.
+- [x] Task: Verification updates.
+    - [x] Add/adjust tests and manual verification scripts for ownership-aware scheduled order creation.
+
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Strategic Planning Tools' (Protocol in workflow.md)

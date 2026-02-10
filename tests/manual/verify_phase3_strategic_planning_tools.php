@@ -30,8 +30,9 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\Route;
 use App\Models\ScheduledOrder;
-use App\Models\UserQuest;
 use App\Models\User;
+use App\Models\UserLocation;
+use App\Models\UserQuest;
 use App\Models\Vendor;
 use App\Services\SimulationService;
 use App\States\Order\Draft;
@@ -155,6 +156,15 @@ function createScheduledOrderWorld(
         'capacity' => $routeCapacity,
         'transit_days' => 2,
         'is_active' => true,
+    ]);
+
+    UserLocation::query()->firstOrCreate([
+        'user_id' => $user->id,
+        'location_id' => $sourceLocation->id,
+    ]);
+    UserLocation::query()->firstOrCreate([
+        'user_id' => $user->id,
+        'location_id' => $targetLocation->id,
     ]);
 
     return compact(
