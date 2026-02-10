@@ -18,6 +18,7 @@ use App\Models\ScheduledOrder;
 use App\Models\SpikeEvent;
 use App\Models\Transfer;
 use App\Models\Vendor;
+use App\Rules\OwnedByAuthenticatedUser;
 use App\Services\QuestService;
 use App\Services\SimulationService;
 use App\States\Order\Cancelled;
@@ -367,6 +368,11 @@ class GameController extends Controller
      */
     public function storeScheduledOrder(Request $request): \Illuminate\Http\RedirectResponse
     {
+        $ownedLocationIds = auth()->user()?->locations()
+            ->pluck('locations.id')
+            ->map(static fn (mixed $id): string => (string) $id)
+            ->all();
+
         $cronFormatRule = function (string $attribute, mixed $value, \Closure $fail): void {
             if ($value === null || trim((string) $value) === '') {
                 return;
@@ -379,8 +385,8 @@ class GameController extends Controller
 
         $validated = $request->validate([
             'vendor_id' => ['required', 'exists:vendors,id'],
-            'location_id' => ['required', 'exists:locations,id', new \App\Rules\OwnedByAuthenticatedUser('The selected destination location is not available for your game state.')],
-            'source_location_id' => ['required', 'exists:locations,id', 'different:location_id', new \App\Rules\OwnedByAuthenticatedUser('The selected source location is not available for your game state.')],
+            'location_id' => ['required', 'exists:locations,id', new OwnedByAuthenticatedUser('The selected destination location is not available for your game state.', $ownedLocationIds)],
+            'source_location_id' => ['required', 'exists:locations,id', 'different:location_id', new OwnedByAuthenticatedUser('The selected source location is not available for your game state.', $ownedLocationIds)],
             'items' => ['required', 'array', 'min:1'],
             'items.*.product_id' => ['required', 'exists:products,id'],
             'items.*.quantity' => ['required', 'integer', 'min:1'],

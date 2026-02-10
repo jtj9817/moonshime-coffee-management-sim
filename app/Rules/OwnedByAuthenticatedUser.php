@@ -12,9 +12,11 @@ class OwnedByAuthenticatedUser implements ValidationRule
      * Create a new rule instance.
      *
      * @param  string|null  $customMessage  Optional custom error message
+     * @param  array<int, string>|null  $ownedLocationIds  Optional preloaded ownership ids
      */
     public function __construct(
-        protected ?string $customMessage = null
+        protected ?string $customMessage = null,
+        protected ?array $ownedLocationIds = null,
     ) {}
 
     /**
@@ -24,17 +26,21 @@ class OwnedByAuthenticatedUser implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $user = Auth::user();
+        $ownedLocationIds = $this->ownedLocationIds;
 
-        if (! $user) {
-            $fail('No authenticated user found.');
+        if ($ownedLocationIds === null) {
+            $user = Auth::user();
+            if (! $user) {
+                $fail('No authenticated user found.');
 
-            return;
+                return;
+            }
+
+            $ownedLocationIds = $user->locations()
+                ->pluck('locations.id')
+                ->map(static fn (mixed $id): string => (string) $id)
+                ->all();
         }
-
-        $ownedLocationIds = $user->locations()
-            ->pluck('locations.id')
-            ->all();
 
         if (! in_array((string) $value, $ownedLocationIds, true)) {
             $fail($this->customMessage ?? "The selected {$attribute} is not available for your game state.");

@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\GameState;
+use App\Rules\OwnedByAuthenticatedUser;
 use App\Services\LogisticsService;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
@@ -72,6 +73,18 @@ class StoreOrderRequest extends FormRequest
             $sourceLocationId = $this->input('source_location_id');
             $user = $this->user();
             $sourceLocation = null;
+            $ownedLocationIds = $user?->locations()
+                ->pluck('locations.id')
+                ->map(static fn (mixed $id): string => (string) $id)
+                ->all();
+            $destinationOwnershipRule = new OwnedByAuthenticatedUser(
+                'Selected destination location is not available for your game state.',
+                $ownedLocationIds
+            );
+            $sourceOwnershipRule = new OwnedByAuthenticatedUser(
+                'Selected source location is not available for your game state.',
+                $ownedLocationIds
+            );
 
             if ($sourceLocationId) {
                 $sourceLocation = \App\Models\Location::find($sourceLocationId);
@@ -150,21 +163,27 @@ class StoreOrderRequest extends FormRequest
             }
 
             if ($user !== null) {
-                $ownedLocationIds = $user->locations()
-                    ->pluck('locations.id')
-                    ->all();
+                $sourceOwnershipRule->validate(
+                    'source_location_id',
+                    $sourceLocation->id,
+                    function (string $message) use ($validator): void {
+                        $validator->errors()->add('source_location_id', $message);
+                    }
+                );
 
-                $sourceIsOwned = in_array($sourceLocation->id, $ownedLocationIds, true);
-                if (! $sourceIsOwned) {
-                    $validator->errors()->add('source_location_id', 'Selected source location is not available for your game state.');
-
+                if ($validator->errors()->has('source_location_id')) {
                     return;
                 }
 
-                $targetIsOwned = in_array($targetLocation->id, $ownedLocationIds, true);
-                if (! $targetIsOwned) {
-                    $validator->errors()->add('location_id', 'Selected destination location is not available for your game state.');
+                $destinationOwnershipRule->validate(
+                    'location_id',
+                    $targetLocation->id,
+                    function (string $message) use ($validator): void {
+                        $validator->errors()->add('location_id', $message);
+                    }
+                );
 
+                if ($validator->errors()->has('location_id')) {
                     return;
                 }
             }

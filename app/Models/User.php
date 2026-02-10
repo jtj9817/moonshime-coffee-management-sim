@@ -66,33 +66,43 @@ class User extends Authenticatable
      * Ensure owned locations include inventory locations plus all vendor locations.
      *
      * @return int Number of newly attached locations.
-     *
-     * @todo Performance: If the number of vendor locations grows significantly
-     *       (e.g., thousands), consider scoping to only active vendors or
-     *       implementing chunking to reduce memory usage.
      */
     public function syncLocations(): int
     {
         $inventoryLocationIds = Inventory::query()
             ->where('user_id', $this->id)
             ->distinct()
-            ->pluck('location_id');
-
-        $vendorLocationIds = Location::query()
-            ->where('type', 'vendor')
-            ->pluck('id');
-
-        $locationIds = $inventoryLocationIds
-            ->merge($vendorLocationIds)
+            ->pluck('location_id')
+            ->map(static fn (mixed $id): string => (string) $id)
             ->unique()
-            ->values();
+            ->values()
+            ->all();
 
-        if ($locationIds->isEmpty()) {
-            return 0;
+        $attachedCount = 0;
+
+        if ($inventoryLocationIds !== []) {
+            $changes = $this->locations()->syncWithoutDetaching($inventoryLocationIds);
+            $attachedCount += count($changes['attached'] ?? []);
         }
 
-        $changes = $this->locations()->syncWithoutDetaching($locationIds->all());
+        $vendorBatch = [];
+        foreach (Location::query()->where('type', 'vendor')->select('id')->cursor() as $vendorLocation) {
+            $vendorBatch[] = (string) $vendorLocation->id;
 
-        return count($changes['attached'] ?? []);
+            if (count($vendorBatch) < 500) {
+                continue;
+            }
+
+            $changes = $this->locations()->syncWithoutDetaching($vendorBatch);
+            $attachedCount += count($changes['attached'] ?? []);
+            $vendorBatch = [];
+        }
+
+        if ($vendorBatch !== []) {
+            $changes = $this->locations()->syncWithoutDetaching($vendorBatch);
+            $attachedCount += count($changes['attached'] ?? []);
+        }
+
+        return $attachedCount;
     }
 }

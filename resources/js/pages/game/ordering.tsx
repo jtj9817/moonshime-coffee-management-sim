@@ -35,7 +35,12 @@ interface OrderingProps {
     orders: OrderModel[];
     vendorProducts: Array<{
         vendor: { id: string; name: string; reliability_score: number };
-        products: Array<{ id: string; name: string; category: string }>;
+        products: Array<{
+            id: string;
+            name: string;
+            category: string;
+            unit_price: number;
+        }>;
     }>;
     scheduledOrders?: ScheduledOrderModel[];
 }
