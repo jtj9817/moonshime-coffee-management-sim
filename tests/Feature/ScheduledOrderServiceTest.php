@@ -6,10 +6,13 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\Route;
 use App\Models\ScheduledOrder;
+use App\Models\SpikeEvent;
 use App\Models\User;
 use App\Models\Vendor;
+use App\Services\GuaranteedSpikeGenerator;
 use App\Services\ScheduledOrderService;
 use App\Services\SimulationService;
+use App\Services\SpikeEventFactory;
 use App\States\Order\Draft;
 use App\States\Order\Pending;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -54,6 +57,21 @@ function buildScheduledOrderWorld(int $cash = 100000): array
     );
 }
 
+function disableRandomSpikesForScheduledOrderTests(): void
+{
+    $generator = Mockery::mock(GuaranteedSpikeGenerator::class);
+    $generator->shouldReceive('generate')->andReturn(null);
+    app()->instance(GuaranteedSpikeGenerator::class, $generator);
+
+    $factory = Mockery::mock(SpikeEventFactory::class)->makePartial();
+    $factory->shouldReceive('generateWithConstraints')->andReturn(null);
+    app()->instance(SpikeEventFactory::class, $factory);
+}
+
+beforeEach(function () {
+    disableRandomSpikesForScheduledOrderTests();
+});
+
 it('creates pending orders from due auto-submit schedules on day advance', function () {
     $world = buildScheduledOrderWorld(100000);
 
@@ -91,6 +109,95 @@ it('creates pending orders from due auto-submit schedules on day advance', funct
         ->and($schedule->last_run_day)->toBe(2)
         ->and($schedule->next_run_day)->toBe(9)
         ->and($schedule->failure_reason)->toBeNull();
+});
+
+it('applies explicit matching price spikes to scheduled auto-submit totals', function () {
+    $world = buildScheduledOrderWorld(100000);
+
+    ScheduledOrder::create([
+        'user_id' => $world['user']->id,
+        'vendor_id' => $world['vendor']->id,
+        'source_location_id' => $world['sourceLocation']->id,
+        'location_id' => $world['targetLocation']->id,
+        'items' => [
+            [
+                'product_id' => $world['product']->id,
+                'quantity' => 10,
+                'unit_price' => 200,
+            ],
+        ],
+        'interval_days' => 7,
+        'next_run_day' => 2,
+        'auto_submit' => true,
+        'is_active' => true,
+    ]);
+
+    SpikeEvent::create([
+        'user_id' => $world['user']->id,
+        'type' => 'price',
+        'magnitude' => 1.30,
+        'duration' => 3,
+        'location_id' => null,
+        'product_id' => $world['product']->id,
+        'starts_at_day' => 2,
+        'ends_at_day' => 5,
+        'is_active' => true,
+        'meta' => null,
+    ]);
+
+    $this->actingAs($world['user']);
+    $simulation = new SimulationService($world['gameState']);
+    $simulation->advanceTime();
+
+    $order = Order::where('user_id', $world['user']->id)->latest()->firstOrFail();
+
+    expect($order->total_cost)->toBe(2850)
+        ->and($world['gameState']->fresh()->cash)->toBe(97150);
+});
+
+it('ignores vendor-scoped price spikes that target a different vendor', function () {
+    $world = buildScheduledOrderWorld(100000);
+    $otherVendor = Vendor::factory()->create();
+
+    ScheduledOrder::create([
+        'user_id' => $world['user']->id,
+        'vendor_id' => $world['vendor']->id,
+        'source_location_id' => $world['sourceLocation']->id,
+        'location_id' => $world['targetLocation']->id,
+        'items' => [
+            [
+                'product_id' => $world['product']->id,
+                'quantity' => 10,
+                'unit_price' => 200,
+            ],
+        ],
+        'interval_days' => 7,
+        'next_run_day' => 2,
+        'auto_submit' => true,
+        'is_active' => true,
+    ]);
+
+    SpikeEvent::create([
+        'user_id' => $world['user']->id,
+        'type' => 'price',
+        'magnitude' => 1.40,
+        'duration' => 3,
+        'location_id' => null,
+        'product_id' => $world['product']->id,
+        'starts_at_day' => 2,
+        'ends_at_day' => 5,
+        'is_active' => true,
+        'meta' => ['vendor_id' => (string) $otherVendor->id],
+    ]);
+
+    $this->actingAs($world['user']);
+    $simulation = new SimulationService($world['gameState']);
+    $simulation->advanceTime();
+
+    $order = Order::where('user_id', $world['user']->id)->latest()->firstOrFail();
+
+    expect($order->total_cost)->toBe(2250)
+        ->and($world['gameState']->fresh()->cash)->toBe(97750);
 });
 
 it('does not auto-submit scheduled orders when funds are insufficient', function () {

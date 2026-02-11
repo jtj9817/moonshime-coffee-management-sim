@@ -6,13 +6,19 @@ use App\Listeners\GenerateSpike;
 use App\Models\GameState;
 use App\Models\SpikeEvent;
 use App\Services\SpikeEventFactory;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Mockery\MockInterface;
+
+uses(RefreshDatabase::class);
 
 test('it generates a spike when time advances', function () {
     Event::fake([SpikeOccurred::class]);
 
-    $spike = SpikeEvent::factory()->make(); // Don't persist yet, or persist if needed
+    $spike = SpikeEvent::factory()->make([
+        'location_id' => null,
+        'product_id' => null,
+    ]);
 
     $factory = Mockery::mock(SpikeEventFactory::class, function (MockInterface $mock) use ($spike) {
         $mock->shouldReceive('generate')->once()->with(2)->andReturn($spike);

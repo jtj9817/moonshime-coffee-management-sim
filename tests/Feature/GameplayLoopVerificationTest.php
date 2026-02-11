@@ -13,7 +13,9 @@ use App\Models\Shipment;
 use App\Models\SpikeEvent;
 use App\Models\User;
 use App\Models\Vendor;
+use App\Services\GuaranteedSpikeGenerator;
 use App\Services\SimulationService;
+use App\Services\SpikeEventFactory;
 use App\States\Order\Delivered;
 use App\States\Order\Pending;
 use App\States\Order\Shipped;
@@ -22,7 +24,20 @@ use Illuminate\Support\Facades\Auth;
 
 uses(RefreshDatabase::class);
 
+function disableRandomSpikesForGameplayLoopVerificationTest(): void
+{
+    $generator = Mockery::mock(GuaranteedSpikeGenerator::class);
+    $generator->shouldReceive('generate')->andReturn(null);
+    app()->instance(GuaranteedSpikeGenerator::class, $generator);
+
+    $factory = Mockery::mock(SpikeEventFactory::class)->makePartial();
+    $factory->shouldReceive('generateWithConstraints')->andReturn(null);
+    app()->instance(SpikeEventFactory::class, $factory);
+}
+
 test('comprehensive 5-day gameplay loop simulation with player agency', function () {
+    disableRandomSpikesForGameplayLoopVerificationTest();
+
     // --- 1. WORLD SETUP ---
     $user = User::factory()->create();
     $gameState = GameState::factory()->create([

@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\SpikeEvent;
 use App\Models\User;
 use App\Models\Vendor;
+use App\Services\GuaranteedSpikeGenerator;
 use App\Services\SimulationService;
 use App\Services\SpikeEventFactory;
 use App\States\Order\Delivered;
@@ -14,6 +15,17 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 
 uses(RefreshDatabase::class);
+
+function disableRandomSpikesForSimulationServiceTests(): void
+{
+    $generator = Mockery::mock(GuaranteedSpikeGenerator::class);
+    $generator->shouldReceive('generate')->andReturn(null);
+    app()->instance(GuaranteedSpikeGenerator::class, $generator);
+
+    $factory = Mockery::mock(SpikeEventFactory::class)->makePartial();
+    $factory->shouldReceive('generateWithConstraints')->andReturn(null);
+    app()->instance(SpikeEventFactory::class, $factory);
+}
 
 beforeEach(function () {
     $user = User::factory()->create();
@@ -47,6 +59,8 @@ test('it fires time advanced event', function () {
 });
 
 test('it processes deliveries on time advancement', function () {
+    disableRandomSpikesForSimulationServiceTests();
+
     $vendor = Vendor::factory()->create();
     $order = Order::factory()->create([
         'vendor_id' => $vendor->id,
@@ -57,6 +71,42 @@ test('it processes deliveries on time advancement', function () {
 
     $this->service->advanceTime(); // Day becomes 2
 
+    expect($order->fresh()->status)->toBeInstanceOf(Delivered::class);
+});
+
+test('it applies delay spikes deterministically to delivery timelines', function () {
+    disableRandomSpikesForSimulationServiceTests();
+
+    $vendor = Vendor::factory()->create();
+    $order = Order::factory()->create([
+        'vendor_id' => $vendor->id,
+        'status' => Shipped::class,
+        'delivery_day' => 2,
+        'user_id' => $this->gameState->user_id,
+    ]);
+
+    SpikeEvent::create([
+        'user_id' => $this->gameState->user_id,
+        'type' => 'delay',
+        'magnitude' => 2,
+        'duration' => 3,
+        'location_id' => null,
+        'product_id' => null,
+        'starts_at_day' => 2,
+        'ends_at_day' => 5,
+        'is_active' => false,
+        'meta' => null,
+    ]);
+
+    $this->service->advanceTime(); // Day 2, delay spike activates and shifts delivery_day by +2
+
+    expect($order->fresh()->status)->toBeInstanceOf(Shipped::class)
+        ->and($order->fresh()->delivery_day)->toBe(4);
+
+    $this->service->advanceTime(); // Day 3
+    expect($order->fresh()->status)->toBeInstanceOf(Shipped::class);
+
+    $this->service->advanceTime(); // Day 4
     expect($order->fresh()->status)->toBeInstanceOf(Delivered::class);
 });
 
