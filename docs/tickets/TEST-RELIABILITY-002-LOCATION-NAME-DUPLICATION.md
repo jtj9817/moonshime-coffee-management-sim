@@ -80,7 +80,18 @@ Location seeding should be deterministic and safe to re-run; uniqueness assertio
 4. Added regression test in `tests/Feature/Seeder/DataConsistencyTest.php`:
 - `rerunning graph seeder does not create duplicate location names`
 
+### Solved vs Pending
+- Solved: GraphSeeder no longer appends duplicate canonical locations when rerun.
+- Solved: Graph route topology is idempotent on repeated seeding.
+- Solved: Dedicated regression assertions now check rerun safety for names and route counts.
+- Pending: Intermittent duplicate-name failures still appear in some runs where duplicate rows already exist before GraphSeeder executes.
+- Pending: No DB-level unique constraint currently enforces global `locations.name` uniqueness.
+- Pending: Root source of pre-existing duplicate names outside GraphSeeder path still needs isolation.
+
 ### Verification Status
 - Syntax checks for modified PHP files pass.
 - Full test verification is currently blocked in this environment because Docker is not running (`php artisan sail ...` reports: `Docker is not running.`).
 - Direct local `php artisan test` is also blocked from valid execution due missing Postgres host (`pgsql`) outside Sail.
+- Log re-check shows mixed outcomes:
+  - Newer runs at approximately `07:00-07:02` show `Tests\\Feature\\Seeder\\DataConsistencyTest` passing.
+  - Earlier runs in the same log window still include intermittent duplicate-name assertions (`31` unique vs `32` total).
