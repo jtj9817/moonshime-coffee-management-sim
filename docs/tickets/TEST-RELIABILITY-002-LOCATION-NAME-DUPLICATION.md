@@ -84,9 +84,10 @@ Location seeding should be deterministic and safe to re-run; uniqueness assertio
 - Solved: GraphSeeder no longer appends duplicate canonical locations when rerun.
 - Solved: Graph route topology is idempotent on repeated seeding.
 - Solved: Dedicated regression assertions now check rerun safety for names and route counts.
-- Pending: Intermittent duplicate-name failures still appear in some runs where duplicate rows already exist before GraphSeeder executes.
-- Pending: No DB-level unique constraint currently enforces global `locations.name` uniqueness.
-- Pending: Root source of pre-existing duplicate names outside GraphSeeder path still needs isolation.
+- Solved: Added migration path to dedupe existing duplicate `locations.name` rows before enforcing uniqueness.
+- Solved: Added schema-level unique index plan for `locations.name` to hard-stop future duplicates from any insert path.
+- Pending: Execute migration in Sail/Postgres and verify no data conflicts in real environment.
+- Pending: Re-run repeat harness (20 runs) after migration to confirm `DataConsistencyTest` no longer flakes.
 
 ### Verification Status
 - Syntax checks for modified PHP files pass.
