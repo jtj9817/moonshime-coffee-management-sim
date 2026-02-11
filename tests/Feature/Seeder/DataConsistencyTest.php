@@ -55,6 +55,19 @@ describe('Location Names', function () {
     test('no location is named "Test Coffee"', function () {
         expect(Location::where('name', 'Test Coffee')->exists())->toBeFalse();
     });
+
+    test('rerunning graph seeder does not create duplicate location names', function () {
+        $initialLocationCount = Location::count();
+
+        $this->seed(\Database\Seeders\GraphSeeder::class);
+
+        $totalLocations = Location::count();
+        $uniqueNames = Location::pluck('name')->unique()->count();
+
+        expect($totalLocations)->toBe($initialLocationCount);
+        expect($uniqueNames)->toBe($totalLocations);
+        expect(Location::where('name', 'Moonshine Central')->count())->toBe(1);
+    });
 });
 
 describe('Inventory Levels', function () {

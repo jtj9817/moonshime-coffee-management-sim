@@ -34,3 +34,20 @@ test('graph seeder creates expected topology', function () {
     expect($vendorToHubRoute)->not->toBeNull('At least one vendor should be connected to a hub via Air');
     expect($vendorToHubRoute->transport_mode)->toBe('Air');
 });
+
+test('graph seeder is idempotent for locations and routes', function () {
+    $this->seed(GraphSeeder::class);
+
+    $initialLocationCount = Location::count();
+    $initialRouteCount = Route::count();
+
+    $this->seed(GraphSeeder::class);
+
+    $currentLocationCount = Location::count();
+    $uniqueLocationNames = Location::pluck('name')->unique()->count();
+
+    expect($currentLocationCount)->toBe($initialLocationCount);
+    expect($uniqueLocationNames)->toBe($currentLocationCount);
+    expect(Location::where('name', 'Moonshine Central')->count())->toBe(1);
+    expect(Route::count())->toBe($initialRouteCount);
+});
