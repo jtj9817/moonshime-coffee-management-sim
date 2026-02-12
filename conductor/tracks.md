@@ -6,12 +6,13 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 # Active Tracks
 
-- [ ] **Track: Gameplay Loop Expansion (Phases 1-3)**
-*Link: [./tracks/gameplay_expansion_20260207/](./tracks/gameplay_expansion_20260207/)*
-
 ---
 
 # Archived Tracks
+
+- [x] **Track: Gameplay Loop Expansion (Phases 1-3)**
+    - **ID:** `gameplay_expansion_20260207`
+    - **Link:** [./archive/gameplay_expansion_20260207/](./archive/gameplay_expansion_20260207/)
 
 - [x] **Track: Phase 0: Critical Architecture Remediation**
     - **ID:** `arch_remediation_20260207`
