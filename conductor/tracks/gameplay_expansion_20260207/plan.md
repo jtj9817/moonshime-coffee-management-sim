@@ -106,4 +106,4 @@ All tasks in this track must preserve completed Phase 0 invariants (money in cen
 - [x] Task: Verification updates.
     - [x] Add/adjust tests and manual verification scripts for ownership-aware scheduled order creation.
 
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Strategic Planning Tools' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Strategic Planning Tools' (Protocol in workflow.md)

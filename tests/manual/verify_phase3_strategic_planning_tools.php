@@ -24,6 +24,7 @@ if (app()->environment('production')) {
 }
 
 use App\Http\Controllers\GameController;
+use App\Http\Middleware\HandleInertiaRequests;
 use App\Models\GameState;
 use App\Models\Location;
 use App\Models\Order;
@@ -277,6 +278,80 @@ try {
         ]);
         check('interval_days persisted', $schedule?->interval_days === 7);
         check('auto_submit persisted', $schedule?->auto_submit === true);
+    });
+
+    runScenario('Controller rejects schedule creation for unowned locations', function () use ($controller, $ownerWorld, $intruderWorld): void {
+        Auth::setUser($intruderWorld['user']);
+
+        $request = Request::create('/game/orders/scheduled', 'POST', [
+            'vendor_id' => $intruderWorld['vendor']->id,
+            'source_location_id' => $ownerWorld['sourceLocation']->id,
+            'location_id' => $ownerWorld['targetLocation']->id,
+            'interval_days' => 2,
+            'auto_submit' => false,
+            'items' => [[
+                'product_id' => $intruderWorld['product']->id,
+                'quantity' => 1,
+                'unit_price' => 100,
+            ]],
+        ]);
+        $request->setUserResolver(fn () => $intruderWorld['user']);
+        app()->instance('request', $request);
+
+        $caught = null;
+        try {
+            $controller->storeScheduledOrder($request);
+        } catch (\Illuminate\Validation\ValidationException $exception) {
+            $caught = $exception;
+        }
+
+        check('ValidationException thrown for unowned locations', $caught !== null);
+        check(
+            'Validation includes location_id error',
+            $caught !== null && array_key_exists('location_id', $caught->errors()),
+            ['errors' => $caught?->errors()]
+        );
+        check(
+            'Validation includes source_location_id error',
+            $caught !== null && array_key_exists('source_location_id', $caught->errors()),
+            ['errors' => $caught?->errors()]
+        );
+    });
+
+    runScenario('Inertia shared props only return owned locations', function (): void {
+        $user = User::factory()->create([
+            'name' => 'Phase 3 Props Verifier',
+            'email' => 'verify-phase3-props-'.uniqid().'@test.com',
+        ]);
+        GameState::factory()->create([
+            'user_id' => $user->id,
+            'day' => 1,
+            'cash' => 100000,
+        ]);
+
+        $ownedLocation = Location::factory()->create(['type' => 'store']);
+        $unownedLocation = Location::factory()->create(['type' => 'store']);
+
+        UserLocation::query()->firstOrCreate([
+            'user_id' => $user->id,
+            'location_id' => $ownedLocation->id,
+        ]);
+
+        $request = Request::create('/game', 'GET');
+        $request->setUserResolver(fn () => $user);
+
+        $props = app(HandleInertiaRequests::class)->share($request);
+        $game = is_callable($props['game'] ?? null) ? $props['game']() : null;
+        $locationIds = $game && isset($game['locations'])
+            ? collect($game['locations'])->pluck('id')->map(fn ($id) => (int) $id)->all()
+            : [];
+
+        check('Owned location is included in shared props', in_array($ownedLocation->id, $locationIds, true), [
+            'location_ids' => $locationIds,
+        ]);
+        check('Unowned location is excluded from shared props', ! in_array($unownedLocation->id, $locationIds, true), [
+            'location_ids' => $locationIds,
+        ]);
     });
 
     runScenario('Controller enforces ownership for toggle/delete', function () use ($controller, $ownerWorld, $intruderWorld): void {
