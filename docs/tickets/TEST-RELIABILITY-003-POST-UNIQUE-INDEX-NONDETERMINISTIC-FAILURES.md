@@ -2,19 +2,21 @@
 
 **Type:** Bug  
 **Priority:** Highest  
-**Status:** Open  
+**Status:** Resolved  
 **Assignee:** Unassigned  
+**Resolved On:** 2026-02-12  
+**Resolved By Commit:** `1124fe9`  
 **Labels:** `testing`, `flaky-tests`, `determinism`, `factories`, `postgres`
 
 ## Summary
-After resolving `DataConsistencyTest` and enforcing `locations.name` uniqueness, the suite still has non-deterministic failures. The dominant class is now `UniqueConstraintViolationException` on `locations_name_unique` from test-created locations, plus one stochastic threshold failure in demand simulation.
+This ticket is resolved. The non-deterministic failures tracked here (location name unique-index collisions and the stochastic SpikeSimulation threshold assertion) were addressed by commit `1124fe9` and validated against the latest repeat-run window.
 
 ## Scope and Impact
-- Blocks reliable CI confidence for core Feature and Unit coverage.
-- Causes intermittent red runs without product-code regressions.
-- Indicates test data generation and isolation guarantees are still incomplete.
+- Original impact: intermittent CI failures without product-code regressions.
+- Current impact: no active reproduction in the latest 20-run log window.
+- Remaining action: keep repeat-run verification in regression checks.
 
-## Evidence (Latest Log Window)
+## Historical Evidence (2026-02-11, Before Fix)
 Analysis date: `2026-02-11`  
 Window: latest 20 files in `storage/logs` (18 pest logs + 2 non-test logs)
 
@@ -147,3 +149,27 @@ Interpretation:
 ## Notes
 - `TEST-RELIABILITY-002` is resolved for GraphSeeder idempotency and DataConsistency coverage.
 - This ticket tracks the next failure class introduced/revealed after enforcing schema-level uniqueness.
+
+## Resolution Update (2026-02-12)
+
+### Completed Changes
+1. Deterministic location naming implemented in `LocationFactory` using a monotonic sequence suffix to guarantee uniqueness across suite execution.
+2. Unit tests that write to DB now include `RefreshDatabase`:
+   - `DelaySpikeScopingTest`
+   - `GuaranteedSpikeGeneratorTest`
+   - `SimulationServiceTest`
+   - `SpikeConstraintCheckerTest`
+3. `SpikeSimulationTest` threshold assertion updated from strict `> 40` boundary behavior to a deterministic floor aligned with variance.
+
+### Verification Evidence
+- Latest 20 repeat-run logs (`storage/logs/pest-run-20260212-*.log`) show no:
+  - `locations_name_unique` violations
+  - `Failed asserting that 40 is greater than 40`
+- Latest sampled runs complete successfully with `OK` summary output.
+
+## Closure Procedure
+- [x] Apply remediation items in all three workstreams.
+- [x] Re-run repeat harness and inspect latest 20 logs.
+- [x] Confirm all ticket-specific failure signatures are absent.
+- [x] Keep verification commands documented for regression checks.
+- [x] Mark ticket status as `Resolved`.
