@@ -45,7 +45,7 @@ All tasks in this track must preserve completed Phase 0 invariants (money in cen
     - [x] Write test for `DemandSimulationService` to verify demand changes based on `sell_price`.
     - [x] Update demand formula to use: `EffectiveDemand = BaseDemand * (StandardPrice / CurrentPrice)^ElasticityFactor`.
 
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Visibility & Consequences' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Visibility & Consequences' (Protocol in workflow.md)
 
 ## Phase 2: Core Engagement & Progression
 
