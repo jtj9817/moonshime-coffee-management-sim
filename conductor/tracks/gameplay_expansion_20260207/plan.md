@@ -72,7 +72,7 @@ All tasks in this track must preserve completed Phase 0 invariants (money in cen
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Core Engagement & Progression' (Protocol in workflow.md)
     - Checkpoint SHA: 83a1f01
 
-## Phase 3: Strategic Planning Tools
+## Phase 3: Strategic Planning Tools [checkpoint: df39e85]
 
 ### Task 1: "What-If" Scenario Calculator
 - [x] Task: Implement Scenario Calculator frontend logic (initial scope).
