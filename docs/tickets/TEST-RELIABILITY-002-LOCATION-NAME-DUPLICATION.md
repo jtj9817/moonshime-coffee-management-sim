@@ -88,9 +88,9 @@ Location seeding should be deterministic and safe to re-run; uniqueness assertio
 - [x] Added schema-level unique index plan for `locations.name` to hard-stop future duplicates from any insert path.
 - [x] Migration executed in Sail/Postgres.
 - [x] Repeat harness (20 runs) executed post-migration with no `DataConsistencyTest` failures in the latest run set.
-- [ ] Remaining non-deterministic failures unrelated to `DataConsistencyTest` (tracked in `TEST-RELIABILITY-003`).
+- [x] Remaining non-deterministic failures unrelated to `DataConsistencyTest` (tracked in `TEST-RELIABILITY-003`, now resolved on 2026-02-12).
 
 ### Verification Status
 - Syntax checks for modified PHP files pass.
 - Post-migration log review shows `Tests\\Feature\\Seeder\\DataConsistencyTest` passing across the latest repeat-run window.
-- The repeat-run suite still contains other failing tests, but those failures are now different in nature (`locations_name_unique` collisions in other test paths and one remaining simulation assertion flake) and are tracked in `TEST-RELIABILITY-003`.
+- Follow-up non-deterministic failures previously tracked in `TEST-RELIABILITY-003` are now closed after deterministic factory naming, unit-suite DB isolation updates, and SpikeSimulation threshold hardening.
