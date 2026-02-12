@@ -121,7 +121,7 @@ RuntimeException: Cannot initialize game: No stores found. Please ensure GraphSe
 ## TICKET-003: Breakdown Spike Resolution Cash Deduction Mismatch
 
 ### Status
-🟡 **INVESTIGATING**
+✅ **RESOLVED**
 
 ### Priority
 **P1 - High**
@@ -153,8 +153,12 @@ The test expectation appears to compare values using different units (cents vs. 
 - `database/migrations/2026_01_21_000000_convert_money_columns_to_decimal.php`
 
 ### Recommended Next Steps
-- Confirm expected units for `resolution_cost` and `game_states.cash`
-- Align test expectation with stored units (dollars)
+- None. Ticket closed.
+
+### Resolution Notes
+- Re-verified on **2026-02-12** with `DB_CONNECTION=sqlite DB_DATABASE=':memory:' php artisan test --filter='SpikeResolutionTest::can resolve breakdown spike early and deduct cost'`.
+- The referenced test now passes (6 assertions), confirming the original failure is no longer reproducible.
+- Root cause remains a historical cents-vs-dollars expectation mismatch after money-column conversion.
 
 ---
 
