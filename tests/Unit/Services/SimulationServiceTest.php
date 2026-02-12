@@ -4,7 +4,10 @@ use App\Events\TimeAdvanced;
 use App\Models\GameState;
 use App\Models\User;
 use App\Services\SimulationService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
+
+uses(RefreshDatabase::class);
 
 test('advanceTime increments the day in GameState', function () {
     $user = User::factory()->create();

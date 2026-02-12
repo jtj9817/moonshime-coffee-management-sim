@@ -9,6 +9,9 @@ use App\Models\Vendor;
 use App\Services\Spikes\DelaySpike;
 use App\States\Order\Pending;
 use App\States\Order\Shipped;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
 
 beforeEach(function () {
     $this->user = User::factory()->create();

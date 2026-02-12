@@ -5,6 +5,9 @@ use App\Models\Location;
 use App\Models\SpikeEvent;
 use App\Models\User;
 use App\Services\GuaranteedSpikeGenerator;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
 
 beforeEach(function () {
     $this->user = User::factory()->create();

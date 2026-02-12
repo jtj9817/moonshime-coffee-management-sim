@@ -10,6 +10,11 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 class LocationFactory extends Factory
 {
     /**
+     * Global sequence counter for test determinism.
+     */
+    protected static int $sequence = 0;
+
+    /**
      * Define the model's default state.
      *
      * @return array<string, mixed>
@@ -36,22 +41,25 @@ class LocationFactory extends Factory
      */
     protected function generateName(string $type, bool $hasFaker = true): string
     {
+        self::$sequence++;
+        $suffix = ' ' . str_pad((string) self::$sequence, 3, '0', STR_PAD_LEFT);
+
         if (! $hasFaker) {
             return match ($type) {
-                'store' => 'Default Coffee Shop',
-                'hub' => 'Central Distribution Hub',
-                'warehouse' => 'Central Depot',
-                'vendor' => 'Default Imports',
-                default => 'Default Location',
+                'store' => 'Default Coffee Shop'.$suffix,
+                'hub' => 'Central Distribution Hub'.$suffix,
+                'warehouse' => 'Central Depot'.$suffix,
+                'vendor' => 'Default Imports'.$suffix,
+                default => 'Default Location'.$suffix,
             };
         }
 
         return match ($type) {
-            'store' => $this->faker->unique()->company().' Coffee',
-            'hub' => $this->faker->unique()->city().' Distribution Hub',
-            'warehouse' => $this->faker->unique()->city().' Depot',
-            'vendor' => $this->faker->unique()->lastName().' Imports',
-            default => $this->faker->unique()->company(),
+            'store' => $this->faker->company().' Coffee'.$suffix,
+            'hub' => $this->faker->city().' Distribution Hub'.$suffix,
+            'warehouse' => $this->faker->city().' Depot'.$suffix,
+            'vendor' => $this->faker->lastName().' Imports'.$suffix,
+            default => $this->faker->company().$suffix,
         };
     }
 }
