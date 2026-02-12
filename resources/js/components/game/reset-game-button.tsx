@@ -7,7 +7,7 @@ import game from '@/routes/game';
 
 export default function ResetGameButton() {
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-    const { post, processing } = useForm();
+    const { post, processing } = useForm({});
 
     const handleReset = () => {
         post(game.reset.url(), {

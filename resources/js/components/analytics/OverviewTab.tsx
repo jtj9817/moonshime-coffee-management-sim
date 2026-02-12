@@ -1,4 +1,4 @@
-import { BarChart3, DollarSign, TrendingUp } from 'lucide-react';
+import { BarChart3, Boxes, DollarSign, Receipt, Tags, TrendingUp } from 'lucide-react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CollapsibleSection } from '@/components/ui/collapsible-section';
@@ -24,12 +24,18 @@ interface OverviewTabProps {
     };
     inventoryTrends: InventoryTrendPoint[];
     locationComparison: LocationComparisonItem[];
+    totalInventoryValue: number;
+    totalSpending: number;
+    categoriesCount: number;
 }
 
 export function OverviewTab({
     overviewMetrics,
     inventoryTrends,
     locationComparison,
+    totalInventoryValue,
+    totalSpending,
+    categoriesCount,
 }: OverviewTabProps) {
     const maxTrendValue = Math.max(...inventoryTrends.map((p) => p.value), 1);
 
@@ -73,6 +79,45 @@ export function OverviewTab({
                     <CardContent>
                         <div className="text-2xl font-bold">
                             ${formatCurrency(overviewMetrics.revenue7Day)}
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium text-stone-500">
+                            Total Inventory Value
+                        </CardTitle>
+                        <Boxes className="h-4 w-4 text-amber-500" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">
+                            ${formatCurrency(totalInventoryValue)}
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium text-stone-500">
+                            Total Spending
+                        </CardTitle>
+                        <Receipt className="h-4 w-4 text-stone-500" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">
+                            ${formatCurrency(totalSpending)}
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium text-stone-500">
+                            Categories
+                        </CardTitle>
+                        <Tags className="h-4 w-4 text-blue-500" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">
+                            {categoriesCount}
                         </div>
                     </CardContent>
                 </Card>

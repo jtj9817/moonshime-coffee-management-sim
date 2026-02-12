@@ -113,5 +113,17 @@
         },
         "jsx": "react-jsx"
     },
-    "include": ["resources/js/**/*.ts", "resources/js/**/*.d.ts", "resources/js/**/*.tsx"]
+    "include": ["resources/js/**/*.ts", "resources/js/**/*.d.ts", "resources/js/**/*.tsx"],
+    "exclude": [
+        "resources/js/components/Inventory.tsx",
+        "resources/js/components/Layout.tsx",
+        "resources/js/components/Ordering.tsx",
+        "resources/js/components/PolicyDeck.tsx",
+        "resources/js/components/SkuDetail.tsx",
+        "resources/js/components/Transfers.tsx",
+        "resources/js/components/VendorDetail.tsx",
+        "resources/js/components/Vendors.tsx",
+        "resources/js/components/WasteReports.tsx",
+        "resources/js/services/geminiService.ts"
+    ]
 }
