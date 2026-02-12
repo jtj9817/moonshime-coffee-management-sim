@@ -343,7 +343,7 @@ try {
         $props = app(HandleInertiaRequests::class)->share($request);
         $game = is_callable($props['game'] ?? null) ? $props['game']() : null;
         $locationIds = $game && isset($game['locations'])
-            ? collect($game['locations'])->pluck('id')->map(fn ($id) => (int) $id)->all()
+            ? collect($game['locations'])->pluck('id')->map(fn ($id) => (string) $id)->all()
             : [];
 
         check('Owned location is included in shared props', in_array($ownedLocation->id, $locationIds, true), [
