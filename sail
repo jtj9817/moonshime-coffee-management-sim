@@ -143,6 +143,10 @@ export APP_PORT=${APP_PORT:-80}
 export APP_SERVICE=${APP_SERVICE:-"laravel.test"}
 export APP_USER=${APP_USER:-"sail"}
 export DB_PORT=${DB_PORT:-3306}
+export VITE_PORT=${VITE_PORT:-5173}
+export FORWARD_DB_PORT=${FORWARD_DB_PORT:-5432}
+export FORWARD_REDIS_PORT=${FORWARD_REDIS_PORT:-6379}
+export FORWARD_MEILISEARCH_PORT=${FORWARD_MEILISEARCH_PORT:-7700}
 export WWWUSER=${WWWUSER:-$UID}
 export WWWGROUP=${WWWGROUP:-$(id -g)}
 
@@ -204,6 +208,12 @@ if [ -z "$SAIL_SKIP_CHECKS" ]; then
         EXEC="no"
     elif [ -z "$("${DOCKER_COMPOSE[@]}" ps -q)" ]; then
         EXEC="no"
+    fi
+fi
+
+if [ "$1" == "up" ] && [ "$EXEC" == "no" ] && [ -z "$SAIL_SKIP_CHECKS" ] && [ -z "$SAIL_SKIP_PORT_CHECK" ]; then
+    if [ -x "./scripts/sail-preflight-ports.sh" ]; then
+        ./scripts/sail-preflight-ports.sh || exit 1
     fi
 fi
 
