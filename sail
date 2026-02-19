@@ -213,7 +213,7 @@ fi
 
 if [ "$1" == "up" ] && [ "$EXEC" == "no" ] && [ -z "$SAIL_SKIP_CHECKS" ] && [ -z "$SAIL_SKIP_PORT_CHECK" ]; then
     if [ -x "./scripts/sail-preflight-ports.sh" ]; then
-        ./scripts/sail-preflight-ports.sh || exit 1
+        source ./scripts/sail-preflight-ports.sh
     fi
 fi
 

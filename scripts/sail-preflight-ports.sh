@@ -1,7 +1,42 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
+# This script checks for port conflicts and dynamically assigns new ports if needed.
+# It is intended to be sourced by the main 'sail' script.
 
+port_in_use() {
+  local port="$1"
+
+  # Prioritize ss as it's more reliable for seeing all listening ports without sudo
+  if command -v ss >/dev/null 2>&1; then
+    ss -ltn 2>/dev/null | grep -qE "[.:]${port}(\s|$)"
+    return $?
+  fi
+
+  if command -v lsof >/dev/null 2>&1; then
+    lsof -iTCP:"${port}" -sTCP:LISTEN -n -P >/dev/null 2>&1
+    return $?
+  fi
+
+  if command -v netstat >/dev/null 2>&1; then
+    netstat -ltn 2>/dev/null | grep -qE "[.:]${port}(\s|$)"
+    return $?
+  fi
+
+  return 1
+}
+
+find_available_port() {
+  local port="$1"
+  local original_port="$1"
+  
+  while port_in_use "$port"; do
+    port=$((port + 1))
+  done
+  
+  echo "$port"
+}
+
+# Source .env if available
 if [ -n "${APP_ENV:-}" ] && [ -f ".env.${APP_ENV}" ]; then
   # shellcheck source=/dev/null
   source ".env.${APP_ENV}"
@@ -10,59 +45,42 @@ elif [ -f ".env" ]; then
   source ".env"
 fi
 
+# Initial values from environment or defaults
 APP_PORT=${APP_PORT:-80}
 VITE_PORT=${VITE_PORT:-5173}
 FORWARD_DB_PORT=${FORWARD_DB_PORT:-5432}
 FORWARD_REDIS_PORT=${FORWARD_REDIS_PORT:-6379}
 FORWARD_MEILISEARCH_PORT=${FORWARD_MEILISEARCH_PORT:-7700}
 
-port_in_use() {
-  local port="$1"
+# Dynamically find available ports
+NEW_APP_PORT=$(find_available_port "$APP_PORT")
+NEW_VITE_PORT=$(find_available_port "$VITE_PORT")
+NEW_DB_PORT=$(find_available_port "$FORWARD_DB_PORT")
+NEW_REDIS_PORT=$(find_available_port "$FORWARD_REDIS_PORT")
+NEW_MEILI_PORT=$(find_available_port "$FORWARD_MEILISEARCH_PORT")
 
-  if command -v lsof >/dev/null 2>&1; then
-    lsof -iTCP:"${port}" -sTCP:LISTEN -n -P >/dev/null 2>&1
-    return $?
-  fi
+# Export the new values if they changed
+if [ "$NEW_APP_PORT" != "$APP_PORT" ]; then
+  echo "APP_PORT conflict: $APP_PORT is in use. Using $NEW_APP_PORT instead." >&2
+  export APP_PORT="$NEW_APP_PORT"
+fi
 
-  if command -v ss >/dev/null 2>&1; then
-    ss -ltn 2>/dev/null | grep -q "[.:]${port} "
-    return $?
-  fi
+if [ "$NEW_VITE_PORT" != "$VITE_PORT" ]; then
+  echo "VITE_PORT conflict: $VITE_PORT is in use. Using $NEW_VITE_PORT instead." >&2
+  export VITE_PORT="$NEW_VITE_PORT"
+fi
 
-  if command -v netstat >/dev/null 2>&1; then
-    netstat -ltn 2>/dev/null | grep -q "[.:]${port} "
-    return $?
-  fi
+if [ "$NEW_DB_PORT" != "$FORWARD_DB_PORT" ]; then
+  echo "DB_PORT conflict: $FORWARD_DB_PORT is in use. Using $NEW_DB_PORT instead." >&2
+  export FORWARD_DB_PORT="$NEW_DB_PORT"
+fi
 
-  return 1
-}
+if [ "$NEW_REDIS_PORT" != "$FORWARD_REDIS_PORT" ]; then
+  echo "REDIS_PORT conflict: $FORWARD_REDIS_PORT is in use. Using $NEW_REDIS_PORT instead." >&2
+  export FORWARD_REDIS_PORT="$NEW_REDIS_PORT"
+fi
 
-declare -a conflicts=()
-
-check_port() {
-  local label="$1"
-  local port="$2"
-
-  if [[ -z "$port" || ! "$port" =~ ^[0-9]+$ ]]; then
-    return 0
-  fi
-
-  if port_in_use "$port"; then
-    conflicts+=("${label}:${port}")
-  fi
-}
-
-check_port "APP_PORT" "$APP_PORT"
-check_port "VITE_PORT" "$VITE_PORT"
-check_port "FORWARD_DB_PORT" "$FORWARD_DB_PORT"
-check_port "FORWARD_REDIS_PORT" "$FORWARD_REDIS_PORT"
-check_port "FORWARD_MEILISEARCH_PORT" "$FORWARD_MEILISEARCH_PORT"
-
-if [ "${#conflicts[@]}" -gt 0 ]; then
-  echo "Port preflight failed. These host ports are already in use:" >&2
-  for item in "${conflicts[@]}"; do
-    echo "  - ${item}" >&2
-  done
-  echo "Resolve the conflict or set SAIL_SKIP_PORT_CHECK=1 to bypass." >&2
-  exit 1
+if [ "$NEW_MEILI_PORT" != "$FORWARD_MEILISEARCH_PORT" ]; then
+  echo "MEILISEARCH_PORT conflict: $FORWARD_MEILISEARCH_PORT is in use. Using $NEW_MEILI_PORT instead." >&2
+  export FORWARD_MEILISEARCH_PORT="$NEW_MEILI_PORT"
 fi
