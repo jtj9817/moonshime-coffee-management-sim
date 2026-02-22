@@ -46,3 +46,9 @@ pnpm-lock.yaml
 .gemini/
 gha-creds-*.json
 .pnpm-store/
+
+# Playwright
+test-results/
+playwright-report/
+.last-run.json
+database/e2e.sqlite
