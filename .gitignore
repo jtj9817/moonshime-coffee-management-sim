@@ -40,7 +40,6 @@ GEMINI.md
 .factory/
 conductor-track-brainstorming.md
 
-composer.lock
 pnpm-lock.yaml
 
 .gemini/
